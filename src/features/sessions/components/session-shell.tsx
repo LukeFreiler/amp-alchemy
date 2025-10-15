@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload } from 'lucide-react';
+import { Upload, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { SessionWithSections } from '@/features/sessions/types/session';
@@ -17,7 +17,14 @@ import { ImportModal } from '@/features/sources/components/import-modal';
 import { SourcesList } from '@/features/sources/components/sources-list';
 import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
 import { GenerateButton } from '@/features/artifacts/components/generate-button';
+import { ArtifactsList } from '@/features/artifacts/components/artifacts-list';
 import { Generator } from '@/features/artifacts/types/artifact';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
 import { SessionFooter } from './session-footer';
@@ -33,6 +40,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState(0);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [artifactsModalOpen, setArtifactsModalOpen] = useState(false);
   const [sourcesRefresh, setSourcesRefresh] = useState(0);
   const [showSources, setShowSources] = useState(true);
   const currentSection = sessionData.sections[currentSectionIndex];
@@ -131,6 +139,15 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
               Import
             </Button>
             <GenerateButton sessionId={sessionData.id} generators={generators} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setArtifactsModalOpen(true)}
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Artifacts
+            </Button>
             <div className="text-sm text-muted-foreground">
               {calculateOverallProgress()}% Complete
             </div>
@@ -231,6 +248,16 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
         open={importModalOpen}
         onClose={handleImportComplete}
       />
+
+      {/* Artifacts modal */}
+      <Dialog open={artifactsModalOpen} onOpenChange={setArtifactsModalOpen}>
+        <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Artifacts</DialogTitle>
+          </DialogHeader>
+          <ArtifactsList sessionId={sessionData.id} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
