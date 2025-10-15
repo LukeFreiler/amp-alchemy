@@ -23,11 +23,12 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
     "next": "^15.1.0",
+    "next-auth": "^4",
     "openai": "^4.77.3",
     "pg": "^8.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "resend": "^4.0.1",
+    "resend": "^4.8.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.6.0"
   },
