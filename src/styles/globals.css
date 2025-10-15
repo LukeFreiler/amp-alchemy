@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Gradient card border - 2px gradient border with solid interior */
+  .card-gradient {
+    position: relative;
+    background: linear-gradient(135deg, #D456AA, #36A6B7, #553172);
+    padding: 2px;
+    border-radius: 0.5rem;
+  }
+
+  .card-gradient::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: #343A4D;
+    border-radius: calc(0.5rem - 2px);
+    z-index: 0;
+  }
+
+  .card-gradient > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Gradient horizontal rule - 2px gradient line */
+  .rule-gradient {
+    height: 2px;
+    background: linear-gradient(135deg, #D456AA, #36A6B7, #553172);
+    border: none;
+  }
+
+  /* Custom scrollbars for dark theme */
+  *::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #1F232F; /* card background */
+    border-radius: 4px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #4C5163; /* border color */
+    border-radius: 4px;
+    border: 2px solid #1F232F; /* creates padding effect */
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #676D7E; /* disabled color - slightly lighter */
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: #888F9F; /* placeholder color - lighter still */
+  }
+
+  /* Firefox scrollbar styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #4C5163 #1F232F; /* thumb track */
+  }
+}
