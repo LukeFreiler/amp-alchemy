@@ -1,5 +1,5 @@
 
-It’s time to continue building **Centercode Alchemy**.
+It’s time to continue building our project.
 
 1. **Commit your current work** locally before starting.
 2. **Review** Issue #1 (`context`) on GitHub and **the next open issue (`epic`)**
@@ -20,3 +20,4 @@ It’s time to continue building **Centercode Alchemy**.
 ⚠️ **Important:**
 - Only complete **one epic per run** before returning here for confirmation.
 - Follow the design standards in `CLAUDE.md` and `DESIGN.md` at all times.
+- Always prioritize existing shadcn/react components, coding patterns, and libraries.
