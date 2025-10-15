@@ -31,9 +31,9 @@ export function FileUpload({ sessionId, onComplete }: FileUploadProps) {
       // Handle rejected files
       if (rejectedFiles.length > 0) {
         const rejection = rejectedFiles[0];
-        if (rejection.errors[0]?.code === 'file-too-large') {
+        if (rejection?.errors[0]?.code === 'file-too-large') {
           setError('File size exceeds 10MB limit');
-        } else if (rejection.errors[0]?.code === 'file-invalid-type') {
+        } else if (rejection?.errors[0]?.code === 'file-invalid-type') {
           setError('Invalid file type. Please upload PDF, DOCX, TXT, CSV, or MD files');
         } else {
           setError('Failed to process file');
@@ -47,6 +47,8 @@ export function FileUpload({ sessionId, onComplete }: FileUploadProps) {
       try {
         for (let i = 0; i < acceptedFiles.length; i++) {
           const file = acceptedFiles[i];
+          if (!file) continue;
+
           const formData = new FormData();
           formData.append('file', file);
 

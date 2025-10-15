@@ -27,7 +27,7 @@ const MAX_PASTE_LENGTH = 50000; // 50k characters
  * List all sources for a session
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -123,7 +123,7 @@ export async function POST(
       const textExtracted = await extractText(file);
 
       // Store source
-      source = await queryOne<Source>(
+      const newSource = await queryOne<Source>(
         `INSERT INTO sources (session_id, type, filename_or_url, text_extracted, metadata, created_by)
          VALUES ($1, 'file', $2, $3, $4, $5)
          RETURNING *`,
@@ -135,6 +135,12 @@ export async function POST(
           user.id,
         ]
       );
+
+      if (!newSource) {
+        throw new Error('Failed to create source');
+      }
+
+      source = newSource;
 
       logger.info('Created file source', {
         source_id: source.id,
@@ -156,12 +162,18 @@ export async function POST(
       }
 
       // Store source
-      source = await queryOne<Source>(
+      const newSource = await queryOne<Source>(
         `INSERT INTO sources (session_id, type, filename_or_url, text_extracted, created_by)
          VALUES ($1, 'paste', NULL, $2, $3)
          RETURNING *`,
         [sessionId, pastedText, user.id]
       );
+
+      if (!newSource) {
+        throw new Error('Failed to create source');
+      }
+
+      source = newSource;
 
       logger.info('Created paste source', {
         source_id: source.id,

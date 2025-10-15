@@ -1,4 +1,5 @@
-import pdf from 'pdf-parse';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require('pdf-parse');
 import mammoth from 'mammoth';
 
 import { ValidationError } from '@/lib/errors';
@@ -8,7 +9,7 @@ export async function extractText(file: File): Promise<string> {
 
   // PDF files
   if (file.type === 'application/pdf') {
-    const data = await pdf(buffer);
+    const data = await pdfParse(buffer);
     return data.text;
   }
 

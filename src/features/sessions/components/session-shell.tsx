@@ -9,7 +9,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Upload } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 import { SessionWithSections } from '@/features/sessions/types/session';
+import { ImportModal } from '@/features/sources/components/import-modal';
+import { SourcesList } from '@/features/sources/components/sources-list';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
 import { SessionFooter } from './session-footer';
@@ -23,6 +28,9 @@ export function SessionShell({ sessionData }: SessionShellProps) {
   const router = useRouter();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState(0);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [sourcesRefresh, setSourcesRefresh] = useState(0);
+  const [showSources, setShowSources] = useState(true);
   const currentSection = sessionData.sections[currentSectionIndex];
 
   // Keyboard navigation
@@ -72,6 +80,11 @@ export function SessionShell({ sessionData }: SessionShellProps) {
     // This callback is for future enhancements
   };
 
+  const handleImportComplete = () => {
+    setImportModalOpen(false);
+    setSourcesRefresh((prev) => prev + 1);
+  };
+
   const handleValidationChange = (errorCount: number) => {
     setValidationErrors(errorCount);
   };
@@ -108,8 +121,19 @@ export function SessionShell({ sessionData }: SessionShellProps) {
               {sessionData.blueprint_name} • v{sessionData.blueprint_version}
             </p>
           </div>
-          <div className="text-sm text-muted-foreground">
-            {calculateOverallProgress()}% Complete
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setImportModalOpen(true)}
+              className="gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              Import
+            </Button>
+            <div className="text-sm text-muted-foreground">
+              {calculateOverallProgress()}% Complete
+            </div>
           </div>
         </div>
       </div>
@@ -129,6 +153,37 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         {/* Center canvas - Current section fields */}
         <main className="flex-1 overflow-y-auto p-8">
           <div className="mx-auto max-w-4xl">
+            {/* Sources section */}
+            {showSources && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Sources</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSources(false)}
+                    className="text-xs"
+                  >
+                    Hide
+                  </Button>
+                </div>
+                <SourcesList sessionId={sessionData.id} refreshTrigger={sourcesRefresh} />
+              </div>
+            )}
+
+            {!showSources && (
+              <div className="mb-6">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSources(true)}
+                  className="text-xs"
+                >
+                  Show Sources
+                </Button>
+              </div>
+            )}
+
             <h2 className="text-2xl font-semibold mb-4">{currentSection.title}</h2>
             {currentSection.description && (
               <p className="text-muted-foreground mb-6">{currentSection.description}</p>
@@ -162,6 +217,13 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         onNext={handleNext}
         onHome={handleHome}
         validationErrors={validationErrors}
+      />
+
+      {/* Import modal */}
+      <ImportModal
+        sessionId={sessionData.id}
+        open={importModalOpen}
+        onClose={handleImportComplete}
       />
     </div>
   );
