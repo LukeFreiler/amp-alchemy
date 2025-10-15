@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Figtree } from 'next/font/google';
 
 import { Toaster } from '@/components/ui/toaster';
+import { CommandPalette } from '@/features/search/components/command-palette';
 import '@/styles/globals.css';
 
 const figtree = Figtree({
@@ -11,8 +12,8 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
-  title: 'Centercode Next.js Starter',
-  description: 'Production-ready Next.js starter with TypeScript, shadcn/ui, and Postgres',
+  title: 'Alchemy',
+  description: 'Flexible web application for structured notes and AI-generated artifacts',
 };
 
 export default function RootLayout({
@@ -23,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${figtree.variable}`}>
       <body className="min-h-screen font-sans antialiased">
+        <CommandPalette />
         {children}
         <Toaster />
       </body>
