@@ -34,7 +34,6 @@ pnpm dev --turbo
 - **[CLAUDE.md](./CLAUDE.md)** - AI agent instructions and Centercode Next.js standards
 - **[PROJECT.md](./PROJECT.md)** - Project-specific details (fill this out first!)
 - **[DESIGN.md](./DESIGN.md)** - Design system and UI guidelines
-- **[STARTER.md](./STARTER.md)** - Enhancement roadmap (complete tasks before production)
 
 ---
 
