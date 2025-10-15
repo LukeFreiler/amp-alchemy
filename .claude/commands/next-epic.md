@@ -2,7 +2,7 @@
 It’s time to continue building our project.
 
 1. **Commit your current work** locally before starting.
-2. **Review** Issue #1 (`context`) on GitHub and the next (lowest number) open issue (`epic`)
+2. **Review** Issue #1 (`context`) on GitHub and select the next LOWEST NUMBER open issue (`epic`) to work on
 3. **Determine** how you will complete this epic (use ultrathink)
 4. **Summarize** (single bulleted list) what you plan to work on before you start. I will approve before you move forward.
 5. **Create a new branch** named after the epic (short, lowercase, hyphenated — e.g., `epic/feature-auth`).
