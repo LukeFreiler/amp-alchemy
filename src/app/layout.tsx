@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Figtree } from 'next/font/google';
+import { getServerSession } from 'next-auth';
 
+import { authOptions } from '@/lib/auth/auth-options';
+import { TopBar } from '@/components/top-bar';
 import { Toaster } from '@/components/ui/toaster';
 import '@/styles/globals.css';
 
@@ -11,18 +14,21 @@ const figtree = Figtree({
 });
 
 export const metadata: Metadata = {
-  title: 'Centercode Next.js Starter',
-  description: 'Production-ready Next.js starter with TypeScript, shadcn/ui, and Postgres',
+  title: 'Centercode Alchemy',
+  description: 'AI-powered structured note capture and artifact generation',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en" className={`dark ${figtree.variable}`}>
       <body className="min-h-screen font-sans antialiased">
+        {session?.user && <TopBar user={session.user} />}
         {children}
         <Toaster />
       </body>
