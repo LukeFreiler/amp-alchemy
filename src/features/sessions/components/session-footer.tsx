@@ -15,6 +15,7 @@ interface SessionFooterProps {
   onBack: () => void;
   onNext: () => void;
   onHome: () => void;
+  validationErrors?: number;
 }
 
 export function SessionFooter({
@@ -23,6 +24,7 @@ export function SessionFooter({
   onBack,
   onNext,
   onHome,
+  validationErrors = 0,
 }: SessionFooterProps) {
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === totalSections - 1;
@@ -30,10 +32,18 @@ export function SessionFooter({
   return (
     <footer className="border-t bg-card p-4">
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={onHome}>
-          <Home className="mr-2 h-4 w-4" />
-          Home
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={onHome}>
+            <Home className="mr-2 h-4 w-4" />
+            Home
+          </Button>
+          {validationErrors > 0 && (
+            <span className="text-sm text-destructive">
+              {validationErrors} required field{validationErrors > 1 ? 's' : ''}{' '}
+              missing
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">

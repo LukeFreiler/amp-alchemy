@@ -13,6 +13,7 @@ import { SessionWithSections } from '@/features/sessions/types/session';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
 import { SessionFooter } from './session-footer';
+import { FieldGrid } from './field-grid';
 
 interface SessionShellProps {
   sessionData: SessionWithSections;
@@ -21,6 +22,7 @@ interface SessionShellProps {
 export function SessionShell({ sessionData }: SessionShellProps) {
   const router = useRouter();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const [validationErrors, setValidationErrors] = useState(0);
   const currentSection = sessionData.sections[currentSectionIndex];
 
   // Keyboard navigation
@@ -63,6 +65,15 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
   const handleHome = () => {
     router.push('/sessions');
+  };
+
+  const handleProgressUpdate = () => {
+    // Progress updates are handled by refetching session data
+    // This callback is for future enhancements
+  };
+
+  const handleValidationChange = (errorCount: number) => {
+    setValidationErrors(errorCount);
   };
 
   const calculateOverallProgress = () => {
@@ -123,15 +134,13 @@ export function SessionShell({ sessionData }: SessionShellProps) {
               <p className="text-muted-foreground mb-6">{currentSection.description}</p>
             )}
 
-            {/* Placeholder for fields (Epic #7) */}
-            <div className="rounded-lg border bg-card p-8">
-              <p className="text-center text-muted-foreground">
-                Field inputs will be implemented in Epic #7
-              </p>
-              <p className="mt-2 text-center text-sm text-muted-foreground">
-                Section: {currentSection.title}
-              </p>
-            </div>
+            {/* Field Grid */}
+            <FieldGrid
+              sessionId={sessionData.id}
+              sectionId={currentSection.id}
+              onProgressUpdate={handleProgressUpdate}
+              onValidationChange={handleValidationChange}
+            />
           </div>
         </main>
 
@@ -152,6 +161,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         onBack={handleBack}
         onNext={handleNext}
         onHome={handleHome}
+        validationErrors={validationErrors}
       />
     </div>
   );
