@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { SessionWithSections } from '@/features/sessions/types/session';
 import { ImportModal } from '@/features/sources/components/import-modal';
 import { SourcesList } from '@/features/sources/components/sources-list';
+import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
 import { SessionFooter } from './session-footer';
@@ -183,6 +184,12 @@ export function SessionShell({ sessionData }: SessionShellProps) {
                 </Button>
               </div>
             )}
+
+            {/* AI Suggestions Banner */}
+            <SuggestionBanner
+              sessionId={sessionData.id}
+              onSuggestionsReviewed={() => setSourcesRefresh((prev) => prev + 1)}
+            />
 
             <h2 className="text-2xl font-semibold mb-4">{currentSection.title}</h2>
             {currentSection.description && (
