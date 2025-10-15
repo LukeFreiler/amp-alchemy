@@ -9,6 +9,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileUpload } from './file-upload';
 import { TextPaste } from './text-paste';
+import { URLInput } from './url-input';
 
 type ImportModalProps = {
   sessionId: string;
@@ -28,9 +29,7 @@ export function ImportModal({ sessionId, open, onClose }: ImportModalProps) {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="file">File Upload</TabsTrigger>
             <TabsTrigger value="paste">Paste Text</TabsTrigger>
-            <TabsTrigger value="url" disabled>
-              URL (Coming Soon)
-            </TabsTrigger>
+            <TabsTrigger value="url">URL</TabsTrigger>
           </TabsList>
 
           <TabsContent value="file" className="mt-6">
@@ -42,9 +41,7 @@ export function ImportModal({ sessionId, open, onClose }: ImportModalProps) {
           </TabsContent>
 
           <TabsContent value="url" className="mt-6">
-            <div className="text-center py-12 text-muted-foreground">
-              URL scraping will be available in the next release.
-            </div>
+            <URLInput sessionId={sessionId} onComplete={onClose} />
           </TabsContent>
         </Tabs>
       </DialogContent>

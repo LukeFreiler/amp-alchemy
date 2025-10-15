@@ -11,6 +11,7 @@ import { handleError, ValidationError, NotFoundError } from '@/lib/errors';
 import { query, queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
 import { extractText } from '@/features/sources/lib/extract-text';
+import { scrapeUrl } from '@/features/sources/lib/scrape-url';
 import { Source } from '@/features/sources/types/source';
 
 type SuccessResponse<T> = {
@@ -73,7 +74,7 @@ export async function GET(
 /**
  * POST /api/v1/sessions/[id]/sources
  *
- * Create new source from file upload or pasted text
+ * Create new source from file upload, pasted text, or URL scraping
  */
 export async function POST(
   request: NextRequest,
@@ -101,13 +102,15 @@ export async function POST(
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const pastedText = formData.get('text') as string | null;
+    const url = formData.get('url') as string | null;
 
-    if (!file && !pastedText) {
-      throw new ValidationError('Either file or text is required');
+    // Validate that exactly one input type is provided
+    const inputCount = [file, pastedText, url].filter(Boolean).length;
+    if (inputCount === 0) {
+      throw new ValidationError('Either file, text, or URL is required');
     }
-
-    if (file && pastedText) {
-      throw new ValidationError('Cannot upload file and paste text simultaneously');
+    if (inputCount > 1) {
+      throw new ValidationError('Cannot provide multiple input types simultaneously');
     }
 
     let source: Source;
@@ -151,9 +154,9 @@ export async function POST(
       });
     }
     // Handle pasted text
-    else {
+    else if (pastedText) {
       // Validate text length
-      if (!pastedText || pastedText.trim() === '') {
+      if (pastedText.trim() === '') {
         throw new ValidationError('Pasted text cannot be empty');
       }
 
@@ -179,6 +182,37 @@ export async function POST(
         source_id: source.id,
         session_id: sessionId,
         text_length: pastedText.length,
+      });
+    }
+    // Handle URL scraping
+    else {
+      // Validate URL format
+      if (!url?.startsWith('http://') && !url?.startsWith('https://')) {
+        throw new ValidationError('URL must start with http:// or https://');
+      }
+
+      // Scrape URL
+      const textExtracted = await scrapeUrl(url);
+
+      // Store source
+      const newSource = await queryOne<Source>(
+        `INSERT INTO sources (session_id, type, filename_or_url, text_extracted, created_by)
+         VALUES ($1, 'url', $2, $3, $4)
+         RETURNING *`,
+        [sessionId, url, textExtracted, user.id]
+      );
+
+      if (!newSource) {
+        throw new Error('Failed to create source');
+      }
+
+      source = newSource;
+
+      logger.info('Created URL source', {
+        source_id: source.id,
+        session_id: sessionId,
+        url,
+        text_length: textExtracted.length,
       });
     }
 
