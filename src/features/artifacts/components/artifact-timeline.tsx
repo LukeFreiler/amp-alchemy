@@ -7,12 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -29,27 +24,17 @@ type ArtifactTimelineProps = {
   onClose: () => void;
 };
 
-export function ArtifactTimeline({
-  sessionId,
-  generatorId,
-  onClose,
-}: ArtifactTimelineProps) {
+export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTimelineProps) {
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(
-    null
-  );
-  const [compareArtifacts, setCompareArtifacts] = useState<
-    [Artifact, Artifact] | null
-  >(null);
+  const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
+  const [compareArtifacts, setCompareArtifacts] = useState<[Artifact, Artifact] | null>(null);
   const [shareArtifactId, setShareArtifactId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchArtifacts = async () => {
       try {
-        const response = await fetch(
-          `/api/v1/sessions/${sessionId}/artifacts`
-        );
+        const response = await fetch(`/api/v1/sessions/${sessionId}/artifacts`);
         const result = await response.json();
 
         if (result.ok) {
@@ -101,18 +86,14 @@ export function ArtifactTimeline({
   };
 
   const handlePublishChange = (artifactId: string, published: boolean) => {
-    setArtifacts((prev) =>
-      prev.map((a) => (a.id === artifactId ? { ...a, published } : a))
-    );
+    setArtifacts((prev) => prev.map((a) => (a.id === artifactId ? { ...a, published } : a)));
   };
 
   if (loading) {
     return (
       <Dialog open onOpenChange={onClose}>
         <DialogContent>
-          <div className="py-8 text-center text-muted-foreground">
-            Loading versions...
-          </div>
+          <div className="py-8 text-center text-muted-foreground">Loading versions...</div>
         </DialogContent>
       </Dialog>
     );
@@ -125,9 +106,7 @@ export function ArtifactTimeline({
           <DialogHeader>
             <DialogTitle>Version History</DialogTitle>
           </DialogHeader>
-          <div className="py-8 text-center text-muted-foreground">
-            No versions found
-          </div>
+          <div className="py-8 text-center text-muted-foreground">No versions found</div>
         </DialogContent>
       </Dialog>
     );
@@ -138,9 +117,7 @@ export function ArtifactTimeline({
       <Dialog open onOpenChange={onClose}>
         <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {artifacts[0]?.generator_name} - Version History
-            </DialogTitle>
+            <DialogTitle>{artifacts[0]?.generator_name} - Version History</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-3">
@@ -157,24 +134,19 @@ export function ArtifactTimeline({
                         </Badge>
                       )}
                       {index === 0 && (
-                        <Badge className="bg-blue-900/50 text-blue-300">
-                          Latest
-                        </Badge>
+                        <Badge className="bg-blue-900/50 text-blue-300">Latest</Badge>
                       )}
                     </div>
 
                     <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4" />
-                      {new Date(artifact.created_at).toLocaleDateString(
-                        'en-US',
-                        {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                        }
-                      )}
+                      {new Date(artifact.created_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
                       <span>•</span>
                       <span>{artifact.creator_name}</span>
                     </div>
@@ -201,9 +173,7 @@ export function ArtifactTimeline({
                       <PublishButton
                         artifactId={artifact.id}
                         isPublished={artifact.published}
-                        onPublishChange={(published) =>
-                          handlePublishChange(artifact.id, published)
-                        }
+                        onPublishChange={(published) => handlePublishChange(artifact.id, published)}
                       />
                     )}
 
@@ -219,22 +189,14 @@ export function ArtifactTimeline({
                     )}
 
                     {index < artifacts.length - 1 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCompare(artifact)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => handleCompare(artifact)}>
                         <GitCompare className="mr-1 h-4 w-4" />
                         Diff
                       </Button>
                     )}
 
                     {!artifact.published && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(artifact.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(artifact.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     )}

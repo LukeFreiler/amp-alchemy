@@ -6,11 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/middleware';
-import {
-  handleError,
-  NotFoundError,
-  AuthorizationError,
-} from '@/lib/errors';
+import { handleError, NotFoundError, AuthorizationError } from '@/lib/errors';
 import { queryOne, execute } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
 
@@ -58,9 +54,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     // Verify user has access
     if (shareLink.company_id !== user.company_id) {
-      throw new AuthorizationError(
-        'You do not have permission to revoke this share link'
-      );
+      throw new AuthorizationError('You do not have permission to revoke this share link');
     }
 
     // Delete share link

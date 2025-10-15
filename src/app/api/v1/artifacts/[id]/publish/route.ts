@@ -6,11 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/middleware';
-import {
-  handleError,
-  NotFoundError,
-  AuthorizationError,
-} from '@/lib/errors';
+import { handleError, NotFoundError, AuthorizationError } from '@/lib/errors';
 import { queryOne, execute } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
 
@@ -55,16 +51,11 @@ export async function PUT(_request: NextRequest, context: RouteContext) {
 
     // Verify user has access
     if (artifact.company_id !== user.company_id) {
-      throw new AuthorizationError(
-        'You do not have permission to publish this artifact'
-      );
+      throw new AuthorizationError('You do not have permission to publish this artifact');
     }
 
     // Mark as published
-    await execute(
-      'UPDATE artifacts SET published = true, updated_at = NOW() WHERE id = $1',
-      [id]
-    );
+    await execute('UPDATE artifacts SET published = true, updated_at = NOW() WHERE id = $1', [id]);
 
     logger.info('Published artifact', {
       artifact_id: id,

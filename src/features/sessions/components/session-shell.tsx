@@ -19,12 +19,7 @@ import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
 import { GenerateButton } from '@/features/artifacts/components/generate-button';
 import { ArtifactsList } from '@/features/artifacts/components/artifacts-list';
 import { Generator } from '@/features/artifacts/types/artifact';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
 import { SessionFooter } from './session-footer';

@@ -6,13 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
 type TextPasteProps = {
-  sessionId: string;
+  sessionId?: string;
+  uploadUrl?: string;
   onComplete: () => void;
 };
 
 const MAX_LENGTH = 50000;
 
-export function TextPaste({ sessionId, onComplete }: TextPasteProps) {
+export function TextPaste({ sessionId, uploadUrl, onComplete }: TextPasteProps) {
+  const url = uploadUrl || `/api/v1/sessions/${sessionId}/sources`;
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function TextPaste({ sessionId, onComplete }: TextPasteProps) {
       const formData = new FormData();
       formData.append('text', text);
 
-      const response = await fetch(`/api/v1/sessions/${sessionId}/sources`, {
+      const response = await fetch(url, {
         method: 'POST',
         body: formData,
       });

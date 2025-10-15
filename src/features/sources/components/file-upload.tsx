@@ -7,11 +7,13 @@ import { Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type FileUploadProps = {
-  sessionId: string;
+  sessionId?: string;
+  uploadUrl?: string;
   onComplete: () => void;
 };
 
-export function FileUpload({ sessionId, onComplete }: FileUploadProps) {
+export function FileUpload({ sessionId, uploadUrl, onComplete }: FileUploadProps) {
+  const url = uploadUrl || `/api/v1/sessions/${sessionId}/sources`;
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function FileUpload({ sessionId, onComplete }: FileUploadProps) {
           const formData = new FormData();
           formData.append('file', file);
 
-          const response = await fetch(`/api/v1/sessions/${sessionId}/sources`, {
+          const response = await fetch(url, {
             method: 'POST',
             body: formData,
           });

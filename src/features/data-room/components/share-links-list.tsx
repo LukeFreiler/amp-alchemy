@@ -84,18 +84,12 @@ export function ShareLinksList() {
   };
 
   if (isLoading) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        Loading share links...
-      </div>
-    );
+    return <div className="py-8 text-center text-muted-foreground">Loading share links...</div>;
   }
 
   if (links.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No share links created yet.
-      </div>
+      <div className="py-8 text-center text-muted-foreground">No share links created yet.</div>
     );
   }
 
@@ -107,13 +101,9 @@ export function ShareLinksList() {
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-medium">{link.artifact_title}</h3>
-                {isExpired(link.expires_at) && (
-                  <Badge variant="destructive">Expired</Badge>
-                )}
+                {isExpired(link.expires_at) && <Badge variant="destructive">Expired</Badge>}
               </div>
-              <p className="text-sm text-muted-foreground">
-                Session: {link.session_name}
-              </p>
+              <p className="text-sm text-muted-foreground">Session: {link.session_name}</p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span>
                   {link.expires_at
@@ -123,7 +113,7 @@ export function ShareLinksList() {
                 <span>•</span>
                 {link.allow_source_upload ? (
                   <span className="flex items-center gap-1">
-                    <Upload className="w-3 h-3" />
+                    <Upload className="h-3 w-3" />
                     Uploads allowed
                   </span>
                 ) : (
@@ -131,8 +121,7 @@ export function ShareLinksList() {
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                Created by {link.creator_name} on{' '}
-                {new Date(link.created_at).toLocaleDateString()}
+                Created by {link.creator_name} on {new Date(link.created_at).toLocaleDateString()}
               </p>
             </div>
 
@@ -143,7 +132,7 @@ export function ShareLinksList() {
               disabled={revokingId === link.id}
               title="Revoke share link"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </Card>

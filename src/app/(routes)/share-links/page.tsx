@@ -14,13 +14,11 @@ export default async function ShareLinksPage() {
   return (
     <div className="container mx-auto max-w-5xl py-8">
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Link className="w-6 h-6" />
+        <div className="mb-2 flex items-center gap-3">
+          <Link className="h-6 w-6" />
           <h1 className="text-3xl font-bold">Share Links</h1>
         </div>
-        <p className="text-muted-foreground">
-          Manage all active share links for your artifacts
-        </p>
+        <p className="text-muted-foreground">Manage all active share links for your artifacts</p>
       </div>
 
       <ShareLinksList />

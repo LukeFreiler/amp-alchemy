@@ -7,12 +7,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Artifact } from '@/features/artifacts/types/artifact';
 import { computeDiff } from '@/lib/artifacts/diff';
@@ -23,18 +18,13 @@ type ArtifactDiffViewerProps = {
   onClose: () => void;
 };
 
-export function ArtifactDiffViewer({
-  oldArtifact,
-  newArtifact,
-  onClose,
-}: ArtifactDiffViewerProps) {
+export function ArtifactDiffViewer({ oldArtifact, newArtifact, onClose }: ArtifactDiffViewerProps) {
   const diff = useMemo(
     () => computeDiff(oldArtifact.markdown, newArtifact.markdown),
     [oldArtifact.markdown, newArtifact.markdown]
   );
 
-  const promptChanged =
-    oldArtifact.prompt_template_hash !== newArtifact.prompt_template_hash;
+  const promptChanged = oldArtifact.prompt_template_hash !== newArtifact.prompt_template_hash;
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -64,9 +54,7 @@ export function ArtifactDiffViewer({
               </span>
             </div>
             {promptChanged && (
-              <Badge className="bg-yellow-900/50 text-yellow-300">
-                Prompt Changed
-              </Badge>
+              <Badge className="bg-yellow-900/50 text-yellow-300">Prompt Changed</Badge>
             )}
           </div>
         </DialogHeader>
@@ -76,15 +64,10 @@ export function ArtifactDiffViewer({
             {diff.map((part, index) => {
               if (part.added) {
                 return (
-                  <div
-                    key={index}
-                    className="bg-green-900/30 px-4 py-1 text-green-300"
-                  >
+                  <div key={index} className="bg-green-900/30 px-4 py-1 text-green-300">
                     {part.value.split('\n').map((line, lineIndex) => (
                       <div key={lineIndex} className="flex">
-                        <span className="mr-4 select-none text-green-500/50">
-                          +
-                        </span>
+                        <span className="mr-4 select-none text-green-500/50">+</span>
                         <span>{line}</span>
                       </div>
                     ))}
@@ -94,15 +77,10 @@ export function ArtifactDiffViewer({
 
               if (part.removed) {
                 return (
-                  <div
-                    key={index}
-                    className="bg-red-900/30 px-4 py-1 text-red-300 line-through"
-                  >
+                  <div key={index} className="bg-red-900/30 px-4 py-1 text-red-300 line-through">
                     {part.value.split('\n').map((line, lineIndex) => (
                       <div key={lineIndex} className="flex">
-                        <span className="mr-4 select-none text-red-500/50">
-                          -
-                        </span>
+                        <span className="mr-4 select-none text-red-500/50">-</span>
                         <span>{line}</span>
                       </div>
                     ))}
@@ -114,9 +92,7 @@ export function ArtifactDiffViewer({
                 <div key={index} className="px-4 py-1 text-foreground/70">
                   {part.value.split('\n').map((line, lineIndex) => (
                     <div key={lineIndex} className="flex">
-                      <span className="mr-4 select-none text-muted-foreground">
-                        {' '}
-                      </span>
+                      <span className="mr-4 select-none text-muted-foreground"> </span>
                       <span>{line}</span>
                     </div>
                   ))}

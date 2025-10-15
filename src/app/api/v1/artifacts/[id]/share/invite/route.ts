@@ -6,12 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/middleware';
-import {
-  handleError,
-  NotFoundError,
-  AuthorizationError,
-  ValidationError,
-} from '@/lib/errors';
+import { handleError, NotFoundError, AuthorizationError, ValidationError } from '@/lib/errors';
 import { queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
 
@@ -80,14 +75,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Verify user has access
     if (shareLink.company_id !== user.company_id) {
-      throw new AuthorizationError(
-        'You do not have permission to share this artifact'
-      );
+      throw new AuthorizationError('You do not have permission to share this artifact');
     }
 
     // Build share URL
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const shareUrl = `${appUrl}/share/${shareLink.token}`;
 
     // Send email via Resend

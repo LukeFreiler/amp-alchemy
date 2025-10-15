@@ -7,12 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { requireAuth } from '@/lib/auth/middleware';
-import {
-  handleError,
-  NotFoundError,
-  AuthorizationError,
-  ValidationError,
-} from '@/lib/errors';
+import { handleError, NotFoundError, AuthorizationError, ValidationError } from '@/lib/errors';
 import { queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
 
@@ -84,9 +79,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Verify user has access
     if (artifact.company_id !== user.company_id) {
-      throw new AuthorizationError(
-        'You do not have permission to share this artifact'
-      );
+      throw new AuthorizationError('You do not have permission to share this artifact');
     }
 
     // Verify artifact is published
@@ -117,8 +110,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Build full URL
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const shareLinkWithUrl: ShareLinkWithUrl = {
       ...shareLink,
       url: `${appUrl}/share/${token}`,

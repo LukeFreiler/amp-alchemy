@@ -7,12 +7,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -111,17 +106,14 @@ export function ShareModal({ artifactId, open, onClose }: ShareModalProps) {
 
     setIsSendingEmail(true);
     try {
-      const response = await fetch(
-        `/api/v1/artifacts/${artifactId}/share/invite`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: email.trim(),
-            share_link_id: shareLink.id,
-          }),
-        }
-      );
+      const response = await fetch(`/api/v1/artifacts/${artifactId}/share/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          share_link_id: shareLink.id,
+        }),
+      });
 
       const result = await response.json();
 
@@ -181,20 +173,11 @@ export function ShareModal({ artifactId, open, onClose }: ShareModalProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch
-                checked={allowUploads}
-                onCheckedChange={setAllowUploads}
-              />
-              <Label className="cursor-pointer">
-                Allow Viewer Source Uploads
-              </Label>
+              <Switch checked={allowUploads} onCheckedChange={setAllowUploads} />
+              <Label className="cursor-pointer">Allow Viewer Source Uploads</Label>
             </div>
 
-            <Button
-              onClick={handleCreate}
-              className="w-full"
-              disabled={isCreating}
-            >
+            <Button onClick={handleCreate} className="w-full" disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Create Share Link'}
             </Button>
           </div>
@@ -210,12 +193,10 @@ export function ShareModal({ artifactId, open, onClose }: ShareModalProps) {
                   onClick={handleCopy}
                   title="Copy to clipboard"
                 >
-                  <Copy className="w-4 h-4" />
+                  <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              {copied && (
-                <p className="text-sm text-green-500">Copied to clipboard!</p>
-              )}
+              {copied && <p className="text-sm text-green-500">Copied to clipboard!</p>}
             </div>
 
             <Separator />
@@ -237,12 +218,10 @@ export function ShareModal({ artifactId, open, onClose }: ShareModalProps) {
                   disabled={!email.trim() || isSendingEmail}
                   title="Send email"
                 >
-                  <Mail className="w-4 h-4" />
+                  <Mail className="h-4 w-4" />
                 </Button>
               </div>
-              {emailSent && (
-                <p className="text-sm text-green-500">Email sent successfully!</p>
-              )}
+              {emailSent && <p className="text-sm text-green-500">Email sent successfully!</p>}
             </div>
 
             <Button onClick={handleClose} variant="outline" className="w-full">

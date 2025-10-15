@@ -7,12 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/middleware';
-import {
-  handleError,
-  NotFoundError,
-  AuthorizationError,
-  ConflictError,
-} from '@/lib/errors';
+import { handleError, NotFoundError, AuthorizationError, ConflictError } from '@/lib/errors';
 import { queryOne, execute } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
 
@@ -86,9 +81,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     // Verify user has access to this artifact's session
     if (artifact.company_id !== user.company_id) {
-      throw new AuthorizationError(
-        'You do not have permission to access this artifact'
-      );
+      throw new AuthorizationError('You do not have permission to access this artifact');
     }
 
     logger.info('Fetched artifact', {
@@ -140,16 +133,12 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     // Verify user has access
     if (artifact.company_id !== user.company_id) {
-      throw new AuthorizationError(
-        'You do not have permission to delete this artifact'
-      );
+      throw new AuthorizationError('You do not have permission to delete this artifact');
     }
 
     // Check if published
     if (artifact.published) {
-      throw new ConflictError(
-        'Cannot delete published artifact. Unpublish it first.'
-      );
+      throw new ConflictError('Cannot delete published artifact. Unpublish it first.');
     }
 
     // Delete artifact

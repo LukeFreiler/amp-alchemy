@@ -17,11 +17,7 @@ type PublishButtonProps = {
   onPublishChange?: (published: boolean) => void;
 };
 
-export function PublishButton({
-  artifactId,
-  isPublished,
-  onPublishChange,
-}: PublishButtonProps) {
+export function PublishButton({ artifactId, isPublished, onPublishChange }: PublishButtonProps) {
   const [published, setPublished] = useState(isPublished);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,12 +26,9 @@ export function PublishButton({
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/v1/artifacts/${artifactId}/publish`,
-        {
-          method: 'PUT',
-        }
-      );
+      const response = await fetch(`/api/v1/artifacts/${artifactId}/publish`, {
+        method: 'PUT',
+      });
 
       const result = await response.json();
 
@@ -48,7 +41,7 @@ export function PublishButton({
       }
 
       setPublished(true);
-      onPublishChange?.( true);
+      onPublishChange?.(true);
     } catch (error) {
       logger.error('Error publishing artifact', {
         artifact_id: artifactId,
@@ -68,12 +61,12 @@ export function PublishButton({
     >
       {published ? (
         <>
-          <Check className="w-4 h-4 mr-2" />
+          <Check className="mr-2 h-4 w-4" />
           Published
         </>
       ) : (
         <>
-          <Upload className="w-4 h-4 mr-2" />
+          <Upload className="mr-2 h-4 w-4" />
           {isLoading ? 'Publishing...' : 'Publish to Data Room'}
         </>
       )}

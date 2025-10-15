@@ -7,12 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Eye } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -83,9 +78,7 @@ export function ArtifactViewer({ artifactId, onClose }: ArtifactViewerProps) {
             <ReactMarkdown>{artifact.markdown}</ReactMarkdown>
           </div>
         ) : (
-          <div className="py-12 text-center text-muted-foreground">
-            Artifact not found
-          </div>
+          <div className="py-12 text-center text-muted-foreground">Artifact not found</div>
         )}
       </DialogContent>
     </Dialog>
