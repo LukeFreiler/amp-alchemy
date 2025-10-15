@@ -117,6 +117,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       values
     );
 
+    if (!field) {
+      throw new Error('Failed to update field');
+    }
+
     logger.info('Updated field', {
       field_id: id,
       fields: Object.keys(body),
@@ -136,7 +140,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
  *
  * Delete field
  */
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth(['owner', 'editor']);
     const { id } = await context.params;

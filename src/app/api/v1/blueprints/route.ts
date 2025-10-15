@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       [user.company_id, body.name.trim()]
     );
 
-    if (existing.count > 0) {
+    if (existing && existing.count > 0) {
       throw new ConflictError('A blueprint with this name already exists');
     }
 
@@ -87,6 +87,10 @@ export async function POST(request: NextRequest) {
        RETURNING *`,
       [user.company_id, body.name.trim(), body.description?.trim() || null]
     );
+
+    if (!blueprint) {
+      throw new Error('Failed to create blueprint');
+    }
 
     logger.info('Created blueprint', {
       blueprint_id: blueprint.id,

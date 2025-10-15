@@ -33,7 +33,6 @@ interface FieldConfigModalProps {
 
 export function FieldConfigModal({
   field,
-  sectionId,
   open,
   onOpenChange,
   onSave,
