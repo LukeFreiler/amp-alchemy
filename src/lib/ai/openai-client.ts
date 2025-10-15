@@ -1,7 +1,7 @@
 /**
  * OpenAI Client
  *
- * Provides GPT-4o integration for semantic field mapping
+ * Provides GPT-4o integration for semantic field mapping and artifact generation
  */
 
 import OpenAI from 'openai';
@@ -92,6 +92,46 @@ Return JSON in this EXACT format:
     return result;
   } catch (error) {
     logger.error('OpenAI field mapping failed', { error });
+    throw error;
+  }
+}
+
+/**
+ * Generates artifact content from a rendered prompt
+ *
+ * @param prompt - Fully rendered prompt with template variables replaced
+ * @returns Generated markdown content
+ */
+export async function generateArtifact(prompt: string): Promise<string> {
+  const systemMessage = `You write polished artifacts from structured context. Never fabricate missing facts. Use Markdown headings and bullets. Keep it concise and professional.`;
+
+  try {
+    logger.info('Starting artifact generation', {
+      prompt_length: prompt.length,
+    });
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.7,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content returned from OpenAI');
+    }
+
+    logger.info('Artifact generation completed', {
+      output_length: content.length,
+      tokens_used: response.usage?.total_tokens,
+    });
+
+    return content;
+  } catch (error) {
+    logger.error('Artifact generation failed', { error });
     throw error;
   }
 }

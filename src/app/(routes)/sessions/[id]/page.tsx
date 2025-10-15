@@ -18,6 +18,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
 
   const { id } = await params;
 
+  // Fetch session data
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL}/api/v1/sessions/${id}`,
     {
@@ -38,5 +39,16 @@ export default async function SessionPage({ params }: SessionPageProps) {
     );
   }
 
-  return <SessionShell sessionData={result.data} />;
+  // Fetch generators for this blueprint
+  const generatorsResponse = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/v1/blueprints/${result.data.blueprint_id}/generators`,
+    {
+      cache: 'no-store',
+    }
+  );
+
+  const generatorsResult = await generatorsResponse.json();
+  const generators = generatorsResult.ok ? generatorsResult.data : [];
+
+  return <SessionShell sessionData={result.data} generators={generators} />;
 }

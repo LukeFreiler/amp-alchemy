@@ -16,6 +16,8 @@ import { SessionWithSections } from '@/features/sessions/types/session';
 import { ImportModal } from '@/features/sources/components/import-modal';
 import { SourcesList } from '@/features/sources/components/sources-list';
 import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
+import { GenerateButton } from '@/features/artifacts/components/generate-button';
+import { Generator } from '@/features/artifacts/types/artifact';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
 import { SessionFooter } from './session-footer';
@@ -23,9 +25,10 @@ import { FieldGrid } from './field-grid';
 
 interface SessionShellProps {
   sessionData: SessionWithSections;
+  generators: Generator[];
 }
 
-export function SessionShell({ sessionData }: SessionShellProps) {
+export function SessionShell({ sessionData, generators }: SessionShellProps) {
   const router = useRouter();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState(0);
@@ -132,6 +135,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
               <Upload className="w-4 h-4" />
               Import
             </Button>
+            <GenerateButton sessionId={sessionData.id} generators={generators} />
             <div className="text-sm text-muted-foreground">
               {calculateOverallProgress()}% Complete
             </div>
