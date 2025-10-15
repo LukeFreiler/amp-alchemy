@@ -106,3 +106,15 @@ export interface SectionWithFields extends Section {
 export interface BlueprintWithSections extends Blueprint {
   sections: SectionWithFields[];
 }
+
+export interface BlueprintWithGenerators extends Blueprint {
+  generators: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    prompt_template: string;
+    output_format: string;
+    visible_in_data_room: boolean;
+    order_index: number;
+  }>;
+}

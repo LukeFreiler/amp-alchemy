@@ -85,6 +85,10 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       values
     );
 
+    if (!section) {
+      throw new Error('Failed to update section');
+    }
+
     logger.info('Updated section', {
       section_id: id,
       fields: Object.keys(body),
@@ -104,7 +108,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
  *
  * Delete section (cascades to fields via DB constraints)
  */
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     const user = await requireAuth(['owner', 'editor']);
     const { id } = await context.params;

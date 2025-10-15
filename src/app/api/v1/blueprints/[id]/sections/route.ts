@@ -66,6 +66,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
       [id, nextOrder, body.title.trim(), body.description?.trim() || null]
     );
 
+    if (!section) {
+      throw new Error('Failed to create section');
+    }
+
     logger.info('Created section', {
       section_id: section.id,
       blueprint_id: id,

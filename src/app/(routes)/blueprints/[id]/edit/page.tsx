@@ -3,7 +3,7 @@
 /**
  * Blueprint Editor Page
  *
- * Complex 2-panel editor for managing blueprint sections and fields
+ * Complex 2-panel editor for managing blueprint sections, fields, and generators
  */
 
 import { useState, useEffect, use } from 'react';
@@ -19,11 +19,13 @@ import { Separator } from '@/components/ui/separator';
 import { SectionList } from '@/features/blueprints/components/section-list';
 import { FieldList } from '@/features/blueprints/components/field-list';
 import { FieldConfigModal } from '@/features/blueprints/components/field-config-modal';
+import { GeneratorList } from '@/features/blueprints/components/generator-list';
 import {
   BlueprintWithSections,
   SectionWithFields,
   Field,
 } from '@/features/blueprints/types/blueprint';
+import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
 
 export default function BlueprintEditPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -37,6 +39,8 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   const [editingField, setEditingField] = useState<Field | undefined>(undefined);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sections' | 'generators'>('sections');
+  const [generators, setGenerators] = useState<BlueprintArtifactGenerator[]>([]);
 
   // Fetch blueprint data
   useEffect(() => {
@@ -57,6 +61,21 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   }, [id]);
 
   const selectedSection = blueprint?.sections.find((s) => s.id === selectedSectionId);
+
+  const fetchGenerators = async () => {
+    const response = await fetch(`/api/v1/blueprints/${id}/generators`);
+    const result = await response.json();
+    if (result.ok) {
+      setGenerators(result.data);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'generators') {
+      fetchGenerators();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, id]);
 
   const handleSaveMetadata = async () => {
     if (!name.trim()) {
@@ -348,8 +367,8 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
     <>
       <div className="flex h-screen flex-col">
         {/* Header */}
-        <div className="border-b border-border bg-card px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="border-b border-border bg-card">
+          <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={() => router.push('/blueprints')}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -377,61 +396,98 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
               </Button>
             </div>
           </div>
+
+          {/* Tabs */}
+          <div className="flex gap-6 px-6 border-t border-border">
+            <button
+              onClick={() => setActiveTab('sections')}
+              className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'sections'
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Sections & Fields
+            </button>
+            <button
+              onClick={() => setActiveTab('generators')}
+              className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'generators'
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Generators
+            </button>
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Left Panel - Sections */}
-          <div className="w-80 border-r border-border bg-card p-4 overflow-y-auto">
-            <SectionList
-              sections={blueprint.sections}
-              selectedSectionId={selectedSectionId}
-              onSectionSelect={setSelectedSectionId}
-              onSectionsReorder={handleSectionsReorder}
-              onAddSection={handleAddSection}
-              onEditSection={handleEditSection}
-              onDeleteSection={handleDeleteSection}
-            />
-          </div>
-
-          {/* Right Panel - Blueprint Metadata & Fields */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {!selectedSectionId ? (
-              <Card className="p-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="blueprint-name">Blueprint Name</Label>
-                    <Input
-                      id="blueprint-name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Blueprint name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="blueprint-description">Description</Label>
-                    <Textarea
-                      id="blueprint-description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Optional description"
-                      rows={4}
-                    />
-                  </div>
-                </div>
-              </Card>
-            ) : (
-              selectedSection && (
-                <FieldList
-                  fields={selectedSection.fields}
-                  onFieldsReorder={handleFieldsReorder}
-                  onAddField={handleAddField}
-                  onEditField={handleEditField}
-                  onDeleteField={handleDeleteField}
+          {activeTab === 'sections' ? (
+            <>
+              {/* Left Panel - Sections */}
+              <div className="w-80 border-r border-border bg-card p-4 overflow-y-auto">
+                <SectionList
+                  sections={blueprint.sections}
+                  selectedSectionId={selectedSectionId}
+                  onSectionSelect={setSelectedSectionId}
+                  onSectionsReorder={handleSectionsReorder}
+                  onAddSection={handleAddSection}
+                  onEditSection={handleEditSection}
+                  onDeleteSection={handleDeleteSection}
                 />
-              )
-            )}
-          </div>
+              </div>
+
+              {/* Right Panel - Blueprint Metadata & Fields */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {!selectedSectionId ? (
+                  <Card className="p-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="blueprint-name">Blueprint Name</Label>
+                        <Input
+                          id="blueprint-name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          placeholder="Blueprint name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="blueprint-description">Description</Label>
+                        <Textarea
+                          id="blueprint-description"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="Optional description"
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                ) : (
+                  selectedSection && (
+                    <FieldList
+                      fields={selectedSection.fields}
+                      onFieldsReorder={handleFieldsReorder}
+                      onAddField={handleAddField}
+                      onEditField={handleEditField}
+                      onDeleteField={handleDeleteField}
+                    />
+                  )
+                )}
+              </div>
+            </>
+          ) : (
+            /* Generators Tab */
+            <div className="flex-1 overflow-y-auto p-6">
+              <GeneratorList
+                blueprintId={id}
+                generators={generators}
+                onUpdate={fetchGenerators}
+              />
+            </div>
+          )}
         </div>
       </div>
 

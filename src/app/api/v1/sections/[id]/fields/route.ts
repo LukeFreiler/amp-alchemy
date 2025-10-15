@@ -95,6 +95,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
       ]
     );
 
+    if (!field) {
+      throw new Error('Failed to create field');
+    }
+
     logger.info('Created field', {
       field_id: field.id,
       section_id: id,
