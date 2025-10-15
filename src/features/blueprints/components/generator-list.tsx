@@ -116,6 +116,8 @@ export function GeneratorList({ blueprintId, generators: initialGenerators, onUp
 
     const newGenerators = [...generators];
     const draggedItem = newGenerators[draggedIndex];
+    if (!draggedItem) return;
+
     newGenerators.splice(draggedIndex, 1);
     newGenerators.splice(index, 0, draggedItem);
 
