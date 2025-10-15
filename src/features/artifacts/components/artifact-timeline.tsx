@@ -16,10 +16,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Eye, Trash2, GitCompare, Clock } from 'lucide-react';
+import { Eye, Trash2, GitCompare, Clock, Share2 } from 'lucide-react';
 import { Artifact, GroupedArtifacts } from '@/features/artifacts/types/artifact';
 import { ArtifactViewer } from './artifact-viewer';
 import { ArtifactDiffViewer } from './artifact-diff-viewer';
+import { PublishButton } from './publish-button';
+import { ShareModal } from '@/features/data-room/components/share-modal';
 
 type ArtifactTimelineProps = {
   sessionId: string;
@@ -40,6 +42,7 @@ export function ArtifactTimeline({
   const [compareArtifacts, setCompareArtifacts] = useState<
     [Artifact, Artifact] | null
   >(null);
+  const [shareArtifactId, setShareArtifactId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchArtifacts = async () => {
@@ -95,6 +98,12 @@ export function ArtifactTimeline({
         setCompareArtifacts([previousVersion, artifact]);
       }
     }
+  };
+
+  const handlePublishChange = (artifactId: string, published: boolean) => {
+    setArtifacts((prev) =>
+      prev.map((a) => (a.id === artifactId ? { ...a, published } : a))
+    );
   };
 
   if (loading) {
@@ -188,6 +197,27 @@ export function ArtifactTimeline({
                       View
                     </Button>
 
+                    {!artifact.published && (
+                      <PublishButton
+                        artifactId={artifact.id}
+                        isPublished={artifact.published}
+                        onPublishChange={(published) =>
+                          handlePublishChange(artifact.id, published)
+                        }
+                      />
+                    )}
+
+                    {artifact.published && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShareArtifactId(artifact.id)}
+                      >
+                        <Share2 className="mr-1 h-4 w-4" />
+                        Share
+                      </Button>
+                    )}
+
                     {index < artifacts.length - 1 && (
                       <Button
                         variant="outline"
@@ -228,6 +258,14 @@ export function ArtifactTimeline({
           oldArtifact={compareArtifacts[0]}
           newArtifact={compareArtifacts[1]}
           onClose={() => setCompareArtifacts(null)}
+        />
+      )}
+
+      {shareArtifactId && (
+        <ShareModal
+          artifactId={shareArtifactId}
+          open={!!shareArtifactId}
+          onClose={() => setShareArtifactId(null)}
         />
       )}
     </>
