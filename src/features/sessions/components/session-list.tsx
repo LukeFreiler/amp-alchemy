@@ -132,16 +132,11 @@ export function SessionList() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sessions.map((session) => (
-            <Card
-              key={session.id}
-              className="flex flex-col p-6 transition-colors hover:bg-card/80"
-            >
+            <Card key={session.id} className="flex flex-col p-6 transition-colors hover:bg-card/80">
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{session.name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {session.blueprint_name}
-                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">{session.blueprint_name}</p>
                 </div>
                 <Badge className={getStatusColor(session.status)}>
                   {session.status.replace('_', ' ')}

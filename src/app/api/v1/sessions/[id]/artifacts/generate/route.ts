@@ -173,14 +173,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Render template
     let prompt = generator.prompt_template;
-    prompt = prompt.replace(
-      /\{\{fields_json\}\}/g,
-      JSON.stringify(fieldsJson, null, 2)
-    );
-    prompt = prompt.replace(
-      /\{\{notes_json\}\}/g,
-      JSON.stringify(notesJson, null, 2)
-    );
+    prompt = prompt.replace(/\{\{fields_json\}\}/g, JSON.stringify(fieldsJson, null, 2));
+    prompt = prompt.replace(/\{\{notes_json\}\}/g, JSON.stringify(notesJson, null, 2));
 
     logger.info('Generating artifact', {
       session_id: sessionId,
@@ -194,10 +188,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const markdown = await generateArtifact(prompt);
 
     // Calculate prompt hash
-    const promptHash = crypto
-      .createHash('sha256')
-      .update(generator.prompt_template)
-      .digest('hex');
+    const promptHash = crypto.createHash('sha256').update(generator.prompt_template).digest('hex');
 
     logger.info('Artifact generated successfully', {
       session_id: sessionId,

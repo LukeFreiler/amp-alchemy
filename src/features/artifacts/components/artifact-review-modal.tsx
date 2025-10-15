@@ -7,20 +7,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GenerateResponse } from '@/features/artifacts/types/artifact';
 
 type ArtifactReviewModalProps = {
@@ -43,18 +34,13 @@ type SuccessResponse = {
   data: GenerateResponse;
 };
 
-export function ArtifactReviewModal({
-  sessionId,
-  generatorId,
-  onClose,
-}: ArtifactReviewModalProps) {
+export function ArtifactReviewModal({ sessionId, generatorId, onClose }: ArtifactReviewModalProps) {
   const [loading, setLoading] = useState(true);
   const [artifact, setArtifact] = useState<GenerateResponse | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const [showMissingFieldsWarning, setShowMissingFieldsWarning] =
-    useState(false);
+  const [showMissingFieldsWarning, setShowMissingFieldsWarning] = useState(false);
 
   const generate = async () => {
     setLoading(true);
@@ -62,18 +48,13 @@ export function ArtifactReviewModal({
     setMissingFields([]);
 
     try {
-      const response = await fetch(
-        `/api/v1/sessions/${sessionId}/artifacts/generate`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ generator_id: generatorId }),
-        }
-      );
+      const response = await fetch(`/api/v1/sessions/${sessionId}/artifacts/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generator_id: generatorId }),
+      });
 
-      const result = (await response.json()) as
-        | SuccessResponse
-        | ErrorResponse;
+      const result = (await response.json()) as SuccessResponse | ErrorResponse;
 
       if (result.ok) {
         setArtifact(result.data);
@@ -108,18 +89,15 @@ export function ArtifactReviewModal({
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/v1/sessions/${sessionId}/artifacts/save`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            generator_id: generatorId,
-            markdown: artifact.markdown,
-            prompt_template_hash: artifact.prompt_hash,
-          }),
-        }
-      );
+      const response = await fetch(`/api/v1/sessions/${sessionId}/artifacts/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          generator_id: generatorId,
+          markdown: artifact.markdown,
+          prompt_template_hash: artifact.prompt_hash,
+        }),
+      });
 
       const result = await response.json();
 
@@ -149,14 +127,14 @@ export function ArtifactReviewModal({
             <AlertTitle>Cannot Generate Artifact</AlertTitle>
             <AlertDescription>
               The following required fields are missing:
-              <ul className="list-disc list-inside mt-2">
+              <ul className="mt-2 list-inside list-disc">
                 {missingFields.map((field) => (
                   <li key={field}>{field}</li>
                 ))}
               </ul>
             </AlertDescription>
           </Alert>
-          <div className="flex justify-end gap-2 mt-4">
+          <div className="mt-4 flex justify-end gap-2">
             <Button variant="outline" onClick={handleProceedAnyway}>
               Go Back
             </Button>
@@ -168,11 +146,9 @@ export function ArtifactReviewModal({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="flex max-h-[90vh] max-w-6xl flex-col overflow-hidden">
         <DialogHeader>
-          <DialogTitle>
-            {artifact?.generator_name || 'Generating...'}
-          </DialogTitle>
+          <DialogTitle>{artifact?.generator_name || 'Generating...'}</DialogTitle>
         </DialogHeader>
 
         {error && (
@@ -185,35 +161,31 @@ export function ArtifactReviewModal({
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : artifact ? (
-          <div className="flex gap-4 flex-1 overflow-hidden">
+          <div className="flex flex-1 gap-4 overflow-hidden">
             {/* Left: Prompt */}
-            <div className="w-1/2 flex flex-col">
-              <h3 className="font-semibold mb-2 text-sm">Prompt</h3>
-              <div className="flex-1 overflow-y-auto bg-muted p-4 rounded-md font-mono text-xs">
+            <div className="flex w-1/2 flex-col">
+              <h3 className="mb-2 text-sm font-semibold">Prompt</h3>
+              <div className="flex-1 overflow-y-auto rounded-md bg-muted p-4 font-mono text-xs">
                 <pre className="whitespace-pre-wrap">{artifact.prompt}</pre>
               </div>
             </div>
 
             {/* Right: Generated Output */}
-            <div className="w-1/2 flex flex-col">
-              <h3 className="font-semibold mb-2 text-sm">Generated Artifact</h3>
-              <div className="flex-1 overflow-y-auto prose prose-sm dark:prose-invert bg-card p-4 rounded-md border border-border">
+            <div className="flex w-1/2 flex-col">
+              <h3 className="mb-2 text-sm font-semibold">Generated Artifact</h3>
+              <div className="prose prose-sm dark:prose-invert flex-1 overflow-y-auto rounded-md border border-border bg-card p-4">
                 <ReactMarkdown>{artifact.markdown}</ReactMarkdown>
               </div>
             </div>
           </div>
         ) : null}
 
-        <div className="flex justify-between mt-4">
-          <Button
-            variant="outline"
-            onClick={generate}
-            disabled={loading || saving}
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
+        <div className="mt-4 flex justify-between">
+          <Button variant="outline" onClick={generate} disabled={loading || saving}>
+            <RefreshCw className="mr-2 h-4 w-4" />
             Regenerate
           </Button>
 
@@ -221,13 +193,10 @@ export function ArtifactReviewModal({
             <Button variant="outline" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={loading || saving || !artifact}
-            >
+            <Button onClick={handleSave} disabled={loading || saving || !artifact}>
               {saving ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
                 </>
               ) : (

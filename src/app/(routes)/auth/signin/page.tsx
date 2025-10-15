@@ -19,20 +19,12 @@ export default function SignInPage() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-md space-y-8 rounded-lg border border-border bg-card p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Centercode Alchemy
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to continue
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Centercode Alchemy</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Sign in to continue</p>
         </div>
 
         <div className="mt-8">
-          <Button
-            onClick={handleSignIn}
-            className="w-full"
-            size="lg"
-          >
+          <Button onClick={handleSignIn} className="w-full" size="lg">
             <Chrome className="mr-2 h-5 w-5" />
             Sign in with Google
           </Button>

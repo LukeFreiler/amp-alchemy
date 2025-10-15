@@ -122,7 +122,10 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {blueprints.map((blueprint) => (
-            <Card key={blueprint.id} className="flex flex-col p-6 transition-colors hover:bg-card/80">
+            <Card
+              key={blueprint.id}
+              className="flex flex-col p-6 transition-colors hover:bg-card/80"
+            >
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{blueprint.name}</h3>
@@ -132,9 +135,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
                     </p>
                   )}
                 </div>
-                <Badge className={getStatusColor(blueprint.status)}>
-                  {blueprint.status}
-                </Badge>
+                <Badge className={getStatusColor(blueprint.status)}>{blueprint.status}</Badge>
               </div>
 
               <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">

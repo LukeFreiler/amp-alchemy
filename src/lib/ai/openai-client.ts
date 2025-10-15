@@ -5,10 +5,7 @@
  */
 
 import OpenAI from 'openai';
-import {
-  MappingResult,
-  FieldCatalogEntry,
-} from '@/features/ai/types/mapping';
+import { MappingResult, FieldCatalogEntry } from '@/features/ai/types/mapping';
 import { logger } from '@/lib/logger';
 
 const openai = new OpenAI({
@@ -84,8 +81,7 @@ Return JSON in this EXACT format:
 
     logger.info('OpenAI field mapping completed', {
       suggestions_count: result.suggestions.length,
-      sections_with_summaries: Object.keys(result.unmapped_summary_by_section)
-        .length,
+      sections_with_summaries: Object.keys(result.unmapped_summary_by_section).length,
       tokens_used: response.usage?.total_tokens,
     });
 

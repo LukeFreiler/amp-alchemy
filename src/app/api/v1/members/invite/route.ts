@@ -21,7 +21,7 @@ interface InviteRequest {
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth(['owner', 'editor']);
-    const body = await req.json() as InviteRequest;
+    const body = (await req.json()) as InviteRequest;
 
     // Validate input
     if (!body.email?.trim()) {

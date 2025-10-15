@@ -24,7 +24,7 @@ export function SectionNav({
   overallProgress,
 }: SectionNavProps) {
   return (
-    <div className="p-4 space-y-2">
+    <div className="space-y-2 p-4">
       {/* Overall progress */}
       <div className="mb-4">
         <div className="text-sm font-medium text-muted-foreground">Overall Progress</div>
@@ -40,7 +40,7 @@ export function SectionNav({
       <Separator />
 
       {/* Section list */}
-      <div className="space-y-1 mt-4">
+      <div className="mt-4 space-y-1">
         {sections.map((section, index) => {
           const isActive = index === currentIndex;
           const completionPercent = section.completion_percentage;
@@ -50,16 +50,16 @@ export function SectionNav({
               key={section.id}
               onClick={() => onSelectSection(index)}
               className={cn(
-                'w-full text-left px-3 py-2 rounded-md transition-colors',
+                'w-full rounded-md px-3 py-2 text-left transition-colors',
                 isActive
-                  ? 'bg-selected text-foreground font-medium'
-                  : 'hover:bg-hover text-muted-foreground'
+                  ? 'bg-selected font-medium text-foreground'
+                  : 'text-muted-foreground hover:bg-hover'
               )}
             >
               <div className="flex items-center gap-2">
                 <div
                   className={cn(
-                    'w-2 h-2 rounded-full flex-shrink-0',
+                    'h-2 w-2 flex-shrink-0 rounded-full',
                     completionPercent === 100
                       ? 'bg-emerald-500'
                       : completionPercent > 0
@@ -67,9 +67,9 @@ export function SectionNav({
                         : 'bg-muted-foreground/30'
                   )}
                 />
-                <span className="text-sm truncate">{section.title}</span>
+                <span className="truncate text-sm">{section.title}</span>
               </div>
-              <div className="text-xs text-muted-foreground ml-4 mt-1">
+              <div className="ml-4 mt-1 text-xs text-muted-foreground">
                 {section.required_count > 0 ? (
                   <>
                     {section.filled_count}/{section.required_count} fields • {completionPercent}%
@@ -84,8 +84,8 @@ export function SectionNav({
       </div>
 
       {/* Keyboard shortcuts hint */}
-      <div className="mt-6 pt-4 border-t text-xs text-muted-foreground space-y-1">
-        <div className="font-medium mb-2">Keyboard Shortcuts</div>
+      <div className="mt-6 space-y-1 border-t pt-4 text-xs text-muted-foreground">
+        <div className="mb-2 font-medium">Keyboard Shortcuts</div>
         <div className="flex justify-between">
           <span>Navigate</span>
           <span className="font-mono">J / K</span>

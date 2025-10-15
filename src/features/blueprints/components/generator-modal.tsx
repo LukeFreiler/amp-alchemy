@@ -20,10 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import {
-  BlueprintArtifactGenerator,
-  OutputFormat,
-} from '@/features/blueprints/types/generator';
+import { BlueprintArtifactGenerator, OutputFormat } from '@/features/blueprints/types/generator';
 
 interface GeneratorModalProps {
   generator?: BlueprintArtifactGenerator;
@@ -39,12 +36,7 @@ interface GeneratorModalProps {
   onClose: () => void;
 }
 
-export function GeneratorModal({
-  generator,
-  open,
-  onSave,
-  onClose,
-}: GeneratorModalProps) {
+export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorModalProps) {
   const [name, setName] = useState(generator?.name || '');
   const [description, setDescription] = useState(generator?.description || '');
   const [promptTemplate, setPromptTemplate] = useState(generator?.prompt_template || '');
@@ -119,18 +111,20 @@ export function GeneratorModal({
                 required
                 placeholder="Enter your prompt template here..."
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Use <code className="bg-muted px-1 rounded">{'{{fields_json}}'}</code> to inject
+              <p className="mt-1 text-xs text-muted-foreground">
+                Use <code className="rounded bg-muted px-1">{'{{fields_json}}'}</code> to inject
                 session field values and{' '}
-                <code className="bg-muted px-1 rounded">{'{{notes_json}}'}</code> for section
-                notes.
+                <code className="rounded bg-muted px-1">{'{{notes_json}}'}</code> for section notes.
               </p>
             </div>
 
             <div className="flex items-center gap-6">
               <div>
                 <Label htmlFor="format">Output Format</Label>
-                <Select value={outputFormat} onValueChange={(val) => setOutputFormat(val as OutputFormat)}>
+                <Select
+                  value={outputFormat}
+                  onValueChange={(val) => setOutputFormat(val as OutputFormat)}
+                >
                   <SelectTrigger id="format" className="w-40">
                     <SelectValue />
                   </SelectTrigger>

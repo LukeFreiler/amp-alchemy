@@ -19,12 +19,9 @@ export default async function SessionPage({ params }: SessionPageProps) {
   const { id } = await params;
 
   // Fetch session data
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/v1/sessions/${id}`,
-    {
-      cache: 'no-store',
-    }
-  );
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/sessions/${id}`, {
+    cache: 'no-store',
+  });
 
   const result = await response.json();
 

@@ -39,8 +39,7 @@ export function SessionFooter({
           </Button>
           {validationErrors > 0 && (
             <span className="text-sm text-destructive">
-              {validationErrors} required field{validationErrors > 1 ? 's' : ''}{' '}
-              missing
+              {validationErrors} required field{validationErrors > 1 ? 's' : ''} missing
             </span>
           )}
         </div>

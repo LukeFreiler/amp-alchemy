@@ -36,10 +36,7 @@ type Suggestion = {
  *
  * List all unreviewed AI-generated field suggestions for a session
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: sessionId } = await params;
     const user = await requireAuth(['owner', 'editor']);

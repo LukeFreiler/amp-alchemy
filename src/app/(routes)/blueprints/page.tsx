@@ -11,13 +11,16 @@ export default async function BlueprintsPage() {
   const user = await requireAuth(['owner', 'editor']);
 
   // Fetch blueprints from API
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/v1/blueprints`, {
-    cache: 'no-store',
-    headers: {
-      // Pass cookies for authentication
-      cookie: `next-auth.session-token=${user.id}`,
-    },
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/v1/blueprints`,
+    {
+      cache: 'no-store',
+      headers: {
+        // Pass cookies for authentication
+        cookie: `next-auth.session-token=${user.id}`,
+      },
+    }
+  );
 
   let blueprints = [];
   if (response.ok) {

@@ -20,9 +20,7 @@ interface CompanySettingsFormProps {
 export function CompanySettingsForm({ company }: CompanySettingsFormProps) {
   const [name, setName] = useState(company.name);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    null
-  );
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,9 +56,7 @@ export function CompanySettingsForm({ company }: CompanySettingsFormProps) {
         <Building2 className="h-6 w-6 text-muted-foreground" />
         <div>
           <h2 className="text-xl font-semibold text-foreground">Company Settings</h2>
-          <p className="text-sm text-muted-foreground">
-            Manage your company name and branding
-          </p>
+          <p className="text-sm text-muted-foreground">Manage your company name and branding</p>
         </div>
       </div>
 
@@ -85,8 +81,8 @@ export function CompanySettingsForm({ company }: CompanySettingsFormProps) {
           <div
             className={`rounded-md p-3 text-sm ${
               message.type === 'success'
-                ? 'bg-green-950/50 text-green-400 border border-green-900'
-                : 'bg-destructive/10 text-destructive border border-destructive/50'
+                ? 'border border-green-900 bg-green-950/50 text-green-400'
+                : 'border border-destructive/50 bg-destructive/10 text-destructive'
             }`}
           >
             {message.text}
@@ -94,11 +90,7 @@ export function CompanySettingsForm({ company }: CompanySettingsFormProps) {
         )}
 
         <div className="flex gap-3">
-          <Button
-            type="submit"
-            disabled={!hasChanges || isLoading}
-            className="w-full sm:w-auto"
-          >
+          <Button type="submit" disabled={!hasChanges || isLoading} className="w-full sm:w-auto">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

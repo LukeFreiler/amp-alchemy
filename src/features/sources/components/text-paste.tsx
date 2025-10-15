@@ -63,15 +63,13 @@ export function TextPaste({ sessionId, onComplete }: TextPasteProps) {
       />
 
       {error && (
-        <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <div className="flex items-center justify-between">
-        <span
-          className={`text-xs ${isOverLimit ? 'text-destructive' : 'text-muted-foreground'}`}
-        >
+        <span className={`text-xs ${isOverLimit ? 'text-destructive' : 'text-muted-foreground'}`}>
           {characterCount.toLocaleString()} / {MAX_LENGTH.toLocaleString()} characters
         </span>
 

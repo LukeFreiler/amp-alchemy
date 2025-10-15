@@ -86,10 +86,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     // Verify section exists
-    const section = await queryOne<{ id: string }>(
-      'SELECT id FROM sections WHERE id = $1',
-      [section_id]
-    );
+    const section = await queryOne<{ id: string }>('SELECT id FROM sections WHERE id = $1', [
+      section_id,
+    ]);
 
     if (!section) {
       throw new NotFoundError('Section not found');

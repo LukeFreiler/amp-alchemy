@@ -24,13 +24,8 @@ type GenerateButtonProps = {
   generators: Generator[];
 };
 
-export function GenerateButton({
-  sessionId,
-  generators,
-}: GenerateButtonProps) {
-  const [selectedGenerator, setSelectedGenerator] = useState<string | null>(
-    null
-  );
+export function GenerateButton({ sessionId, generators }: GenerateButtonProps) {
+  const [selectedGenerator, setSelectedGenerator] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   const handleGenerate = () => {
@@ -45,10 +40,7 @@ export function GenerateButton({
   return (
     <>
       <div className="flex gap-2">
-        <Select
-          value={selectedGenerator || ''}
-          onValueChange={setSelectedGenerator}
-        >
+        <Select value={selectedGenerator || ''} onValueChange={setSelectedGenerator}>
           <SelectTrigger className="w-64">
             <SelectValue placeholder="Select generator..." />
           </SelectTrigger>
@@ -62,7 +54,7 @@ export function GenerateButton({
         </Select>
 
         <Button onClick={handleGenerate} disabled={!selectedGenerator}>
-          <Sparkles className="w-4 h-4 mr-2" />
+          <Sparkles className="mr-2 h-4 w-4" />
           Generate
         </Button>
       </div>

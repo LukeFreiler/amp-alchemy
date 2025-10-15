@@ -268,7 +268,10 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
               ...prev,
               sections: prev.sections.map((s) =>
                 s.id === selectedSectionId
-                  ? { ...s, fields: s.fields.map((f) => (f.id === editingField.id ? result.data : f)) }
+                  ? {
+                      ...s,
+                      fields: s.fields.map((f) => (f.id === editingField.id ? result.data : f)),
+                    }
                   : s
               ),
             };
@@ -317,7 +320,9 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           return {
             ...prev,
             sections: prev.sections.map((s) =>
-              s.id === selectedSectionId ? { ...s, fields: s.fields.filter((f) => f.id !== fieldId) } : s
+              s.id === selectedSectionId
+                ? { ...s, fields: s.fields.filter((f) => f.id !== fieldId) }
+                : s
             ),
           };
         });
@@ -398,10 +403,10 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-6 px-6 border-t border-border">
+          <div className="flex gap-6 border-t border-border px-6">
             <button
               onClick={() => setActiveTab('sections')}
-              className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'sections'
                   ? 'border-primary text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -411,7 +416,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
             </button>
             <button
               onClick={() => setActiveTab('generators')}
-              className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
                 activeTab === 'generators'
                   ? 'border-primary text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -427,7 +432,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           {activeTab === 'sections' ? (
             <>
               {/* Left Panel - Sections */}
-              <div className="w-80 border-r border-border bg-card p-4 overflow-y-auto">
+              <div className="w-80 overflow-y-auto border-r border-border bg-card p-4">
                 <SectionList
                   sections={blueprint.sections}
                   selectedSectionId={selectedSectionId}
@@ -481,11 +486,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           ) : (
             /* Generators Tab */
             <div className="flex-1 overflow-y-auto p-6">
-              <GeneratorList
-                blueprintId={id}
-                generators={generators}
-                onUpdate={fetchGenerators}
-              />
+              <GeneratorList blueprintId={id} generators={generators} onUpdate={fetchGenerators} />
             </div>
           )}
         </div>

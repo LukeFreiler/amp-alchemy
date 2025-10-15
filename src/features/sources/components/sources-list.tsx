@@ -60,25 +60,23 @@ export function SourcesList({ sessionId, refreshTrigger }: SourcesListProps) {
   const getIcon = (type: string) => {
     switch (type) {
       case 'file':
-        return <FileText className="w-5 h-5 text-muted-foreground" />;
+        return <FileText className="h-5 w-5 text-muted-foreground" />;
       case 'paste':
-        return <Type className="w-5 h-5 text-muted-foreground" />;
+        return <Type className="h-5 w-5 text-muted-foreground" />;
       case 'url':
-        return <LinkIcon className="w-5 h-5 text-muted-foreground" />;
+        return <LinkIcon className="h-5 w-5 text-muted-foreground" />;
       default:
-        return <FileText className="w-5 h-5 text-muted-foreground" />;
+        return <FileText className="h-5 w-5 text-muted-foreground" />;
     }
   };
 
   if (loading) {
-    return (
-      <div className="text-sm text-muted-foreground text-center py-8">Loading sources...</div>
-    );
+    return <div className="py-8 text-center text-sm text-muted-foreground">Loading sources...</div>;
   }
 
   if (sources.length === 0) {
     return (
-      <div className="text-sm text-muted-foreground text-center py-8">
+      <div className="py-8 text-center text-sm text-muted-foreground">
         No sources imported yet. Use the Import button to add files or text.
       </div>
     );
@@ -89,13 +87,11 @@ export function SourcesList({ sessionId, refreshTrigger }: SourcesListProps) {
       {sources.map((source) => (
         <Card key={source.id} className="p-4">
           <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
               {getIcon(source.type)}
 
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">
-                  {source.filename_or_url || 'Pasted Text'}
-                </p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{source.filename_or_url || 'Pasted Text'}</p>
                 <p className="text-sm text-muted-foreground">
                   {new Date(source.created_at).toLocaleDateString('en-US', {
                     month: 'short',
@@ -114,7 +110,7 @@ export function SourcesList({ sessionId, refreshTrigger }: SourcesListProps) {
               disabled={deletingId === source.id}
               className="ml-2"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </Card>

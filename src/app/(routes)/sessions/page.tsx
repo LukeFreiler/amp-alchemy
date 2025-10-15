@@ -13,10 +13,8 @@ export default async function SessionsPage() {
   return (
     <div className="container mx-auto p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Sessions</h1>
-        <p className="text-muted-foreground">
-          Manage your data collection sessions
-        </p>
+        <h1 className="mb-2 text-3xl font-bold">Sessions</h1>
+        <p className="text-muted-foreground">Manage your data collection sessions</p>
       </div>
 
       <SessionList />

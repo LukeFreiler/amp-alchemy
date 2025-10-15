@@ -144,9 +144,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (body.status !== undefined) {
       const validStatuses: string[] = ['in_progress', 'completed', 'archived'];
       if (!validStatuses.includes(body.status)) {
-        throw new ValidationError(
-          `Status must be one of: ${validStatuses.join(', ')}`
-        );
+        throw new ValidationError(`Status must be one of: ${validStatuses.join(', ')}`);
       }
       updates.push(`status = $${paramIndex++}`);
       values.push(body.status);

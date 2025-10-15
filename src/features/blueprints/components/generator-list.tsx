@@ -30,10 +30,16 @@ interface GeneratorListProps {
   onUpdate: () => void;
 }
 
-export function GeneratorList({ blueprintId, generators: initialGenerators, onUpdate }: GeneratorListProps) {
+export function GeneratorList({
+  blueprintId,
+  generators: initialGenerators,
+  onUpdate,
+}: GeneratorListProps) {
   const [generators, setGenerators] = useState(initialGenerators);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingGenerator, setEditingGenerator] = useState<BlueprintArtifactGenerator | undefined>();
+  const [editingGenerator, setEditingGenerator] = useState<
+    BlueprintArtifactGenerator | undefined
+  >();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -190,7 +196,7 @@ export function GeneratorList({ blueprintId, generators: initialGenerators, onUp
               onDragStart={() => handleDragStart(index)}
               onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
-              className="flex items-center gap-4 p-4 transition-colors hover:bg-card/80 cursor-move"
+              className="flex cursor-move items-center gap-4 p-4 transition-colors hover:bg-card/80"
             >
               <GripVertical className="h-5 w-5 text-muted-foreground" />
 
@@ -207,7 +213,7 @@ export function GeneratorList({ blueprintId, generators: initialGenerators, onUp
                   )}
                 </div>
                 {generator.description && (
-                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                     {generator.description}
                   </p>
                 )}

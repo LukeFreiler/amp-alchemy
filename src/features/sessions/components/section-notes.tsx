@@ -33,9 +33,7 @@ export function SectionNotes({ sessionId, sectionId }: SectionNotesProps) {
   const fetchNotes = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/v1/sessions/${sessionId}/sections/${sectionId}/notes`
-      );
+      const response = await fetch(`/api/v1/sessions/${sessionId}/sections/${sectionId}/notes`);
       const result = await response.json();
 
       if (result.ok) {
@@ -107,11 +105,11 @@ export function SectionNotes({ sessionId, sectionId }: SectionNotesProps) {
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         {isPreview ? (
-          <div className="prose prose-sm prose-invert max-w-none overflow-y-auto h-full pr-2">
+          <div className="prose prose-sm prose-invert h-full max-w-none overflow-y-auto pr-2">
             {markdown.trim() ? (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
             ) : (
-              <p className="text-muted-foreground italic">No notes yet</p>
+              <p className="italic text-muted-foreground">No notes yet</p>
             )}
           </div>
         ) : (
@@ -132,7 +130,7 @@ export function SectionNotes({ sessionId, sectionId }: SectionNotesProps) {
       </div>
 
       {/* Help text */}
-      <div className="mt-4 pt-4 border-t text-xs text-muted-foreground">
+      <div className="mt-4 border-t pt-4 text-xs text-muted-foreground">
         <p>Notes are saved automatically when you click away</p>
         <p className="mt-1">Supports Markdown formatting</p>
       </div>

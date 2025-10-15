@@ -40,14 +40,11 @@ export function FieldRenderer({
   const debouncedSave = useDebouncedCallback(async (newValue: string) => {
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `/api/v1/sessions/${sessionId}/fields/${field.id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ value: newValue }),
-        }
-      );
+      const response = await fetch(`/api/v1/sessions/${sessionId}/fields/${field.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: newValue }),
+      });
 
       if (!response.ok) {
         const result = await response.json();
@@ -56,9 +53,7 @@ export function FieldRenderer({
 
       onValueChange(field.id, newValue);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to save field value'
-      );
+      setError(err instanceof Error ? err.message : 'Failed to save field value');
     } finally {
       setIsSaving(false);
     }
@@ -83,18 +78,11 @@ export function FieldRenderer({
   };
 
   return (
-    <div
-      className={cn(
-        'space-y-2',
-        field.span === 2 ? 'col-span-2' : 'col-span-1'
-      )}
-    >
+    <div className={cn('space-y-2', field.span === 2 ? 'col-span-2' : 'col-span-1')}>
       <Label htmlFor={field.id}>
         {field.label}
         {field.required && <span className="ml-1 text-destructive">*</span>}
-        {isSaving && (
-          <span className="ml-2 text-xs text-muted-foreground">Saving...</span>
-        )}
+        {isSaving && <span className="ml-2 text-xs text-muted-foreground">Saving...</span>}
       </Label>
 
       {field.type === 'ShortText' && (
@@ -131,22 +119,14 @@ export function FieldRenderer({
             checked={value === 'true'}
             onCheckedChange={(checked) => handleChange(String(checked))}
           />
-          <span className="text-sm text-muted-foreground">
-            {value === 'true' ? 'Yes' : 'No'}
-          </span>
+          <span className="text-sm text-muted-foreground">{value === 'true' ? 'Yes' : 'No'}</span>
         </div>
       )}
 
-      {field.help_text && (
-        <p className="text-xs text-muted-foreground">{field.help_text}</p>
-      )}
+      {field.help_text && <p className="text-xs text-muted-foreground">{field.help_text}</p>}
 
       {error && (
-        <p
-          id={`${field.id}-error`}
-          className="text-xs text-destructive"
-          role="alert"
-        >
+        <p id={`${field.id}-error`} className="text-xs text-destructive" role="alert">
           {error}
         </p>
       )}

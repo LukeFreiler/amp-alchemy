@@ -62,15 +62,14 @@ export function URLInput({ sessionId, onComplete }: URLInputProps) {
           aria-describedby={error ? 'url-error' : undefined}
         />
         <p className="text-xs text-muted-foreground">
-          Enter a URL to extract content from web pages, articles, or
-          documentation.
+          Enter a URL to extract content from web pages, articles, or documentation.
         </p>
       </div>
 
       {error && (
         <div
           id="url-error"
-          className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3"
+          className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
         >
           {error}
         </div>
@@ -83,12 +82,12 @@ export function URLInput({ sessionId, onComplete }: URLInputProps) {
       >
         {scraping ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Scraping...
           </>
         ) : (
           <>
-            <ExternalLink className="w-4 h-4 mr-2" />
+            <ExternalLink className="mr-2 h-4 w-4" />
             Scrape URL
           </>
         )}

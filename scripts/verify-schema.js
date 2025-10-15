@@ -61,9 +61,7 @@ async function verifySchema() {
       GROUP BY b.id
     `);
     for (const bp of blueprints.rows) {
-      console.log(
-        `  ✓ ${bp.name} v${bp.version} with ${bp.section_count} sections`
-      );
+      console.log(`  ✓ ${bp.name} v${bp.version} with ${bp.section_count} sections`);
     }
 
     // Check sections and fields

@@ -124,9 +124,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     );
 
     // Recalculate completion
-    const { completion_percent, status } = await updateSessionCompletion(
-      sessionId
-    );
+    const { completion_percent, status } = await updateSessionCompletion(sessionId);
 
     logger.info('Updated field value', {
       session_id: sessionId,

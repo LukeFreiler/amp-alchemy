@@ -19,7 +19,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Field, FieldType } from '@/features/blueprints/types/blueprint';
 
@@ -31,12 +37,7 @@ interface FieldConfigModalProps {
   onSave: (data: Partial<Field>) => Promise<void>;
 }
 
-export function FieldConfigModal({
-  field,
-  open,
-  onOpenChange,
-  onSave,
-}: FieldConfigModalProps) {
+export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldConfigModalProps) {
   const [type, setType] = useState<FieldType>(field?.type || 'ShortText');
   const [key, setKey] = useState(field?.key || '');
   const [label, setLabel] = useState(field?.label || '');
@@ -190,11 +191,7 @@ export function FieldConfigModal({
 
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <Switch
-                id="field-required"
-                checked={required}
-                onCheckedChange={setRequired}
-              />
+              <Switch id="field-required" checked={required} onCheckedChange={setRequired} />
               <Label htmlFor="field-required" className="cursor-pointer">
                 Required
               </Label>

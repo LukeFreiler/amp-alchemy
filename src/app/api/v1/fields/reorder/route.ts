@@ -54,10 +54,10 @@ export async function PUT(request: NextRequest) {
         }
 
         // Update order_index
-        await client.query(
-          'UPDATE fields SET order_index = $1, updated_at = NOW() WHERE id = $2',
-          [field.order_index, field.id]
-        );
+        await client.query('UPDATE fields SET order_index = $1, updated_at = NOW() WHERE id = $2', [
+          field.order_index,
+          field.id,
+        ]);
       }
     });
 

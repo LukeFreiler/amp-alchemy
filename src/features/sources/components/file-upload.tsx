@@ -79,14 +79,14 @@ export function FileUpload({ sessionId, onComplete }: FileUploadProps) {
       <div
         {...getRootProps()}
         className={cn(
-          'border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors',
+          'cursor-pointer rounded-lg border-2 border-dashed p-12 text-center transition-colors',
           isDragActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary',
           uploading && 'pointer-events-none opacity-50'
         )}
       >
         <input {...getInputProps()} />
-        <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-sm font-medium mb-1">
+        <Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+        <p className="mb-1 text-sm font-medium">
           {isDragActive ? 'Drop files here' : 'Drag & drop files or click to browse'}
         </p>
         <p className="text-xs text-muted-foreground">
@@ -95,7 +95,7 @@ export function FileUpload({ sessionId, onComplete }: FileUploadProps) {
       </div>
 
       {error && (
-        <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -106,7 +106,7 @@ export function FileUpload({ sessionId, onComplete }: FileUploadProps) {
             <span>Uploading...</span>
             <span>{Math.round(progress)}%</span>
           </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-2 overflow-hidden rounded-full bg-muted">
             <div
               className="h-full bg-primary transition-all duration-300"
               style={{ width: `${progress}%` }}

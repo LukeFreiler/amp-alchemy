@@ -41,18 +41,13 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if user is typing in an input
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
 
       if (e.key === 'j' || e.key === 'ArrowDown') {
         e.preventDefault();
-        setCurrentSectionIndex((prev) =>
-          Math.min(prev + 1, sessionData.sections.length - 1)
-        );
+        setCurrentSectionIndex((prev) => Math.min(prev + 1, sessionData.sections.length - 1));
       } else if (e.key === 'k' || e.key === 'ArrowUp') {
         e.preventDefault();
         setCurrentSectionIndex((prev) => Math.max(prev - 1, 0));
@@ -132,7 +127,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
               onClick={() => setImportModalOpen(true)}
               className="gap-2"
             >
-              <Upload className="w-4 h-4" />
+              <Upload className="h-4 w-4" />
               Import
             </Button>
             <GenerateButton sessionId={sessionData.id} generators={generators} />
@@ -146,7 +141,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
       {/* 3-panel layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left rail - Section navigation */}
-        <aside className="w-64 border-r bg-sidebar overflow-y-auto">
+        <aside className="w-64 overflow-y-auto border-r bg-sidebar">
           <SectionNav
             sections={sessionData.sections}
             currentIndex={currentSectionIndex}
@@ -161,7 +156,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
             {/* Sources section */}
             {showSources && (
               <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Sources</h3>
                   <Button
                     variant="ghost"
@@ -195,9 +190,9 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
               onSuggestionsReviewed={() => setSourcesRefresh((prev) => prev + 1)}
             />
 
-            <h2 className="text-2xl font-semibold mb-4">{currentSection.title}</h2>
+            <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
             {currentSection.description && (
-              <p className="text-muted-foreground mb-6">{currentSection.description}</p>
+              <p className="mb-6 text-muted-foreground">{currentSection.description}</p>
             )}
 
             {/* Field Grid */}
@@ -211,7 +206,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
         </main>
 
         {/* Right rail - Section notes */}
-        <aside className="w-96 border-l bg-sidebar overflow-y-auto">
+        <aside className="w-96 overflow-y-auto border-l bg-sidebar">
           <SectionNotes
             sessionId={sessionData.id}
             sectionId={currentSection.id}

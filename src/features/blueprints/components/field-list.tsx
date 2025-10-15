@@ -184,7 +184,11 @@ export function FieldList({
             </Button>
           </Card>
         ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
               {fields.map((field) => (
                 <SortableField

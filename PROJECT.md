@@ -12,8 +12,8 @@ Pick canonical names to keep the code and UI consistent. Suggested set:
 
 - **Company**: an organization that owns data and seats.
 - **Member**: a user in a Company.
-    - **Editor**: can create Blueprints, Sessions, and Artifacts.
-    - **Viewer**: can view Artifacts and, if allowed, upload Sources.
+  - **Editor**: can create Blueprints, Sessions, and Artifacts.
+  - **Viewer**: can view Artifacts and, if allowed, upload Sources.
 - **Blueprint**: A reusable template that defines Sections, Fields, and Artifact Generators.
 - **Section**: A page in the wizard that groups related Fields and has its own Notes.
 - **Field**: an input inside a Section. Initial types are ShortText, LongText, Toggle. Fields have labels, help text, required flag, and a 1‑column or 2‑column span.
@@ -29,17 +29,17 @@ Pick canonical names to keep the code and UI consistent. Suggested set:
 
 - **Company Owner**: first Editor who creates a Company. Can invite Members, set defaults.
 - **Editor**:
-    - Create, edit, duplicate, archive Blueprints.
-    - Create, edit, run Sessions for any Blueprint in the Company.
-    - Import Sources into Sessions at any time.
-    - Create and manage Artifact Generators on a Blueprint.
-    - Generate, review, publish, and export Artifacts. View Artifact history.
+  - Create, edit, duplicate, archive Blueprints.
+  - Create, edit, run Sessions for any Blueprint in the Company.
+  - Import Sources into Sessions at any time.
+  - Create and manage Artifact Generators on a Blueprint.
+  - Generate, review, publish, and export Artifacts. View Artifact history.
 - **Viewer**:
-    - Access shared Artifacts in the Data Room.
-    - Optional per-share toggle: “Viewer can upload Sources to this Session”.
+  - Access shared Artifacts in the Data Room.
+  - Optional per-share toggle: “Viewer can upload Sources to this Session”.
 - **Access model**:
-    - Company-wide access to Blueprints and Sessions by default.
-    - Share Artifacts via link or named Viewers. Links can be time bound and read only.
+  - Company-wide access to Blueprints and Sessions by default.
+  - Share Artifacts via link or named Viewers. Links can be time bound and read only.
 
 Acceptance checks
 
@@ -53,14 +53,14 @@ Acceptance checks
 - **Dark mode** only. Branding and colors supplied by tailwind.config.ts.
 - **Top bar**: logo, breadcrumb, search, command palette trigger, user avatar menu. Right side includes “Import” button.
 - **Three columns**:
-    - **Left**: Sections list with progress dots and validation states. Click to jump. Shows completion percentage.
-    - **Center**: current Section’s Fields in a large open canvas. No subpanels.
-    - **Right**: Section Notes. Freeform Markdown with live preview toggle.
+  - **Left**: Sections list with progress dots and validation states. Click to jump. Shows completion percentage.
+  - **Center**: current Section’s Fields in a large open canvas. No subpanels.
+  - **Right**: Section Notes. Freeform Markdown with live preview toggle.
 - **Sticky footer** in Sessions: Back, Next, Home. Shows validation errors on Next if required fields are missing.
 - **Keyboard**:
-    - Cmd/Ctrl+K opens command palette.
-    - Cmd/Ctrl+Enter to generate selected Artifact.
-    - Arrow or J/K to move Sections.
+  - Cmd/Ctrl+K opens command palette.
+  - Cmd/Ctrl+Enter to generate selected Artifact.
+  - Arrow or J/K to move Sections.
 
 Acceptance checks
 
@@ -72,28 +72,28 @@ Acceptance checks
 ## 5) Session lifecycle
 
 1. **Start session**:
-    - Choose a Blueprint, name the Session, pick an initial import option:
-        - Upload files
-        - Paste text
-        - Provide URLs to scrape
-    - Or skip import and begin manually.
+   - Choose a Blueprint, name the Session, pick an initial import option:
+     - Upload files
+     - Paste text
+     - Provide URLs to scrape
+   - Or skip import and begin manually.
 
 2. **Ingest and prefill** (optional, anytime):
-    - Parse Sources, extract text, map content to Fields by semantics.
-    - Prefill Fields with confidence scores and change tracking.
-    - Never overwrite user edits without confirmation.
+   - Parse Sources, extract text, map content to Fields by semantics.
+   - Prefill Fields with confidence scores and change tracking.
+   - Never overwrite user edits without confirmation.
 3. **Edit**:
-    - Move freely across Sections or use Next/Back.
-    - Required fields are indicated inline. Completion percent updates live.
-    - Add Notes per Section to capture out-of-schema details.
+   - Move freely across Sections or use Next/Back.
+   - Required fields are indicated inline. Completion percent updates live.
+   - Add Notes per Section to capture out-of-schema details.
 4. **Generate Artifacts**:
-    - Choose one or more Artifact Generators defined on the Blueprint.
-    - Review generated content in a side-by-side view. Save as Artifact v1, v2, etc.
+   - Choose one or more Artifact Generators defined on the Blueprint.
+   - Review generated content in a side-by-side view. Save as Artifact v1, v2, etc.
 5. **Publish and share**:
-    - Publish to Data Room and share links with Viewers.
-    - Optionally export to PDF or HTML in later milestone.
+   - Publish to Data Room and share links with Viewers.
+   - Optionally export to PDF or HTML in later milestone.
 6. **Close session**:
-    - Mark complete when all required fields are filled. Sessions remain editable unless locked.
+   - Mark complete when all required fields are filled. Sessions remain editable unless locked.
 
 Acceptance checks
 
@@ -107,19 +107,19 @@ Acceptance checks
 Editors define Blueprints with a quick form builder:
 
 - **Sections**:
-    - Title, optional description.
-    - Right-rail Notes enabled by default.
+  - Title, optional description.
+  - Right-rail Notes enabled by default.
 - **Fields** (MVP types):
-    - ShortText
-    - LongText
-    - Toggle
-    - Layout span: 1 or 2 columns.
-    - Label, Help text, Required flag, Placeholder.
+  - ShortText
+  - LongText
+  - Toggle
+  - Layout span: 1 or 2 columns.
+  - Label, Help text, Required flag, Placeholder.
 - **Artifact Generators**:
-    - Name, Description
-    - Prompt template with variables
-    - Output format hint: Markdown or HTML
-    - Visibility in Data Room by default or not
+  - Name, Description
+  - Prompt template with variables
+  - Output format hint: Markdown or HTML
+  - Visibility in Data Room by default or not
 
 Blueprint actions
 
@@ -148,8 +148,8 @@ Acceptance checks
 - Semantic match chunks to Fields using labels and help text.
 - Produce suggested values with confidence scores.
 - Present a review list for new or conflicting values:
-    - Accept all, accept per-field, or discard.
-    - Log provenance for each accepted value.
+  - Accept all, accept per-field, or discard.
+  - Log provenance for each accepted value.
 
 **Section Notes**
 
@@ -177,11 +177,11 @@ Acceptance checks
 **History**
 
 - Store every run as an Artifact version with:
-    - Generator name
-    - Timestamp and Member
-    - Prompt template version and parameters
-    - Session snapshot reference
-    - Diff from prior version
+  - Generator name
+  - Timestamp and Member
+  - Prompt template version and parameters
+  - Session snapshot reference
+  - Diff from prior version
 
 **Regeneration**
 
@@ -205,15 +205,15 @@ Acceptance checks
 ## 10) Search and command palette
 
 - Global search across:
-    - Blueprints by name and Section titles
-    - Sessions by name, fields, and notes
-    - Artifacts by title and content
+  - Blueprints by name and Section titles
+  - Sessions by name, fields, and notes
+  - Artifacts by title and content
 - Command palette actions:
-    - Navigate to Section
-    - Import Sources
-    - Generate Artifact
-    - Toggle preview
-    - Share
+  - Navigate to Section
+  - Import Sources
+  - Generate Artifact
+  - Toggle preview
+  - Share
 
 Acceptance checks
 
@@ -226,17 +226,17 @@ Acceptance checks
 High level entities and relationships. Use your stack to implement.
 
 - **Company**: id, name, branding.
-- **Member**: id, company\_id, role, name, email, auth\_id.
-- **Blueprint**: id, company\_id, version, status, meta.
-- **Section**: id, blueprint\_id, order, title, description.
-- **Field**: id, section\_id, key, type, label, help, required, span.
-- **BlueprintArtifactGenerator**: id, blueprint\_id, name, description, prompt\_template, output\_format.
-- **Session**: id, blueprint\_id, blueprint\_version, company\_id, name, status, completion\_percent, created\_by.
-- **SessionFieldValue**: id, session\_id, field\_id, value, source\_provenance, confidence, reviewed.
-- **SectionNote**: id, session\_id, section\_id, markdown, provenance\_tags.
-- **Source**: id, session\_id, type, filename\_or\_url, text\_extracted, created\_by.
-- **Artifact**: id, session\_id, generator\_id, version, title, markdown, prompt\_template\_hash, snapshot\_ref, created\_by, published\_flag.
-- **ShareLink**: id, artifact\_id, created\_by, expires\_at, allow\_source\_upload.
+- **Member**: id, company_id, role, name, email, auth_id.
+- **Blueprint**: id, company_id, version, status, meta.
+- **Section**: id, blueprint_id, order, title, description.
+- **Field**: id, section_id, key, type, label, help, required, span.
+- **BlueprintArtifactGenerator**: id, blueprint_id, name, description, prompt_template, output_format.
+- **Session**: id, blueprint_id, blueprint_version, company_id, name, status, completion_percent, created_by.
+- **SessionFieldValue**: id, session_id, field_id, value, source_provenance, confidence, reviewed.
+- **SectionNote**: id, session_id, section_id, markdown, provenance_tags.
+- **Source**: id, session_id, type, filename_or_url, text_extracted, created_by.
+- **Artifact**: id, session_id, generator_id, version, title, markdown, prompt_template_hash, snapshot_ref, created_by, published_flag.
+- **ShareLink**: id, artifact_id, created_by, expires_at, allow_source_upload.
 
 ---
 
@@ -254,37 +254,128 @@ Use this as a seed object your app can serialize. Keep keys stable for prompts.
         "title": "Project Overview",
         "description": "High level context for the beta.",
         "fields": [
-          { "key": "project_name", "type": "ShortText", "label": "Project name", "required": true, "span": 1, "help": "Working title or code name" },
-          { "key": "objective", "type": "LongText", "label": "Primary objectives", "required": true, "span": 2, "help": "What this beta must prove" },
-          { "key": "success_criteria", "type": "LongText", "label": "Success criteria", "required": true, "span": 2, "help": "Measurable outcomes" },
-          { "key": "is_public_beta", "type": "Toggle", "label": "Public beta", "required": false, "span": 1, "help": "Public vs private" }
+          {
+            "key": "project_name",
+            "type": "ShortText",
+            "label": "Project name",
+            "required": true,
+            "span": 1,
+            "help": "Working title or code name"
+          },
+          {
+            "key": "objective",
+            "type": "LongText",
+            "label": "Primary objectives",
+            "required": true,
+            "span": 2,
+            "help": "What this beta must prove"
+          },
+          {
+            "key": "success_criteria",
+            "type": "LongText",
+            "label": "Success criteria",
+            "required": true,
+            "span": 2,
+            "help": "Measurable outcomes"
+          },
+          {
+            "key": "is_public_beta",
+            "type": "Toggle",
+            "label": "Public beta",
+            "required": false,
+            "span": 1,
+            "help": "Public vs private"
+          }
         ]
       },
       {
         "title": "Participants",
         "description": "Who will participate and how many.",
         "fields": [
-          { "key": "target_profile", "type": "LongText", "label": "Target profile", "required": true, "span": 2, "help": "Persona, segments, devices" },
-          { "key": "recruitment_channels", "type": "LongText", "label": "Recruitment channels", "required": false, "span": 2, "help": "Email, panel, social" },
-          { "key": "participant_count", "type": "ShortText", "label": "Participant count", "required": true, "span": 1, "help": "Number or range" }
+          {
+            "key": "target_profile",
+            "type": "LongText",
+            "label": "Target profile",
+            "required": true,
+            "span": 2,
+            "help": "Persona, segments, devices"
+          },
+          {
+            "key": "recruitment_channels",
+            "type": "LongText",
+            "label": "Recruitment channels",
+            "required": false,
+            "span": 2,
+            "help": "Email, panel, social"
+          },
+          {
+            "key": "participant_count",
+            "type": "ShortText",
+            "label": "Participant count",
+            "required": true,
+            "span": 1,
+            "help": "Number or range"
+          }
         ]
       },
       {
         "title": "Product Details",
         "description": "What is being tested.",
         "fields": [
-          { "key": "product_description", "type": "LongText", "label": "Product description", "required": true, "span": 2, "help": "What it does and for whom" },
-          { "key": "key_features", "type": "LongText", "label": "Key features", "required": false, "span": 2, "help": "Bulleted list in Markdown" },
-          { "key": "price", "type": "ShortText", "label": "Price", "required": false, "span": 1, "help": "List price or range" }
+          {
+            "key": "product_description",
+            "type": "LongText",
+            "label": "Product description",
+            "required": true,
+            "span": 2,
+            "help": "What it does and for whom"
+          },
+          {
+            "key": "key_features",
+            "type": "LongText",
+            "label": "Key features",
+            "required": false,
+            "span": 2,
+            "help": "Bulleted list in Markdown"
+          },
+          {
+            "key": "price",
+            "type": "ShortText",
+            "label": "Price",
+            "required": false,
+            "span": 1,
+            "help": "List price or range"
+          }
         ]
       },
       {
         "title": "Schedule",
         "description": "Timeline for the beta.",
         "fields": [
-          { "key": "start_date", "type": "ShortText", "label": "Start date", "required": true, "span": 1, "help": "YYYY-MM-DD" },
-          { "key": "end_date", "type": "ShortText", "label": "End date", "required": true, "span": 1, "help": "YYYY-MM-DD" },
-          { "key": "milestones", "type": "LongText", "label": "Key milestones", "required": false, "span": 2, "help": "Bulleted list" }
+          {
+            "key": "start_date",
+            "type": "ShortText",
+            "label": "Start date",
+            "required": true,
+            "span": 1,
+            "help": "YYYY-MM-DD"
+          },
+          {
+            "key": "end_date",
+            "type": "ShortText",
+            "label": "End date",
+            "required": true,
+            "span": 1,
+            "help": "YYYY-MM-DD"
+          },
+          {
+            "key": "milestones",
+            "type": "LongText",
+            "label": "Key milestones",
+            "required": false,
+            "span": 2,
+            "help": "Bulleted list"
+          }
         ]
       }
     ],
@@ -326,14 +417,19 @@ Use structured prompts to keep results predictable.
 
 - System content: “You map input text to Blueprint fields by semantics. Return only JSON. Prefer exact text spans where possible. Do not infer values that are not present.”
 - Template variables:
-    - `fields_catalog` contains field keys, labels, and help text.
-    - `source_text` is extracted text from files or pages.
+  - `fields_catalog` contains field keys, labels, and help text.
+  - `source_text` is extracted text from files or pages.
 - Expected JSON:
 
 ```json
 {
   "suggestions": [
-    { "field_key": "product_description", "value": "…", "confidence": 0.82, "provenance": {"source_id": "src_123", "offset": [120, 350]} }
+    {
+      "field_key": "product_description",
+      "value": "…",
+      "confidence": 0.82,
+      "provenance": { "source_id": "src_123", "offset": [120, 350] }
+    }
   ],
   "unmapped_summary_by_section": {
     "Product Details": "…",
@@ -353,9 +449,9 @@ Use structured prompts to keep results predictable.
 
 - Each Artifact can be published to the Data Room.
 - Share options:
-    - Private link with optional expiry
-    - Invite by email
-    - Toggle to allow Viewer Source uploads to the specific Session
+  - Private link with optional expiry
+  - Invite by email
+  - Toggle to allow Viewer Source uploads to the specific Session
 - Artifact viewing shows the version timeline and a “Regenerate” button for Editors.
 
 Acceptance checks

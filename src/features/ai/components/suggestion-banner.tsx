@@ -17,10 +17,7 @@ interface SuggestionBannerProps {
   onSuggestionsReviewed?: () => void;
 }
 
-export function SuggestionBanner({
-  sessionId,
-  onSuggestionsReviewed,
-}: SuggestionBannerProps) {
+export function SuggestionBanner({ sessionId, onSuggestionsReviewed }: SuggestionBannerProps) {
   const [count, setCount] = useState(0);
   const [source, setSource] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -28,9 +25,7 @@ export function SuggestionBanner({
 
   const fetchSuggestions = async () => {
     try {
-      const response = await fetch(
-        `/api/v1/sessions/${sessionId}/suggestions`
-      );
+      const response = await fetch(`/api/v1/sessions/${sessionId}/suggestions`);
       const result = await response.json();
 
       if (result.ok) {
@@ -40,8 +35,7 @@ export function SuggestionBanner({
           const firstSource = result.data[0].source_provenance;
           if (firstSource && typeof firstSource === 'object') {
             setSource(
-              (firstSource as { source_filename?: string }).source_filename ||
-                'unknown source'
+              (firstSource as { source_filename?: string }).source_filename || 'unknown source'
             );
           } else {
             setSource('unknown source');
@@ -73,9 +67,9 @@ export function SuggestionBanner({
 
   return (
     <>
-      <div className="bg-blue-950/30 border border-blue-700/50 px-4 py-3 rounded-md flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between rounded-md border border-blue-700/50 bg-blue-950/30 px-4 py-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-blue-400" />
+          <Sparkles className="h-5 w-5 text-blue-400" />
           <span className="font-medium">
             {count} suggestion{count > 1 ? 's' : ''} ready to review
             {source && <> from {source}</>}

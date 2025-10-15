@@ -10,10 +10,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { handleError, ValidationError, ConflictError } from '@/lib/errors';
 import { query, queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
-import {
-  Blueprint,
-  CreateBlueprintRequest,
-} from '@/features/blueprints/types/blueprint';
+import { Blueprint, CreateBlueprintRequest } from '@/features/blueprints/types/blueprint';
 
 type SuccessResponse<T> = {
   ok: true;

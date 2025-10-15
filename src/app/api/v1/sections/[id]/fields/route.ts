@@ -9,11 +9,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { handleError, ValidationError, NotFoundError } from '@/lib/errors';
 import { queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
-import {
-  Section,
-  Field,
-  CreateFieldRequest,
-} from '@/features/blueprints/types/blueprint';
+import { Section, Field, CreateFieldRequest } from '@/features/blueprints/types/blueprint';
 
 type SuccessResponse<T> = {
   ok: true;

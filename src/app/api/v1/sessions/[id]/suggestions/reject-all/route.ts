@@ -20,10 +20,7 @@ type SuccessResponse = {
  *
  * Reject all unreviewed AI-generated field suggestions by clearing values and marking as reviewed
  */
-export async function PUT(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: sessionId } = await params;
     const user = await requireAuth(['owner', 'editor']);

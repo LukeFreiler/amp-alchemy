@@ -31,9 +31,7 @@ export function FieldGrid({
     const fetchFields = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          `/api/v1/sessions/${sessionId}/sections/${sectionId}/fields`
-        );
+        const response = await fetch(`/api/v1/sessions/${sessionId}/sections/${sectionId}/fields`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch fields');
@@ -52,9 +50,7 @@ export function FieldGrid({
   }, [sessionId, sectionId]);
 
   const handleFieldChange = (fieldId: string, value: string) => {
-    setFields((prev) =>
-      prev.map((f) => (f.id === fieldId ? { ...f, value } : f))
-    );
+    setFields((prev) => prev.map((f) => (f.id === fieldId ? { ...f, value } : f)));
     onProgressUpdate?.();
   };
 
@@ -75,9 +71,7 @@ export function FieldGrid({
   if (fields.length === 0) {
     return (
       <div className="rounded-lg border bg-card p-8">
-        <p className="text-center text-muted-foreground">
-          No fields defined for this section
-        </p>
+        <p className="text-center text-muted-foreground">No fields defined for this section</p>
       </div>
     );
   }

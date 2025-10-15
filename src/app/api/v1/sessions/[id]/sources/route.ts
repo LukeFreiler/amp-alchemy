@@ -27,10 +27,7 @@ const MAX_PASTE_LENGTH = 50000; // 50k characters
  *
  * List all sources for a session
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: sessionId } = await params;
     const user = await requireAuth(['owner', 'editor']);
@@ -76,10 +73,7 @@ export async function GET(
  *
  * Create new source from file upload, pasted text, or URL scraping
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: sessionId } = await params;
     const user = await requireAuth(['owner', 'editor']);

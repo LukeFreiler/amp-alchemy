@@ -27,10 +27,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Check if member exists by auth_id
-        const existingMember = await queryOne<Member>(
-          'SELECT * FROM members WHERE auth_id = $1',
-          [account.providerAccountId]
-        );
+        const existingMember = await queryOne<Member>('SELECT * FROM members WHERE auth_id = $1', [
+          account.providerAccountId,
+        ]);
 
         if (existingMember) {
           logger.info('Existing member signed in', {
@@ -79,10 +78,9 @@ export const authOptions: NextAuthOptions = {
       try {
         // Enrich token with member data on initial sign-in
         if (account) {
-          const member = await queryOne<Member>(
-            'SELECT * FROM members WHERE auth_id = $1',
-            [account.providerAccountId]
-          );
+          const member = await queryOne<Member>('SELECT * FROM members WHERE auth_id = $1', [
+            account.providerAccountId,
+          ]);
 
           if (member) {
             token.id = member.id;

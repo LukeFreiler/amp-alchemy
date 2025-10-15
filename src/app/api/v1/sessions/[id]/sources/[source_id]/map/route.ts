@@ -151,9 +151,7 @@ export async function POST(
 
     // Append unmapped summaries to section notes
     let summariesAppended = 0;
-    for (const [sectionTitle, summary] of Object.entries(
-      result.unmapped_summary_by_section
-    )) {
+    for (const [sectionTitle, summary] of Object.entries(result.unmapped_summary_by_section)) {
       const section = sections.find((s) => s.title === sectionTitle);
       if (!section || !summary.trim()) {
         continue;
@@ -171,9 +169,7 @@ export async function POST(
         ? `${existingNote.markdown}\n\n${newContent}`
         : newContent;
 
-      const provenanceTags = JSON.stringify([
-        { source_id: sourceId, tag: sourceLabel },
-      ]);
+      const provenanceTags = JSON.stringify([{ source_id: sourceId, tag: sourceLabel }]);
 
       await execute(
         `INSERT INTO section_notes (session_id, section_id, markdown, provenance_tags)
