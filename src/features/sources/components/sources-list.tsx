@@ -109,6 +109,7 @@ export function SourcesList({ sessionId, refreshTrigger }: SourcesListProps) {
               onClick={() => handleDelete(source.id)}
               disabled={deletingId === source.id}
               className="ml-2"
+              aria-label="Delete source"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

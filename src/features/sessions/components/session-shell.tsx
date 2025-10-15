@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { Upload, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SessionWithSections } from '@/features/sessions/types/session';
 import { ImportModal } from '@/features/sources/components/import-modal';
 import { SourcesList } from '@/features/sources/components/sources-list';
@@ -116,22 +117,23 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
     <div className="flex h-screen flex-col">
       {/* Top bar */}
       <div className="border-b bg-navbar p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-xl font-semibold">{sessionData.name}</h1>
             <p className="text-sm text-muted-foreground">
               {sessionData.blueprint_name} • v{sessionData.blueprint_version}
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setImportModalOpen(true)}
               className="gap-2"
+              aria-label="Import sources"
             >
               <Upload className="h-4 w-4" />
-              Import
+              <span className="hidden sm:inline">Import</span>
             </Button>
             <GenerateButton sessionId={sessionData.id} generators={generators} />
             <Button
@@ -139,9 +141,10 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
               size="sm"
               onClick={() => setArtifactsModalOpen(true)}
               className="gap-2"
+              aria-label="View artifacts"
             >
               <FileText className="h-4 w-4" />
-              Artifacts
+              <span className="hidden sm:inline">Artifacts</span>
             </Button>
             <div className="text-sm text-muted-foreground">
               {calculateOverallProgress()}% Complete
@@ -150,8 +153,88 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
         </div>
       </div>
 
-      {/* 3-panel layout */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* Mobile: Tab-based layout */}
+      <div className="flex flex-1 flex-col overflow-hidden md:hidden">
+        <Tabs defaultValue="fields" className="flex flex-1 flex-col overflow-hidden">
+          <TabsList className="grid w-full grid-cols-3 rounded-none border-b">
+            <TabsTrigger value="sections">Sections</TabsTrigger>
+            <TabsTrigger value="fields">Fields</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="sections" className="flex-1 overflow-y-auto p-0 mt-0">
+            <SectionNav
+              sections={sessionData.sections}
+              currentIndex={currentSectionIndex}
+              onSelectSection={setCurrentSectionIndex}
+              overallProgress={calculateOverallProgress()}
+            />
+          </TabsContent>
+
+          <TabsContent value="fields" className="flex-1 overflow-y-auto p-4 mt-0">
+            {/* Sources section */}
+            {showSources && (
+              <div className="mb-8">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Sources</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSources(false)}
+                    className="text-xs"
+                  >
+                    Hide
+                  </Button>
+                </div>
+                <SourcesList sessionId={sessionData.id} refreshTrigger={sourcesRefresh} />
+              </div>
+            )}
+
+            {!showSources && (
+              <div className="mb-6">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSources(true)}
+                  className="text-xs"
+                >
+                  Show Sources
+                </Button>
+              </div>
+            )}
+
+            {/* AI Suggestions Banner */}
+            <SuggestionBanner
+              sessionId={sessionData.id}
+              onSuggestionsReviewed={() => setSourcesRefresh((prev) => prev + 1)}
+            />
+
+            <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
+            {currentSection.description && (
+              <p className="mb-6 text-muted-foreground">{currentSection.description}</p>
+            )}
+
+            {/* Field Grid */}
+            <FieldGrid
+              sessionId={sessionData.id}
+              sectionId={currentSection.id}
+              onProgressUpdate={handleProgressUpdate}
+              onValidationChange={handleValidationChange}
+            />
+          </TabsContent>
+
+          <TabsContent value="notes" className="flex-1 overflow-y-auto p-0 mt-0">
+            <SectionNotes
+              sessionId={sessionData.id}
+              sectionId={currentSection.id}
+              key={currentSection.id}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Desktop: 3-panel layout */}
+      <div className="hidden md:flex flex-1 overflow-hidden">
         {/* Left rail - Section navigation */}
         <aside className="w-64 overflow-y-auto border-r bg-sidebar">
           <SectionNav

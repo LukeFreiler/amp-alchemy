@@ -40,7 +40,7 @@ export function SectionNav({
       <Separator />
 
       {/* Section list */}
-      <div className="mt-4 space-y-1">
+      <nav className="mt-4 space-y-1" role="navigation" aria-label="Section navigation">
         {sections.map((section, index) => {
           const isActive = index === currentIndex;
           const completionPercent = section.completion_percentage;
@@ -49,6 +49,7 @@ export function SectionNav({
             <button
               key={section.id}
               onClick={() => onSelectSection(index)}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'w-full rounded-md px-3 py-2 text-left transition-colors',
                 isActive
@@ -81,7 +82,7 @@ export function SectionNav({
             </button>
           );
         })}
-      </div>
+      </nav>
 
       {/* Keyboard shortcuts hint */}
       <div className="mt-6 space-y-1 border-t pt-4 text-xs text-muted-foreground">

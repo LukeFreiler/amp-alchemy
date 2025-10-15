@@ -130,7 +130,7 @@ export function ShareLinksList() {
               size="sm"
               onClick={() => handleRevoke(link.id)}
               disabled={revokingId === link.id}
-              title="Revoke share link"
+              aria-label="Revoke share link"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

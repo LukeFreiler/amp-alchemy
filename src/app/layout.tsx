@@ -24,8 +24,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${figtree.variable}`}>
       <body className="min-h-screen font-sans antialiased">
+        <a
+          href="#main-content"
+          className="sr-only sr-only-focusable fixed left-4 top-4 z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only"
+        >
+          Skip to main content
+        </a>
         <CommandPalette />
-        {children}
+        <div id="main-content">{children}</div>
         <Toaster />
       </body>
     </html>

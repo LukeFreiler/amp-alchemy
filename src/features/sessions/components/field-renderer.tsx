@@ -78,11 +78,15 @@ export function FieldRenderer({
   };
 
   return (
-    <div className={cn('space-y-2', field.span === 2 ? 'col-span-2' : 'col-span-1')}>
+    <div className={cn('space-y-2', field.span === 2 ? 'col-span-1 md:col-span-2' : 'col-span-1')}>
       <Label htmlFor={field.id}>
         {field.label}
         {field.required && <span className="ml-1 text-destructive">*</span>}
-        {isSaving && <span className="ml-2 text-xs text-muted-foreground">Saving...</span>}
+        {isSaving && (
+          <span className="ml-2 text-xs text-muted-foreground" role="status" aria-live="polite">
+            Saving...
+          </span>
+        )}
       </Label>
 
       {field.type === 'ShortText' && (

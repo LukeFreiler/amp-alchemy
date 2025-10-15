@@ -10,6 +10,17 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Enhanced focus-visible styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Remove default outline for non-keyboard focus */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 @layer components {
@@ -71,5 +82,32 @@
   * {
     scrollbar-width: thin;
     scrollbar-color: #4C5163 #1F232F; /* thumb track */
+  }
+}
+
+@layer utilities {
+  /* Screen reader only - hides content visually but keeps it accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Allow sr-only content to be focusable when navigated to via keyboard */
+  .sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
   }
 }
