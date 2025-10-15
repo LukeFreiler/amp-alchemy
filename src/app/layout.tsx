@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import { Figtree } from 'next/font/google';
+import { getServerSession } from 'next-auth';
 
 import { Toaster } from '@/components/ui/toaster';
 import { CommandPalette } from '@/features/search/components/command-palette';
+import { TopBar } from '@/components/top-bar';
+import { authOptions } from '@/lib/auth/auth-options';
 import '@/styles/globals.css';
 
 const figtree = Figtree({
@@ -16,11 +19,13 @@ export const metadata: Metadata = {
   description: 'Flexible web application for structured notes and AI-generated artifacts',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en" className={`dark ${figtree.variable}`}>
       <body className="min-h-screen font-sans antialiased">
@@ -31,6 +36,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <CommandPalette />
+        {session?.user && <TopBar user={session.user} />}
         <div id="main-content">{children}</div>
         <Toaster />
       </body>
