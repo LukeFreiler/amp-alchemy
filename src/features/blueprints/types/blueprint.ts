@@ -11,6 +11,7 @@ export interface Blueprint {
   created_at: string;
   updated_at: string;
   section_count?: number; // Computed field from JOIN query
+  field_count?: number; // Computed field from JOIN query
 }
 
 export interface Section {

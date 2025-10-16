@@ -83,7 +83,7 @@ export default function TeamSettingsPage() {
           </p>
         </div>
         <Button onClick={() => setShowInviteModal(true)}>
-          <UserPlus className="mr-2 h-4 w-4" />
+          <UserPlus className="h-4 w-4" />
           Invite Member
         </Button>
       </div>

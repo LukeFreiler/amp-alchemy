@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, Upload, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 import { SearchInput } from '@/features/search/components/search-input';
 import { UserMenu } from '@/components/user-menu';
@@ -22,7 +22,6 @@ interface TopBarProps {
  * - Logo (links to home)
  * - Main navigation (Blueprints, Sessions)
  * - Search input (opens command palette)
- * - Context-aware Import button (shows on Session pages)
  * - User menu
  * - Mobile responsive hamburger menu (<768px)
  *
@@ -33,8 +32,6 @@ export function TopBar({ user }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const isSessionPage = pathname.startsWith('/sessions/') && pathname.split('/').length > 2;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
@@ -83,15 +80,8 @@ export function TopBar({ user }: TopBarProps) {
             <SearchInput />
           </div>
 
-          {/* Right: Import + User Menu + Mobile Toggle */}
+          {/* Right: User Menu + Mobile Toggle */}
           <div className="flex shrink-0 items-center gap-2">
-            {isSessionPage && (
-              <Button variant="outline" className="hidden sm:flex">
-                <Upload className="mr-2 h-4 w-4" />
-                Import
-              </Button>
-            )}
-
             <UserMenu user={user} />
 
             {/* Mobile Menu Toggle */}
@@ -114,14 +104,6 @@ export function TopBar({ user }: TopBarProps) {
             <div className="lg:hidden">
               <SearchInput />
             </div>
-
-            {/* Mobile Import Button */}
-            {isSessionPage && (
-              <Button variant="outline" className="w-full sm:hidden">
-                <Upload className="mr-2 h-4 w-4" />
-                Import
-              </Button>
-            )}
 
             {/* Mobile Quick Links */}
             <nav className="space-y-2 border-t pt-3">

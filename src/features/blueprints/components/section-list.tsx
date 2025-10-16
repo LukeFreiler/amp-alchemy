@@ -179,7 +179,7 @@ export function SectionList({
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">Sections</h3>
           <Button size="sm" onClick={onAddSection}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Add
           </Button>
         </div>

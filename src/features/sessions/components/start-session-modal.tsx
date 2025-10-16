@@ -144,7 +144,7 @@ export function StartSessionModal({
                   ) : (
                     blueprints.map((blueprint) => (
                       <SelectItem key={blueprint.id} value={blueprint.id}>
-                        {blueprint.name} (v{blueprint.version})
+                        {blueprint.name}
                       </SelectItem>
                     ))
                   )}

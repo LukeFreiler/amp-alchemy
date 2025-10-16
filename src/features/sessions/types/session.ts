@@ -16,7 +16,10 @@ export interface Session {
   created_at: string;
   updated_at: string;
   blueprint_name?: string; // Computed field from JOIN query
-  completion_percentage?: number; // Computed field
+  required_count?: number; // Computed field for progress
+  required_filled_count?: number; // Computed field for progress
+  total_count?: number; // Computed field for progress
+  total_filled_count?: number; // Computed field for progress
 }
 
 export interface SectionNote {
@@ -34,7 +37,7 @@ export interface SessionFieldValue {
   field_id: string;
   value: string | null;
   source_id: string | null;
-  confidence_score: number | null;
+  confidence: number | null;
   reviewed: boolean;
   created_at: string;
   updated_at: string;
@@ -60,8 +63,11 @@ export interface UpdateSectionNotesRequest {
 
 export interface SectionWithProgress extends Section {
   required_count: number;
-  filled_count: number;
+  required_filled_count: number;
+  total_count: number;
+  total_filled_count: number;
   completion_percentage: number;
+  total_completion_percentage: number;
 }
 
 export interface SessionWithSections extends Session {

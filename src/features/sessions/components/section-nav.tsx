@@ -14,6 +14,7 @@ interface SectionNavProps {
   sections: SectionWithProgress[];
   currentIndex: number;
   onSelectSection: (index: number) => void;
+  requiredProgress: number;
   overallProgress: number;
 }
 
@@ -21,19 +22,49 @@ export function SectionNav({
   sections,
   currentIndex,
   onSelectSection,
+  requiredProgress,
   overallProgress,
 }: SectionNavProps) {
+  // Check if there are any required fields across all sections
+  const hasRequiredFields = sections.some((section) => section.required_count > 0);
+
   return (
     <div className="space-y-2 p-4">
       {/* Overall progress */}
       <div className="mb-4">
-        <div className="text-sm font-medium text-muted-foreground">Overall Progress</div>
-        <div className="text-2xl font-bold">{overallProgress}%</div>
-        <div className="mt-2 h-2 w-full rounded-full bg-muted">
-          <div
-            className="h-2 rounded-full bg-primary transition-all"
-            style={{ width: `${overallProgress}%` }}
-          />
+        <div className="text-sm font-medium text-muted-foreground">Progress</div>
+        <div className="text-sm text-muted-foreground">
+          {hasRequiredFields ? (
+            <>
+              {requiredProgress}% required • {overallProgress}% overall
+            </>
+          ) : (
+            <>
+              {overallProgress}% complete
+            </>
+          )}
+        </div>
+        <div className="mt-2 h-2 w-full rounded-full bg-muted relative overflow-hidden">
+          {hasRequiredFields ? (
+            <>
+              {/* Background layer: overall progress (lighter) */}
+              <div
+                className="absolute inset-0 h-2 rounded-full bg-primary/30 transition-all"
+                style={{ width: `${overallProgress}%` }}
+              />
+              {/* Foreground layer: required progress (primary) */}
+              <div
+                className="absolute inset-0 h-2 rounded-full bg-primary transition-all"
+                style={{ width: `${requiredProgress}%` }}
+              />
+            </>
+          ) : (
+            /* Single bar: overall progress only */
+            <div
+              className="h-2 rounded-full bg-primary transition-all"
+              style={{ width: `${overallProgress}%` }}
+            />
+          )}
         </div>
       </div>
 
@@ -43,7 +74,8 @@ export function SectionNav({
       <nav className="mt-4 space-y-1" role="navigation" aria-label="Section navigation">
         {sections.map((section, index) => {
           const isActive = index === currentIndex;
-          const completionPercent = section.completion_percentage;
+          const requiredComplete = section.completion_percentage === 100;
+          const hasProgress = section.required_filled_count > 0 || section.total_filled_count > 0;
 
           return (
             <button
@@ -61,9 +93,9 @@ export function SectionNav({
                 <div
                   className={cn(
                     'h-2 w-2 flex-shrink-0 rounded-full',
-                    completionPercent === 100
+                    requiredComplete
                       ? 'bg-emerald-500'
-                      : completionPercent > 0
+                      : hasProgress
                         ? 'bg-amber-500'
                         : 'bg-muted-foreground/30'
                   )}
@@ -73,10 +105,14 @@ export function SectionNav({
               <div className="ml-4 mt-1 text-xs text-muted-foreground">
                 {section.required_count > 0 ? (
                   <>
-                    {section.filled_count}/{section.required_count} fields • {completionPercent}%
+                    {section.required_filled_count}/{section.required_count} required • {section.total_filled_count}/{section.total_count} total
+                  </>
+                ) : section.total_count > 0 ? (
+                  <>
+                    {section.total_filled_count}/{section.total_count} total (no required)
                   </>
                 ) : (
-                  'No required fields'
+                  'No fields'
                 )}
               </div>
             </button>

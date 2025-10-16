@@ -165,7 +165,7 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
                       size="sm"
                       onClick={() => setSelectedArtifact(artifact)}
                     >
-                      <Eye className="mr-1 h-4 w-4" />
+                      <Eye className="h-4 w-4" />
                       View
                     </Button>
 
@@ -183,14 +183,14 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
                         size="sm"
                         onClick={() => setShareArtifactId(artifact.id)}
                       >
-                        <Share2 className="mr-1 h-4 w-4" />
+                        <Share2 className="h-4 w-4" />
                         Share
                       </Button>
                     )}
 
                     {index < artifacts.length - 1 && (
                       <Button variant="outline" size="sm" onClick={() => handleCompare(artifact)}>
-                        <GitCompare className="mr-1 h-4 w-4" />
+                        <GitCompare className="h-4 w-4" />
                         Diff
                       </Button>
                     )}

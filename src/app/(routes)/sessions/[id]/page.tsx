@@ -65,8 +65,25 @@ export default async function SessionPage({ params }: SessionPageProps) {
            AND sfv.value IS NOT NULL
            AND sfv.value != ''),
         0
-      ) as filled_count,
-      0 as completion_percentage
+      ) as required_filled_count,
+      COALESCE(
+        (SELECT COUNT(*)::int
+         FROM fields f
+         WHERE f.section_id = s.id),
+        0
+      ) as total_count,
+      COALESCE(
+        (SELECT COUNT(*)::int
+         FROM session_field_values sfv
+         JOIN fields f ON f.id = sfv.field_id
+         WHERE sfv.session_id = $1
+           AND f.section_id = s.id
+           AND sfv.value IS NOT NULL
+           AND sfv.value != ''),
+        0
+      ) as total_filled_count,
+      0 as completion_percentage,
+      0 as total_completion_percentage
      FROM sections s
      WHERE s.blueprint_id = $2
      ORDER BY s.order_index`,
@@ -78,8 +95,12 @@ export default async function SessionPage({ params }: SessionPageProps) {
     ...section,
     completion_percentage:
       section.required_count > 0
-        ? Math.round((section.filled_count / section.required_count) * 100)
-        : 100,
+        ? Math.round((section.required_filled_count / section.required_count) * 100)
+        : 0,
+    total_completion_percentage:
+      section.total_count > 0
+        ? Math.round((section.total_filled_count / section.total_count) * 100)
+        : 0,
   }));
 
   const sessionData: SessionWithSections = {

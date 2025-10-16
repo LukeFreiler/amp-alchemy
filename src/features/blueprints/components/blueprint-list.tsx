@@ -130,8 +130,10 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
                 <Badge className={getStatusColor(blueprint.status)}>{blueprint.status}</Badge>
               </div>
 
-              <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                 <span>{blueprint.section_count || 0} sections</span>
+                <span>•</span>
+                <span>{blueprint.field_count || 0} fields</span>
               </div>
 
               <div className="mt-auto flex items-center gap-2">
@@ -141,7 +143,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
                   className="flex-1"
                   onClick={() => router.push(`/blueprints/${blueprint.id}/edit`)}
                 >
-                  <FileText className="mr-2 h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                   Edit
                 </Button>
                 <Button

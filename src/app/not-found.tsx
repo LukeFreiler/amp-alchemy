@@ -25,13 +25,13 @@ export default function NotFoundPage() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild className="flex-1" variant="outline">
               <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" />
                 Go Back
               </Link>
             </Button>
             <Button asChild className="flex-1">
               <Link href="/">
-                <Home className="mr-2 h-4 w-4" />
+                <Home className="h-4 w-4" />
                 Home
               </Link>
             </Button>

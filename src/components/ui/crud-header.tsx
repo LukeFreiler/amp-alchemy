@@ -43,7 +43,7 @@ export function CrudHeader({
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         </div>
         <Button onClick={onButtonClick}>
-          <Icon className="mr-2 h-4 w-4" />
+          <Icon className="h-4 w-4" />
           {buttonText}
         </Button>
       </div>

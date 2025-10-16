@@ -53,7 +53,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       `SELECT
         f.*,
         sfv.value,
-        sfv.confidence_score as confidence,
+        sfv.confidence,
         COALESCE(sfv.reviewed, false) as reviewed
        FROM fields f
        LEFT JOIN session_field_values sfv

@@ -104,21 +104,21 @@ function SortableField({
 
         <Icon className="h-4 w-4 text-muted-foreground" />
 
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h5 className="font-medium">{field.label}</h5>
-            {field.required && (
-              <Badge variant="outline" className="h-5 text-xs">
-                Required
-              </Badge>
-            )}
-            {field.span === 2 && (
-              <Badge variant="outline" className="h-5 text-xs">
-                2-col
-              </Badge>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">{field.key}</p>
+        <div className="flex flex-1 items-center gap-2">
+          <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
+            {field.key}
+          </kbd>
+          <h5 className="font-medium">{field.label}</h5>
+          {field.required && (
+            <Badge variant="outline" className="h-5 text-xs">
+              Required
+            </Badge>
+          )}
+          {field.span === 2 && (
+            <Badge variant="outline" className="h-5 text-xs">
+              2-col
+            </Badge>
+          )}
         </div>
 
         <Button variant="ghost" size="sm" onClick={onEdit} aria-label="Edit field">
@@ -185,7 +185,7 @@ export function FieldList({
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">Fields</h3>
           <Button size="sm" onClick={onAddField}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Add Field
           </Button>
         </div>

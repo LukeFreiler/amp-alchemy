@@ -6,15 +6,11 @@
  * Complex 2-panel editor for managing blueprint sections, fields, and generators
  */
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Rocket, Save } from 'lucide-react';
+import { ArrowLeft, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/toaster';
 import { SectionList } from '@/features/blueprints/components/section-list';
@@ -44,9 +40,11 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editingSectionTitle, setEditingSectionTitle] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'sections' | 'generators'>('sections');
   const [generators, setGenerators] = useState<BlueprintArtifactGenerator[]>([]);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch blueprint data
   useEffect(() => {
@@ -83,33 +81,64 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, id]);
 
-  const handleSaveMetadata = async () => {
-    if (!name.trim()) {
+  const handleNameClick = () => {
+    setTempName(name);
+    setIsEditingName(true);
+  };
+
+  const handleNameSave = async () => {
+    if (!tempName.trim()) {
       toast.error('Blueprint name is required');
+      setTempName(name);
+      setIsEditingName(false);
       return;
     }
 
-    setIsSaving(true);
+    if (tempName === name) {
+      setIsEditingName(false);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/v1/blueprints/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ name: tempName, description }),
       });
 
       const result = await response.json();
       if (result.ok) {
+        setName(tempName);
         setBlueprint((prev) => (prev ? { ...prev, ...result.data } : null));
-        toast.success('Blueprint saved');
+        toast.success('Blueprint name updated');
       } else {
-        toast.error(result.error.message || 'Failed to save blueprint');
+        toast.error(result.error.message || 'Failed to update blueprint name');
+        setTempName(name);
       }
     } catch (error) {
-      toast.error('Failed to save blueprint');
+      toast.error('Failed to update blueprint name');
+      setTempName(name);
     } finally {
-      setIsSaving(false);
+      setIsEditingName(false);
     }
   };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleNameSave();
+    } else if (e.key === 'Escape') {
+      setTempName(name);
+      setIsEditingName(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isEditingName && nameInputRef.current) {
+      nameInputRef.current.focus();
+      nameInputRef.current.select();
+    }
+  }, [isEditingName]);
 
   const handlePublish = async () => {
     setIsPublishing(true);
@@ -404,12 +433,29 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={() => router.push('/blueprints')}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
               <Separator orientation="vertical" className="h-6" />
               <div>
-                <h1 className="text-xl font-bold">{name}</h1>
+                {isEditingName ? (
+                  <input
+                    ref={nameInputRef}
+                    type="text"
+                    value={tempName}
+                    onChange={(e) => setTempName(e.target.value)}
+                    onBlur={handleNameSave}
+                    onKeyDown={handleNameKeyDown}
+                    className="text-xl font-bold bg-transparent border-none outline-none focus:outline-none p-0 m-0"
+                  />
+                ) : (
+                  <h1
+                    className="text-xl font-bold cursor-pointer hover:opacity-70 transition-opacity"
+                    onClick={handleNameClick}
+                  >
+                    {name}
+                  </h1>
+                )}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Badge variant="outline">{blueprint.status}</Badge>
                   <span>{blueprint.sections.length} sections</span>
@@ -417,12 +463,8 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleSaveMetadata} disabled={isSaving}>
-                <Save className="mr-2 h-4 w-4" />
-                {isSaving ? 'Saving...' : 'Save'}
-              </Button>
               <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
-                <Rocket className="mr-2 h-4 w-4" />
+                <Rocket className="h-4 w-4" />
                 {isPublishing ? 'Publishing...' : 'Publish'}
               </Button>
             </div>
@@ -470,42 +512,16 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
                 />
               </div>
 
-              {/* Right Panel - Blueprint Metadata & Fields */}
+              {/* Right Panel - Fields */}
               <div className="flex-1 overflow-y-auto p-6">
-                {!selectedSectionId ? (
-                  <Card className="p-6">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="blueprint-name">Blueprint Name</Label>
-                        <Input
-                          id="blueprint-name"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Blueprint name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="blueprint-description">Description</Label>
-                        <Textarea
-                          id="blueprint-description"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          placeholder="Optional description"
-                          rows={4}
-                        />
-                      </div>
-                    </div>
-                  </Card>
-                ) : (
-                  selectedSection && (
-                    <FieldList
-                      fields={selectedSection.fields}
-                      onFieldsReorder={handleFieldsReorder}
-                      onAddField={handleAddField}
-                      onEditField={handleEditField}
-                      onDeleteField={handleDeleteField}
-                    />
-                  )
+                {selectedSection && (
+                  <FieldList
+                    fields={selectedSection.fields}
+                    onFieldsReorder={handleFieldsReorder}
+                    onAddField={handleAddField}
+                    onEditField={handleEditField}
+                    onDeleteField={handleDeleteField}
+                  />
                 )}
               </div>
             </>

@@ -47,12 +47,12 @@ export default function ErrorPage({
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button onClick={reset} className="flex-1" variant="outline">
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
               Try Again
             </Button>
             <Button asChild className="flex-1">
               <Link href="/">
-                <Home className="mr-2 h-4 w-4" />
+                <Home className="h-4 w-4" />
                 Home
               </Link>
             </Button>

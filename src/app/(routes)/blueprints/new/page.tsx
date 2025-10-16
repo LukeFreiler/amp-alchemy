@@ -54,7 +54,7 @@ export default function NewBlueprintPage() {
   return (
     <div className="container mx-auto max-w-2xl py-8">
       <Button variant="ghost" onClick={() => router.back()} className="mb-6">
-        <ArrowLeft className="mr-2 h-4 w-4" />
+        <ArrowLeft className="h-4 w-4" />
         Back
       </Button>
 

@@ -26,6 +26,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Session } from '@/features/sessions/types/session';
 import { StartSessionModal } from './start-session-modal';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export function SessionList() {
   const router = useRouter();
@@ -128,7 +134,8 @@ export function SessionList() {
           description="Start your first data collection session"
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <TooltipProvider delayDuration={200}>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sessions.map((session) => (
             <Card key={session.id} className="flex flex-col p-6 transition-colors hover:bg-card/80">
               <div className="mb-4 flex items-start justify-between">
@@ -141,11 +148,68 @@ export function SessionList() {
                 </Badge>
               </div>
 
-              <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
-                <span>v{session.blueprint_version}</span>
-                <span>•</span>
+              <div className="mb-4 text-sm text-muted-foreground">
                 <span>{formatDate(session.updated_at)}</span>
               </div>
+
+              {/* Progress bar */}
+              {(session.required_count || 0) > 0 || (session.total_count || 0) > 0 ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="mb-4 cursor-help">
+                      <div className="h-2 w-full rounded-full bg-muted relative overflow-hidden">
+                        {(session.required_count || 0) > 0 ? (
+                          <>
+                            {/* Background layer: overall progress (lighter) */}
+                            <div
+                              className="absolute inset-0 h-2 rounded-full bg-primary/30 transition-all"
+                              style={{
+                                width: `${session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%`,
+                              }}
+                            />
+                            {/* Foreground layer: required progress (primary) */}
+                            <div
+                              className="absolute inset-0 h-2 rounded-full bg-primary transition-all"
+                              style={{
+                                width: `${session.required_count ? Math.round(((session.required_filled_count || 0) / session.required_count) * 100) : 0}%`,
+                              }}
+                            />
+                          </>
+                        ) : (
+                          /* Single bar: overall progress only */
+                          <div
+                            className="h-2 rounded-full bg-primary transition-all"
+                            style={{
+                              width: `${session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%`,
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="text-xs">
+                      {(session.required_count || 0) > 0 ? (
+                        <>
+                          <div>
+                            <span className="font-medium">Required:</span> {session.required_filled_count || 0}/{session.required_count} (
+                            {session.required_count ? Math.round(((session.required_filled_count || 0) / session.required_count) * 100) : 0}%)
+                          </div>
+                          <div>
+                            <span className="font-medium">Overall:</span> {session.total_filled_count || 0}/{session.total_count} (
+                            {session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%)
+                          </div>
+                        </>
+                      ) : (
+                        <div>
+                          <span className="font-medium">Progress:</span> {session.total_filled_count || 0}/{session.total_count} (
+                          {session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%)
+                        </div>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              ) : null}
 
               <div className="mt-auto flex items-center gap-2">
                 <Button
@@ -154,7 +218,7 @@ export function SessionList() {
                   className="flex-1"
                   onClick={() => router.push(`/sessions/${session.id}`)}
                 >
-                  <FileText className="mr-2 h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                   Open
                 </Button>
                 <Button
@@ -168,7 +232,8 @@ export function SessionList() {
               </div>
             </Card>
           ))}
-        </div>
+          </div>
+        </TooltipProvider>
       )}
 
       <StartSessionModal

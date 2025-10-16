@@ -30,7 +30,33 @@ export async function GET() {
     const sessions = await query<Session>(
       `SELECT
         s.*,
-        b.name as blueprint_name
+        b.name as blueprint_name,
+        (SELECT COUNT(*)::int
+         FROM fields f
+         JOIN sections sec ON f.section_id = sec.id
+         WHERE sec.blueprint_id = s.blueprint_id
+           AND f.required = true) as required_count,
+        (SELECT COUNT(*)::int
+         FROM session_field_values sfv
+         JOIN fields f ON f.id = sfv.field_id
+         JOIN sections sec ON f.section_id = sec.id
+         WHERE sfv.session_id = s.id
+           AND sec.blueprint_id = s.blueprint_id
+           AND f.required = true
+           AND sfv.value IS NOT NULL
+           AND sfv.value != '') as required_filled_count,
+        (SELECT COUNT(*)::int
+         FROM fields f
+         JOIN sections sec ON f.section_id = sec.id
+         WHERE sec.blueprint_id = s.blueprint_id) as total_count,
+        (SELECT COUNT(*)::int
+         FROM session_field_values sfv
+         JOIN fields f ON f.id = sfv.field_id
+         JOIN sections sec ON f.section_id = sec.id
+         WHERE sfv.session_id = s.id
+           AND sec.blueprint_id = s.blueprint_id
+           AND sfv.value IS NOT NULL
+           AND sfv.value != '') as total_filled_count
        FROM sessions s
        JOIN blueprints b ON b.id = s.blueprint_id
        WHERE s.company_id = $1

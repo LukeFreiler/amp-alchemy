@@ -175,7 +175,7 @@ export function GeneratorList({
           </p>
         </div>
         <Button onClick={handleAdd}>
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           Add Generator
         </Button>
       </div>
@@ -188,7 +188,7 @@ export function GeneratorList({
             Add your first artifact generator to get started
           </p>
           <Button onClick={handleAdd}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Add Generator
           </Button>
         </Card>

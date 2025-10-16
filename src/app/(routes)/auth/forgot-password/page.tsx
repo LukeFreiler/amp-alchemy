@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
           <div className="space-y-4">
             <Link href="/auth/signin">
               <Button variant="outline" className="w-full">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" />
                 Back to Sign In
               </Button>
             </Link>
@@ -137,7 +137,7 @@ export default function ForgotPasswordPage() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Sending...
               </>
             ) : (

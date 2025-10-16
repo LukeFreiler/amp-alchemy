@@ -54,7 +54,7 @@ export function GenerateButton({ sessionId, generators }: GenerateButtonProps) {
         </Select>
 
         <Button onClick={handleGenerate} disabled={!selectedGenerator}>
-          <Sparkles className="mr-2 h-4 w-4" />
+          <Sparkles className="h-4 w-4" />
           Generate
         </Button>
       </div>

@@ -227,7 +227,7 @@ export function SuggestionReviewModal({
                         onClick={() => handleAccept(suggestion.id)}
                         disabled={processing !== null}
                       >
-                        <Check className="mr-1 h-4 w-4" />
+                        <Check className="h-4 w-4" />
                         Accept
                       </Button>
                       <Button
@@ -236,7 +236,7 @@ export function SuggestionReviewModal({
                         onClick={() => handleReject(suggestion.id)}
                         disabled={processing !== null}
                       >
-                        <X className="mr-1 h-4 w-4" />
+                        <X className="h-4 w-4" />
                         Reject
                       </Button>
                     </div>

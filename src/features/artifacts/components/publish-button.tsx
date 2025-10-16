@@ -61,12 +61,12 @@ export function PublishButton({ artifactId, isPublished, onPublishChange }: Publ
     >
       {published ? (
         <>
-          <Check className="mr-2 h-4 w-4" />
+          <Check className="h-4 w-4" />
           Published
         </>
       ) : (
         <>
-          <Upload className="mr-2 h-4 w-4" />
+          <Upload className="h-4 w-4" />
           {isLoading ? 'Publishing...' : 'Publish to Data Room'}
         </>
       )}
