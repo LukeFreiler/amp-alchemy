@@ -13,13 +13,13 @@ export interface AuthUser {
   role: MemberRole;
   name: string;
   email: string;
-  auth_id: string; // OAuth provider ID
+  auth_id: string | null; // OAuth provider ID (null for credentials-based users)
 }
 
 export interface Member {
   id: string;
   company_id: string;
-  auth_id: string;
+  auth_id: string | null; // OAuth provider ID (null for credentials-based users)
   role: MemberRole;
   name: string;
   email: string;

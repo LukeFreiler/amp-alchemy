@@ -24,7 +24,16 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Plus, Trash2, Edit, Type, AlignLeft, ToggleLeft, ListChecks } from 'lucide-react';
+import {
+  GripVertical,
+  Plus,
+  Trash2,
+  Edit,
+  Type,
+  AlignLeft,
+  ToggleLeft,
+  ListChecks,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

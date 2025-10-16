@@ -37,7 +37,9 @@ export default async function SessionPage({ params }: SessionPageProps) {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Session Not Found</h1>
-          <p className="mt-2 text-muted-foreground">This session does not exist or you do not have access to it.</p>
+          <p className="mt-2 text-muted-foreground">
+            This session does not exist or you do not have access to it.
+          </p>
         </div>
       </div>
     );

@@ -25,6 +25,7 @@ async function runMigration(migrationFile) {
     console.log('✓ Migration completed successfully');
   } catch (error) {
     console.error('✗ Migration failed:', error.message);
+    console.error('Full error:', error);
     process.exit(1);
   } finally {
     await client.end();

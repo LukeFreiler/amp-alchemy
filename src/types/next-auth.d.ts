@@ -1,11 +1,11 @@
 /**
  * NextAuth type extensions
  *
- * Extends the default NextAuth session and JWT to include
- * company and member information.
+ * Extends NextAuth default types to include our custom user properties
  */
 
 import 'next-auth';
+import 'next-auth/jwt';
 import { MemberRole } from '@/features/auth/types/session';
 
 declare module 'next-auth' {
@@ -16,23 +16,23 @@ declare module 'next-auth' {
       role: MemberRole;
       name: string;
       email: string;
-      auth_id: string;
+      auth_id: string | null;
     };
   }
 
   interface User {
     id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
+    company_id?: string;
+    role?: MemberRole;
+    auth_id?: string | null;
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    id: string;
-    company_id: string;
-    role: MemberRole;
-    auth_id: string;
+    id?: string;
+    company_id?: string;
+    role?: MemberRole;
+    auth_id?: string | null;
   }
 }

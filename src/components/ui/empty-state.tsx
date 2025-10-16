@@ -22,10 +22,10 @@ interface EmptyStateProps {
  */
 export function EmptyState({ icon: Icon, title, description }: EmptyStateProps) {
   return (
-    <Card className="flex flex-col items-center justify-center py-16 px-8">
+    <Card className="flex flex-col items-center justify-center px-8 py-16">
       <Icon className="mb-6 h-16 w-16 text-muted-foreground" />
       <h3 className="mb-3 text-xl font-semibold">{title}</h3>
-      <p className="text-center text-sm text-muted-foreground max-w-md">{description}</p>
+      <p className="max-w-md text-center text-sm text-muted-foreground">{description}</p>
     </Card>
   );
 }

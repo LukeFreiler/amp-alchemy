@@ -76,8 +76,10 @@ function SortableSection({
   return (
     <div ref={setNodeRef} style={style}>
       <Card
-        className={`flex items-center gap-2 p-3 transition-colors cursor-pointer ${
-          isSelected ? 'bg-accent border-2 border-primary' : 'hover:bg-accent/50 border-2 border-transparent'
+        className={`flex cursor-pointer items-center gap-2 p-3 transition-colors ${
+          isSelected
+            ? 'border-2 border-primary bg-accent'
+            : 'border-2 border-transparent hover:bg-accent/50'
         }`}
         onClick={onSelect}
       >

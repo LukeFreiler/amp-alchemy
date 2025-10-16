@@ -43,7 +43,13 @@ export function TopBar({ user }: TopBarProps) {
           {/* Left: Logo + Main Nav + Breadcrumbs */}
           <div className="flex min-w-0 items-center gap-4">
             <Link href="/" className="flex shrink-0 items-center gap-2">
-              <Image src="/logo.svg" alt="Alchemy Logo" width={32} height={32} className="h-8 w-8" />
+              <Image
+                src="/logo.svg"
+                alt="Alchemy Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
               <span className="text-xl font-bold">Alchemy</span>
             </Link>
 

@@ -1,7 +1,7 @@
 /**
- * Sign-in page
+ * Sign-up page
  *
- * Supports both email/password and Google OAuth authentication.
+ * Allows users to create an account with email/password or Google OAuth.
  */
 
 'use client';
@@ -9,22 +9,22 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { Chrome, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default function SignInPage() {
-  const searchParams = useSearchParams();
+export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,21 +41,47 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      const result = await signIn('credentials', {
+      // Validate passwords match
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        setIsLoading(false);
+        return;
+      }
+
+      // Call signup API
+      const response = await fetch('/api/v1/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        setError(data.error?.message || 'Failed to create account');
+        setIsLoading(false);
+        return;
+      }
+
+      // Sign in with credentials after successful signup
+      const signInResult = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
         redirect: false,
       });
 
-      if (result?.error) {
-        setError('Invalid email or password');
+      if (signInResult?.error) {
+        setError('Account created but sign-in failed. Please sign in manually.');
         setIsLoading(false);
         return;
       }
 
-      // Get callback URL from query params or default to /sessions
-      const callbackUrl = searchParams.get('callbackUrl') || '/sessions';
-      window.location.href = callbackUrl;
+      // Redirect to dashboard
+      window.location.href = '/sessions';
     } catch {
       setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
@@ -64,16 +90,17 @@ export default function SignInPage() {
 
   const handleGoogleSignIn = () => {
     setIsGoogleLoading(true);
-    const callbackUrl = searchParams.get('callbackUrl') || '/sessions';
-    signIn('google', { callbackUrl });
+    signIn('google', { callbackUrl: '/sessions' });
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-md space-y-8 rounded-lg border border-border bg-card p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Welcome Back</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Create Account</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sign up to get started with Centercode Alchemy
+          </p>
         </div>
 
         {error && (
@@ -83,6 +110,21 @@ export default function SignInPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              required
+              value={formData.name}
+              onChange={handleChange}
+              disabled={isLoading}
+              placeholder="John Doe"
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -99,19 +141,32 @@ export default function SignInPage() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
+            <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               name="password"
               type="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               required
               value={formData.password}
+              onChange={handleChange}
+              disabled={isLoading}
+              placeholder="••••••••"
+            />
+            <p className="text-xs text-muted-foreground">
+              Must be at least 8 characters with uppercase, lowercase, and numbers
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              required
+              value={formData.confirmPassword}
               onChange={handleChange}
               disabled={isLoading}
               placeholder="••••••••"
@@ -122,10 +177,10 @@ export default function SignInPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Creating account...
               </>
             ) : (
-              'Sign In'
+              'Create Account'
             )}
           </Button>
         </form>
@@ -154,22 +209,22 @@ export default function SignInPage() {
           ) : (
             <>
               <Chrome className="mr-2 h-5 w-5" />
-              Sign in with Google
+              Sign up with Google
             </>
           )}
         </Button>
 
         <div className="text-center text-sm">
           <p className="text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/signup" className="font-medium text-primary hover:underline">
-              Sign up
+            Already have an account?{' '}
+            <Link href="/auth/signin" className="font-medium text-primary hover:underline">
+              Sign in
             </Link>
           </p>
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
-          By signing in, you agree to our Terms of Service and Privacy Policy.
+          By signing up, you agree to our Terms of Service and Privacy Policy.
         </p>
       </div>
     </div>
