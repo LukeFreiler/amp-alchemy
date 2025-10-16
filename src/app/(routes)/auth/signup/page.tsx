@@ -83,8 +83,8 @@ export default function SignUpPage() {
         return;
       }
 
-      // Redirect to dashboard
-      window.location.href = '/sessions';
+      // Redirect to onboarding (user needs to create company)
+      window.location.href = '/auth/onboarding';
     } catch {
       setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);

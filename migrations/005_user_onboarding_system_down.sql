@@ -4,11 +4,14 @@
 -- ============================================================================
 
 -- ============================================================================
--- 1. RESTORE MEMBERS.COMPANY_ID NOT NULL CONSTRAINT
+-- 1. RESTORE MEMBERS.COMPANY_ID AND ROLE NOT NULL CONSTRAINTS
 -- ============================================================================
 
--- Note: This will fail if there are members without company_id
+-- Note: These will fail if there are members without company_id or role
 -- Clean up orphaned members before rolling back
+ALTER TABLE members
+ALTER COLUMN role SET NOT NULL;
+
 ALTER TABLE members
 ALTER COLUMN company_id SET NOT NULL;
 

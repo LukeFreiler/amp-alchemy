@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ import { toast } from 'sonner';
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { update } = useSession();
   const [companyName, setCompanyName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,6 +40,9 @@ export default function OnboardingPage() {
       if (!data.ok) {
         throw new Error(data.error?.message || 'Failed to complete onboarding');
       }
+
+      // Refresh the session to get updated company_id and role
+      await update();
 
       toast.success('Welcome! Your company has been created');
       router.push('/sessions');

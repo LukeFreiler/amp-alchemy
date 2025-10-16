@@ -29,13 +29,16 @@ ADD COLUMN invitation_token VARCHAR(64) UNIQUE;
 CREATE INDEX idx_members_invitation_token ON members(invitation_token);
 
 -- ============================================================================
--- 3. MAKE MEMBERS.COMPANY_ID NULLABLE FOR ONBOARDING
+-- 3. MAKE MEMBERS.COMPANY_ID AND ROLE NULLABLE FOR ONBOARDING
 -- ============================================================================
 
--- Allow company_id to be null initially so new users can sign up
--- and then be assigned to a company during onboarding
+-- Allow company_id and role to be null initially so new users can sign up
+-- and then be assigned to a company and role during onboarding
 ALTER TABLE members
 ALTER COLUMN company_id DROP NOT NULL;
+
+ALTER TABLE members
+ALTER COLUMN role DROP NOT NULL;
 
 -- ============================================================================
 -- END OF MIGRATION 005

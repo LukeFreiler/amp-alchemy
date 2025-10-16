@@ -23,16 +23,5 @@ export default async function CompanySettingsPage() {
     throw new NotFoundError('Company');
   }
 
-  return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground">Manage your company and account settings</p>
-        </div>
-
-        <CompanySettingsForm company={company} />
-      </div>
-    </div>
-  );
+  return <CompanySettingsForm company={company} />;
 }

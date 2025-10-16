@@ -56,7 +56,7 @@ export async function GET() {
 /**
  * POST /api/v1/blueprints
  *
- * Create new blueprint (draft status, version 1)
+ * Create new blueprint (draft status)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
 
     // Create blueprint
     const blueprint = await queryOne<Blueprint>(
-      `INSERT INTO blueprints (company_id, name, description, version, status)
-       VALUES ($1, $2, $3, 1, 'draft')
+      `INSERT INTO blueprints (company_id, name, description, status)
+       VALUES ($1, $2, $3, 'draft')
        RETURNING *`,
       [user.company_id, body.name.trim(), body.description?.trim() || null]
     );

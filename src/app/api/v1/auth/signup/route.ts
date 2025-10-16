@@ -2,7 +2,8 @@
  * POST /api/v1/auth/signup
  *
  * User registration endpoint for email/password authentication.
- * Creates new member and company, sends welcome email.
+ * Creates new member without company (onboarding flow will create company).
+ * Sends welcome email.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -16,7 +17,6 @@ interface SignupRequestBody {
   email: string;
   password: string;
   name: string;
-  companyName?: string;
 }
 
 const PASSWORD_MIN_LENGTH = 8;
@@ -50,7 +50,7 @@ function isValidPassword(password: string): string | null {
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as SignupRequestBody;
-    const { email, password, name, companyName } = body;
+    const { email, password, name } = body;
 
     // Validate required fields
     if (!email || !password || !name) {
@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
     // Hash password
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // Create member and company in transaction
-    const result = await transaction(async (client) => {
+    // Create member without company (onboarding will create company)
+    const member = await transaction(async (client) => {
       // Check if email already exists
       const existingMember = await client.query('SELECT id FROM members WHERE email = $1', [email]);
 
@@ -80,38 +80,29 @@ export async function POST(request: NextRequest) {
         throw new ConflictError('Email already registered');
       }
 
-      // Create company
-      const defaultCompanyName = companyName || `${name}'s Company`;
-      const companyResult = await client.query(
-        'INSERT INTO companies (name) VALUES ($1) RETURNING id',
-        [defaultCompanyName]
-      );
-      const company = companyResult.rows[0] as { id: string };
-
-      // Create member with credentials auth
+      // Create member without company_id or role (set during onboarding)
       const memberResult = await client.query(
-        `INSERT INTO members (company_id, role, name, email, password_hash, auth_method)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO members (name, email, password_hash, auth_method)
+         VALUES ($1, $2, $3, $4)
          RETURNING id, company_id, role, name, email, auth_method`,
-        [company.id, 'owner', name, email, passwordHash, 'credentials']
+        [name, email, passwordHash, 'credentials']
       );
-      const member = memberResult.rows[0] as {
+      const newMember = memberResult.rows[0] as {
         id: string;
-        company_id: string;
-        role: string;
+        company_id: string | null;
+        role: string | null;
         name: string;
         email: string;
         auth_method: string;
       };
 
-      logger.info('New user signed up', {
-        member_id: member.id,
-        company_id: company.id,
+      logger.info('New user signed up (pending onboarding)', {
+        member_id: newMember.id,
         email,
         auth_method: 'credentials',
       });
 
-      return { member, company };
+      return newMember;
     });
 
     // Send welcome email (don't block on this)
@@ -124,13 +115,10 @@ export async function POST(request: NextRequest) {
         ok: true,
         data: {
           member: {
-            id: result.member.id,
-            name: result.member.name,
-            email: result.member.email,
-            role: result.member.role,
-          },
-          company: {
-            id: result.company.id,
+            id: member.id,
+            name: member.name,
+            email: member.email,
+            role: member.role,
           },
         },
       },

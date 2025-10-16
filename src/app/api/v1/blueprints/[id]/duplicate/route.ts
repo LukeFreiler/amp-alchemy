@@ -62,10 +62,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Duplicate blueprint with transaction
     const newBlueprint = await transaction(async (client) => {
-      // 1. Create new blueprint as draft version 1
+      // 1. Create new blueprint as draft
       const blueprintResult = await client.query(
-        `INSERT INTO blueprints (company_id, name, description, version, status)
-         VALUES ($1, $2, $3, 1, 'draft')
+        `INSERT INTO blueprints (company_id, name, description, status)
+         VALUES ($1, $2, $3, 'draft')
          RETURNING *`,
         [user.company_id, body.name.trim(), sourceBlueprint.description]
       );

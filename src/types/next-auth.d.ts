@@ -12,8 +12,8 @@ declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
-      company_id: string;
-      role: MemberRole;
+      company_id: string | null; // null for users who haven't completed onboarding
+      role: MemberRole | null; // null for users who haven't completed onboarding
       name: string;
       email: string;
       auth_id: string | null;
@@ -22,8 +22,8 @@ declare module 'next-auth' {
 
   interface User {
     id: string;
-    company_id?: string;
-    role?: MemberRole;
+    company_id?: string | null;
+    role?: MemberRole | null;
     auth_id?: string | null;
   }
 }
@@ -31,8 +31,8 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     id?: string;
-    company_id?: string;
-    role?: MemberRole;
+    company_id?: string | null;
+    role?: MemberRole | null;
     auth_id?: string | null;
   }
 }

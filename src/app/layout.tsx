@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import { Toaster } from '@/components/ui/toaster';
 import { CommandPalette } from '@/features/search/components/command-palette';
 import { TopBar } from '@/components/top-bar';
+import { Providers } from '@/components/providers';
 import { authOptions } from '@/lib/auth/auth-options';
 import '@/styles/globals.css';
 
@@ -29,16 +30,18 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`dark ${figtree.variable}`}>
       <body className="min-h-screen font-sans antialiased">
-        <a
-          href="#main-content"
-          className="sr-only-focusable sr-only fixed left-4 top-4 z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only"
-        >
-          Skip to main content
-        </a>
-        <CommandPalette />
-        {session?.user && <TopBar user={session.user} />}
-        <div id="main-content">{children}</div>
-        <Toaster />
+        <Providers session={session}>
+          <a
+            href="#main-content"
+            className="sr-only-focusable sr-only fixed left-4 top-4 z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only"
+          >
+            Skip to main content
+          </a>
+          <CommandPalette />
+          {session?.user && <TopBar user={session.user} />}
+          <div id="main-content">{children}</div>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

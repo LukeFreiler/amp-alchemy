@@ -9,8 +9,8 @@ export type MemberRole = 'owner' | 'editor' | 'viewer';
 
 export interface AuthUser {
   id: string;
-  company_id: string;
-  role: MemberRole;
+  company_id: string | null; // null for users who haven't completed onboarding
+  role: MemberRole | null; // null for users who haven't completed onboarding
   name: string;
   email: string;
   auth_id: string | null; // OAuth provider ID (null for credentials-based users)
@@ -18,9 +18,9 @@ export interface AuthUser {
 
 export interface Member {
   id: string;
-  company_id: string;
+  company_id: string | null; // null for users who haven't completed onboarding
   auth_id: string | null; // OAuth provider ID (null for credentials-based users)
-  role: MemberRole;
+  role: MemberRole | null; // null for users who haven't completed onboarding
   name: string;
   email: string;
   created_at: Date;

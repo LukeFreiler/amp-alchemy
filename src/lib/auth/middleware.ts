@@ -25,8 +25,11 @@ export async function requireAuth(allowedRoles?: MemberRole[]): Promise<AuthUser
     throw new AuthenticationError('Authentication required');
   }
 
-  if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(session.user.role)) {
-    throw new AuthorizationError(`Access denied. Requires one of: ${allowedRoles.join(', ')}`);
+  // Check if user has completed onboarding and has required role
+  if (allowedRoles && allowedRoles.length > 0) {
+    if (!session.user.role || !allowedRoles.includes(session.user.role)) {
+      throw new AuthorizationError(`Access denied. Requires one of: ${allowedRoles.join(', ')}`);
+    }
   }
 
   return session.user;

@@ -35,8 +35,8 @@ export const authOptions: NextAuthOptions = {
           // Find member by email
           const member = await queryOne<{
             id: string;
-            company_id: string;
-            role: string;
+            company_id: string | null;
+            role: string | null;
             name: string;
             email: string;
             password_hash: string | null;
@@ -80,7 +80,7 @@ export const authOptions: NextAuthOptions = {
             email: member.email,
             name: member.name,
             company_id: member.company_id,
-            role: member.role as 'owner' | 'editor' | 'viewer',
+            role: member.role as 'owner' | 'editor' | 'viewer' | null,
             auth_id: member.auth_id,
           };
         } catch (error) {
@@ -117,31 +117,18 @@ export const authOptions: NextAuthOptions = {
           return true;
         }
 
-        // Create new company and owner member for first-time OAuth users
+        // Create new member for first-time OAuth users (without company - onboarding will create)
         await transaction(async (client) => {
-          // Create company with default name
-          const companyResult = await client.query(
-            'INSERT INTO companies (name) VALUES ($1) RETURNING id',
-            [`${user.name}'s Company`]
-          );
-          const company = companyResult.rows[0] as { id: string };
-
-          logger.info('Created new company', {
-            company_id: company.id,
-            company_name: `${user.name}'s Company`,
-          });
-
-          // Create owner member with OAuth auth
+          // Create member without company_id or role (set during onboarding)
           await client.query(
-            `INSERT INTO members (company_id, auth_id, role, name, email, auth_method)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-            [company.id, account.providerAccountId, 'owner', user.name, user.email, 'oauth']
+            `INSERT INTO members (auth_id, name, email, auth_method)
+             VALUES ($1, $2, $3, $4)`,
+            [account.providerAccountId, user.name, user.email, 'oauth']
           );
 
-          logger.info('Created owner member via OAuth', {
-            company_id: company.id,
+          logger.info('Created new member via OAuth (pending onboarding)', {
             email: user.email,
-            role: 'owner',
+            auth_method: 'oauth',
           });
         });
 
@@ -152,7 +139,7 @@ export const authOptions: NextAuthOptions = {
       }
     },
 
-    async jwt({ token, account, user }) {
+    async jwt({ token, account, user, trigger }) {
       try {
         // Enrich token with member data on initial sign-in
         if (account) {
@@ -160,14 +147,14 @@ export const authOptions: NextAuthOptions = {
           if (account.provider === 'credentials' && user) {
             const credentialsUser = user as {
               id: string;
-              company_id: string;
-              role: 'owner' | 'editor' | 'viewer';
+              company_id: string | null;
+              role: 'owner' | 'editor' | 'viewer' | null;
               auth_id: string | null;
             };
             token.id = user.id;
-            token.company_id = credentialsUser.company_id;
-            token.role = credentialsUser.role;
-            token.auth_id = credentialsUser.auth_id;
+            token.company_id = credentialsUser.company_id ?? undefined;
+            token.role = credentialsUser.role ?? undefined;
+            token.auth_id = credentialsUser.auth_id ?? undefined;
             return token;
           }
 
@@ -184,6 +171,25 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
+        // Refresh token data when session is updated (e.g., after onboarding)
+        if (trigger === 'update' && token.id) {
+          const member = await queryOne<Member>(
+            'SELECT id, company_id, role, auth_id FROM members WHERE id = $1',
+            [token.id as string]
+          );
+
+          if (member) {
+            token.company_id = member.company_id ?? undefined;
+            token.role = member.role ?? undefined;
+            token.auth_id = member.auth_id ?? undefined;
+            logger.info('Session refreshed with updated member data', {
+              member_id: token.id,
+              company_id: member.company_id,
+              role: member.role,
+            });
+          }
+        }
+
         return token;
       } catch (error) {
         logger.error('JWT callback error', { error, token });
@@ -196,9 +202,9 @@ export const authOptions: NextAuthOptions = {
         // Attach member data to session
         if (token && session.user) {
           session.user.id = token.id as string;
-          session.user.company_id = token.company_id as string;
-          session.user.role = token.role as 'owner' | 'editor' | 'viewer';
-          session.user.auth_id = token.auth_id as string;
+          session.user.company_id = (token.company_id ?? null) as string | null;
+          session.user.role = (token.role ?? null) as 'owner' | 'editor' | 'viewer' | null;
+          session.user.auth_id = (token.auth_id ?? null) as string | null;
         }
 
         return session;

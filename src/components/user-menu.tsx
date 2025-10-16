@@ -62,7 +62,7 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuItem asChild>
           <a href="/settings/company" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
-            Company Settings
+            Settings
           </a>
         </DropdownMenuItem>
 

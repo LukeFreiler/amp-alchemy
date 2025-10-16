@@ -5,11 +5,19 @@
  * All authenticated users can view blueprints
  */
 
+import { cookies } from 'next/headers';
 import { requireAuth } from '@/lib/auth/middleware';
 import { BlueprintList } from '@/features/blueprints/components/blueprint-list';
 
 export default async function BlueprintsPage() {
   const user = await requireAuth();
+
+  // Get cookies to pass to internal API
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join('; ');
 
   // Fetch blueprints from API
   const response = await fetch(
@@ -17,8 +25,7 @@ export default async function BlueprintsPage() {
     {
       cache: 'no-store',
       headers: {
-        // Pass cookies for authentication
-        cookie: `next-auth.session-token=${user.id}`,
+        cookie: cookieHeader,
       },
     }
   );

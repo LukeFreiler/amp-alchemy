@@ -121,12 +121,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
       const result = await response.json();
       if (result.ok) {
         toast.success('Blueprint published successfully!');
-        // Redirect to the new version if one was created
-        if (result.data.id !== id) {
-          router.push(`/blueprints/${result.data.id}/edit`);
-        } else {
-          setBlueprint((prev) => (prev ? { ...prev, ...result.data } : null));
-        }
+        setBlueprint((prev) => (prev ? { ...prev, ...result.data } : null));
       } else {
         toast.error(result.error.message || 'Failed to publish blueprint');
       }
@@ -417,8 +412,6 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
                 <h1 className="text-xl font-bold">{name}</h1>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Badge variant="outline">{blueprint.status}</Badge>
-                  <span>v{blueprint.version}</span>
-                  <span>•</span>
                   <span>{blueprint.sections.length} sections</span>
                 </div>
               </div>

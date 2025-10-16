@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch blueprint and verify it exists and is published
-    const blueprint = await queryOne<{ id: string; version: number; status: string }>(
-      'SELECT id, version, status FROM blueprints WHERE id = $1 AND company_id = $2',
+    const blueprint = await queryOne<{ id: string; status: string }>(
+      'SELECT id, status FROM blueprints WHERE id = $1 AND company_id = $2',
       [body.blueprint_id, user.company_id]
     );
 
@@ -97,10 +97,10 @@ export async function POST(request: NextRequest) {
 
     // Create session
     const session = await queryOne<Session>(
-      `INSERT INTO sessions (company_id, blueprint_id, blueprint_version, name, status, created_by)
-       VALUES ($1, $2, $3, $4, 'in_progress', $5)
+      `INSERT INTO sessions (company_id, blueprint_id, name, status, created_by)
+       VALUES ($1, $2, $3, 'in_progress', $4)
        RETURNING *`,
-      [user.company_id, blueprint.id, blueprint.version, body.name.trim(), user.id]
+      [user.company_id, blueprint.id, body.name.trim(), user.id]
     );
 
     if (!session) {

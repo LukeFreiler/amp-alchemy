@@ -91,8 +91,6 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
         return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
       case 'draft':
         return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'archived':
-        return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
     }
   };
 
@@ -133,8 +131,6 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
               </div>
 
               <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
-                <span>v{blueprint.version}</span>
-                <span>•</span>
                 <span>{blueprint.section_count || 0} sections</span>
               </div>
 

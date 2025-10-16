@@ -10,7 +10,6 @@ export interface Session {
   id: string;
   company_id: string;
   blueprint_id: string;
-  blueprint_version: number;
   name: string;
   status: SessionStatus;
   created_by: string;

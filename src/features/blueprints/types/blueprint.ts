@@ -6,8 +6,7 @@ export interface Blueprint {
   id: string;
   company_id: string;
   name: string;
-  version: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published';
   description: string | null;
   created_at: string;
   updated_at: string;
