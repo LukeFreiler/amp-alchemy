@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Sparkles, Zap, Lock } from 'lucide-react';
 
 import { authOptions } from '@/lib/auth/auth-options';
@@ -19,7 +20,7 @@ export default async function HomePage() {
       <header className="border-b border-border">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center space-x-2">
-            <Sparkles className="h-6 w-6 text-primary" />
+            <Image src="/logo.svg" alt="Centercode Alchemy" width={24} height={24} priority />
             <span className="text-xl font-bold text-foreground">Centercode Alchemy</span>
           </div>
           <div className="flex items-center space-x-4">
