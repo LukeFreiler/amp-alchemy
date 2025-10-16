@@ -32,20 +32,11 @@ function isValidEmail(email: string): boolean {
 
 /**
  * Validate password strength
+ * Requirements: At least 8 characters and at least one number
  */
 function isValidPassword(password: string): string | null {
   if (password.length < PASSWORD_MIN_LENGTH) {
     return `Password must be at least ${PASSWORD_MIN_LENGTH} characters long`;
-  }
-
-  // Check for at least one uppercase letter
-  if (!/[A-Z]/.test(password)) {
-    return 'Password must contain at least one uppercase letter';
-  }
-
-  // Check for at least one lowercase letter
-  if (!/[a-z]/.test(password)) {
-    return 'Password must contain at least one lowercase letter';
   }
 
   // Check for at least one number
