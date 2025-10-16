@@ -6,7 +6,7 @@
  * Displays artifact generators with add/edit/delete/reorder controls
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Edit, Trash2, Plus, Eye, EyeOff, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -43,6 +43,11 @@ export function GeneratorList({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  // Sync local state with props when they change
+  useEffect(() => {
+    setGenerators(initialGenerators);
+  }, [initialGenerators]);
 
   const handleAdd = () => {
     setEditingGenerator(undefined);

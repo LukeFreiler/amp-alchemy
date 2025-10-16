@@ -30,11 +30,12 @@ interface UserMenuProps {
  *   <UserMenu user={session.user} />
  */
 export function UserMenu({ user }: UserMenuProps) {
-  const initials = user.name
-    ?.split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase() || 'U';
+  const initials =
+    user.name
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase() || 'U';
 
   return (
     <DropdownMenu>
@@ -60,7 +61,7 @@ export function UserMenu({ user }: UserMenuProps) {
 
         <DropdownMenuItem asChild>
           <a href="/settings/company" className="cursor-pointer">
-            <Settings className="w-4 h-4 mr-2" />
+            <Settings className="mr-2 h-4 w-4" />
             Company Settings
           </a>
         </DropdownMenuItem>
@@ -68,7 +69,7 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
-          <LogOut className="w-4 h-4 mr-2" />
+          <LogOut className="mr-2 h-4 w-4" />
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -31,7 +31,7 @@ export default async function RootLayout({
       <body className="min-h-screen font-sans antialiased">
         <a
           href="#main-content"
-          className="sr-only sr-only-focusable fixed left-4 top-4 z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only"
+          className="sr-only-focusable sr-only fixed left-4 top-4 z-50 rounded-md bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only"
         >
           Skip to main content
         </a>

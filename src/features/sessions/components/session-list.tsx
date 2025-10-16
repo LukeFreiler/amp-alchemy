@@ -12,6 +12,8 @@ import { FileText, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { CrudHeader } from '@/components/ui/crud-header';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -110,25 +112,21 @@ export function SessionList() {
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-end">
-        <Button onClick={() => setShowStartModal(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Start Session
-        </Button>
-      </div>
+      <CrudHeader
+        title="Sessions"
+        description="Manage your data collection sessions"
+        buttonText="Start Session"
+        buttonIcon={Plus}
+        onButtonClick={() => setShowStartModal(true)}
+        showSeparator={sessions.length > 0}
+      />
 
       {sessions.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-12">
-          <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-          <h3 className="mb-2 text-lg font-semibold">No sessions yet</h3>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Start your first data collection session
-          </p>
-          <Button onClick={() => setShowStartModal(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Start Session
-          </Button>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title="No sessions yet"
+          description="Start your first data collection session"
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {sessions.map((session) => (

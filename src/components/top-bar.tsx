@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Menu, Upload, X } from 'lucide-react';
+import Image from 'next/image';
+import { Menu, Upload, X } from 'lucide-react';
 
 import { SearchInput } from '@/features/search/components/search-input';
 import { UserMenu } from '@/components/user-menu';
@@ -14,17 +15,12 @@ interface TopBarProps {
   user: AuthUser;
 }
 
-interface Breadcrumb {
-  label: string;
-  href: string | null;
-}
-
 /**
  * Top Navigation Bar Component
  *
  * Displays the main navigation bar with:
  * - Logo (links to home)
- * - Breadcrumb navigation
+ * - Main navigation (Blueprints, Sessions)
  * - Search input (opens command palette)
  * - Context-aware Import button (shows on Session pages)
  * - User menu
@@ -38,54 +34,54 @@ export function TopBar({ user }: TopBarProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const breadcrumbs = getBreadcrumbs(pathname);
   const isSessionPage = pathname.startsWith('/sessions/') && pathname.split('/').length > 2;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between gap-4">
-          {/* Left: Logo + Breadcrumbs */}
-          <div className="flex items-center gap-4 min-w-0">
-            <Link href="/" className="font-bold text-xl shrink-0">
-              Alchemy
+          {/* Left: Logo + Main Nav + Breadcrumbs */}
+          <div className="flex min-w-0 items-center gap-4">
+            <Link href="/" className="flex shrink-0 items-center gap-2">
+              <Image src="/logo.svg" alt="Alchemy Logo" width={32} height={32} className="h-8 w-8" />
+              <span className="text-xl font-bold">Alchemy</span>
             </Link>
 
-            {breadcrumbs.length > 0 && (
-              <nav className="hidden md:flex items-center gap-2 text-sm min-w-0">
-                {breadcrumbs.map((crumb, i) => (
-                  <div key={i} className="flex items-center gap-2 min-w-0">
-                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                    {crumb.href ? (
-                      <button
-                        onClick={() => {
-                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                          // @ts-ignore - Next.js 15 strict Route typing
-                          router.push(crumb.href);
-                        }}
-                        className="text-muted-foreground hover:text-foreground truncate cursor-pointer"
-                      >
-                        {crumb.label}
-                      </button>
-                    ) : (
-                      <span className="text-foreground font-medium truncate">{crumb.label}</span>
-                    )}
-                  </div>
-                ))}
-              </nav>
-            )}
+            {/* Main Navigation (Desktop) */}
+            <nav className="hidden items-center gap-1 md:flex">
+              <Button
+                variant={pathname.startsWith('/blueprints') ? 'default' : 'ghost'}
+                onClick={() => {
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore - Next.js 15 strict Route typing
+                  router.push('/blueprints');
+                }}
+              >
+                Blueprints
+              </Button>
+              <Button
+                variant={pathname.startsWith('/sessions') ? 'default' : 'ghost'}
+                onClick={() => {
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore - Next.js 15 strict Route typing
+                  router.push('/sessions');
+                }}
+              >
+                Sessions
+              </Button>
+            </nav>
           </div>
 
           {/* Center: Search (Desktop only) */}
-          <div className="hidden lg:block flex-1 max-w-md">
+          <div className="hidden max-w-md flex-1 lg:block">
             <SearchInput />
           </div>
 
           {/* Right: Import + User Menu + Mobile Toggle */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             {isSessionPage && (
               <Button variant="outline" className="hidden sm:flex">
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="mr-2 h-4 w-4" />
                 Import
               </Button>
             )}
@@ -100,50 +96,23 @@ export function TopBar({ user }: TopBarProps) {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t mt-3 pt-3 space-y-3">
+          <div className="mt-3 space-y-3 border-t pt-3 md:hidden">
             {/* Mobile Search */}
             <div className="lg:hidden">
               <SearchInput />
             </div>
 
-            {/* Mobile Breadcrumbs */}
-            {breadcrumbs.length > 0 && (
-              <nav className="space-y-2">
-                {breadcrumbs.map((crumb, i) => (
-                  <div key={i}>
-                    {crumb.href ? (
-                      <button
-                        onClick={() => {
-                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                          // @ts-ignore - Next.js 15 strict Route typing
-                          router.push(crumb.href);
-                          setMobileMenuOpen(false);
-                        }}
-                        className="block px-2 py-1 text-sm text-muted-foreground hover:text-foreground w-full text-left"
-                      >
-                        {crumb.label}
-                      </button>
-                    ) : (
-                      <span className="block px-2 py-1 text-sm text-foreground font-medium">
-                        {crumb.label}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </nav>
-            )}
-
             {/* Mobile Import Button */}
             {isSessionPage && (
               <Button variant="outline" className="w-full sm:hidden">
-                <Upload className="w-4 h-4 mr-2" />
+                <Upload className="mr-2 h-4 w-4" />
                 Import
               </Button>
             )}
@@ -157,7 +126,7 @@ export function TopBar({ user }: TopBarProps) {
                   router.push('/blueprints');
                   setMobileMenuOpen(false);
                 }}
-                className="block px-2 py-1 text-sm text-muted-foreground hover:text-foreground w-full text-left"
+                className="block w-full px-2 py-1 text-left text-sm text-muted-foreground hover:text-foreground"
               >
                 Blueprints
               </button>
@@ -168,7 +137,7 @@ export function TopBar({ user }: TopBarProps) {
                   router.push('/sessions');
                   setMobileMenuOpen(false);
                 }}
-                className="block px-2 py-1 text-sm text-muted-foreground hover:text-foreground w-full text-left"
+                className="block w-full px-2 py-1 text-left text-sm text-muted-foreground hover:text-foreground"
               >
                 Sessions
               </button>
@@ -179,7 +148,7 @@ export function TopBar({ user }: TopBarProps) {
                   router.push('/artifacts');
                   setMobileMenuOpen(false);
                 }}
-                className="block px-2 py-1 text-sm text-muted-foreground hover:text-foreground w-full text-left"
+                className="block w-full px-2 py-1 text-left text-sm text-muted-foreground hover:text-foreground"
               >
                 Artifacts
               </button>
@@ -189,48 +158,4 @@ export function TopBar({ user }: TopBarProps) {
       </div>
     </header>
   );
-}
-
-/**
- * Generate breadcrumbs based on the current pathname
- *
- * Examples:
- *   /blueprints -> [{ label: 'Blueprints', href: '/blueprints' }]
- *   /blueprints/123 -> [{ label: 'Blueprints', href: '/blueprints' }, { label: 'Edit', href: null }]
- *   /sessions/456 -> [{ label: 'Sessions', href: '/sessions' }, { label: 'Session', href: null }]
- */
-function getBreadcrumbs(pathname: string): Breadcrumb[] {
-  const segments = pathname.split('/').filter(Boolean);
-  const crumbs: Breadcrumb[] = [];
-
-  if (segments.length === 0) {
-    return crumbs;
-  }
-
-  // First segment determines the section
-  const section = segments[0];
-
-  if (section === 'blueprints') {
-    crumbs.push({ label: 'Blueprints', href: segments.length > 1 ? '/blueprints' : null });
-    if (segments.length > 1) {
-      crumbs.push({ label: 'Edit', href: null });
-    }
-  } else if (section === 'sessions') {
-    crumbs.push({ label: 'Sessions', href: segments.length > 1 ? '/sessions' : null });
-    if (segments.length > 1) {
-      crumbs.push({ label: 'Session', href: null });
-    }
-  } else if (section === 'artifacts') {
-    crumbs.push({ label: 'Artifacts', href: segments.length > 1 ? '/artifacts' : null });
-    if (segments.length > 1) {
-      crumbs.push({ label: 'View', href: null });
-    }
-  } else if (section === 'settings') {
-    crumbs.push({ label: 'Settings', href: segments.length > 1 ? '/settings' : null });
-    if (segments[1] === 'company') {
-      crumbs.push({ label: 'Company', href: null });
-    }
-  }
-
-  return crumbs;
 }

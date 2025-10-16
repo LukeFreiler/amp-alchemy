@@ -21,10 +21,11 @@ type SuccessResponse<T> = {
  * GET /api/v1/sessions
  *
  * List all sessions for the user's company
+ * All authenticated users can view sessions
  */
 export async function GET() {
   try {
-    const user = await requireAuth(['owner', 'editor']);
+    const user = await requireAuth();
 
     const sessions = await query<Session>(
       `SELECT

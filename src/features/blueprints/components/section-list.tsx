@@ -6,7 +6,7 @@
  * Displays sections with drag-and-drop reordering
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -24,9 +24,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Plus, Trash2, Edit } from 'lucide-react';
+import { GripVertical, Plus, Trash2, Edit, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,8 +76,8 @@ function SortableSection({
   return (
     <div ref={setNodeRef} style={style}>
       <Card
-        className={`flex items-center gap-2 p-3 transition-colors ${
-          isSelected ? 'bg-accent' : 'hover:bg-card/80'
+        className={`flex items-center gap-2 p-3 transition-colors cursor-pointer ${
+          isSelected ? 'bg-accent border-2 border-primary' : 'hover:bg-accent/50 border-2 border-transparent'
         }`}
         onClick={onSelect}
       >
@@ -134,6 +135,11 @@ export function SectionList({
   const [sections, setSections] = useState(initialSections);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Sync local state with props when they change
+  useEffect(() => {
+    setSections(initialSections);
+  }, [initialSections]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -170,20 +176,18 @@ export function SectionList({
       <div className="space-y-2">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">Sections</h3>
-          <Button size="sm" variant="outline" onClick={onAddSection}>
+          <Button size="sm" onClick={onAddSection}>
             <Plus className="mr-2 h-4 w-4" />
             Add
           </Button>
         </div>
 
         {sections.length === 0 ? (
-          <Card className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="mb-2 text-sm text-muted-foreground">No sections yet</p>
-            <Button size="sm" onClick={onAddSection}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Section
-            </Button>
-          </Card>
+          <EmptyState
+            icon={FolderOpen}
+            title="No sections yet"
+            description="Add your first section to organize fields in this blueprint"
+          />
         ) : (
           <DndContext
             sensors={sensors}

@@ -162,7 +162,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sections" className="flex-1 overflow-y-auto p-0 mt-0">
+          <TabsContent value="sections" className="mt-0 flex-1 overflow-y-auto p-0">
             <SectionNav
               sections={sessionData.sections}
               currentIndex={currentSectionIndex}
@@ -171,7 +171,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
             />
           </TabsContent>
 
-          <TabsContent value="fields" className="flex-1 overflow-y-auto p-4 mt-0">
+          <TabsContent value="fields" className="mt-0 flex-1 overflow-y-auto p-4">
             {/* Sources section */}
             {showSources && (
               <div className="mb-8">
@@ -223,7 +223,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
             />
           </TabsContent>
 
-          <TabsContent value="notes" className="flex-1 overflow-y-auto p-0 mt-0">
+          <TabsContent value="notes" className="mt-0 flex-1 overflow-y-auto p-0">
             <SectionNotes
               sessionId={sessionData.id}
               sectionId={currentSection.id}
@@ -234,7 +234,7 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
       </div>
 
       {/* Desktop: 3-panel layout */}
-      <div className="hidden md:flex flex-1 overflow-hidden">
+      <div className="hidden flex-1 overflow-hidden md:flex">
         {/* Left rail - Section navigation */}
         <aside className="w-64 overflow-y-auto border-r bg-sidebar">
           <SectionNav

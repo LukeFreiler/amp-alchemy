@@ -31,10 +31,11 @@ export interface FieldWithValue extends Field {
  * GET /api/v1/sessions/[id]/sections/[section_id]/fields
  *
  * Get all fields for a section with their current values
+ * All authenticated users can view fields
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth(['owner', 'editor']);
+    const user = await requireAuth();
     const { id: sessionId, section_id: sectionId } = await context.params;
 
     // Verify session exists and belongs to company

@@ -26,11 +26,12 @@ const MAX_PASTE_LENGTH = 50000; // 50k characters
  * GET /api/v1/sessions/[id]/sources
  *
  * List all sources for a session
+ * All authenticated users can view sources
  */
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: sessionId } = await params;
-    const user = await requireAuth(['owner', 'editor']);
+    const user = await requireAuth();
 
     // Verify session exists and belongs to user's company
     const session = await queryOne<{ company_id: string }>(

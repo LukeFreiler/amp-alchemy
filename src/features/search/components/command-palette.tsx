@@ -89,23 +89,23 @@ export function CommandPalette() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
         onClick={() => setOpen(false)}
       />
 
       {/* Command Palette */}
-      <div className="fixed top-[20%] left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4">
-        <Command className="rounded-lg border border-border shadow-2xl bg-card overflow-hidden">
+      <div className="fixed left-1/2 top-[20%] z-50 w-full max-w-2xl -translate-x-1/2 px-4">
+        <Command className="overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
           {/* Search Input */}
           <div className="flex items-center border-b border-border px-4">
-            <Search className="w-5 h-5 text-muted-foreground mr-2" />
+            <Search className="mr-2 h-5 w-5 text-muted-foreground" />
             <Command.Input
               value={query}
               onValueChange={setQuery}
               placeholder="Search blueprints, sessions, artifacts..."
               className="flex-1 bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"
             />
-            {loading && <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />}
+            {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           </div>
 
           {/* Results List */}
@@ -121,9 +121,7 @@ export function CommandPalette() {
             {query.trim().length === 0 && (
               <div className="py-12 text-center text-sm text-muted-foreground">
                 <p>Start typing to search...</p>
-                <p className="mt-2 text-xs">
-                  Search across blueprints, sessions, and artifacts
-                </p>
+                <p className="mt-2 text-xs">Search across blueprints, sessions, and artifacts</p>
               </div>
             )}
 
@@ -138,31 +136,29 @@ export function CommandPalette() {
               <Command.Item
                 key={`${result.type}-${result.id}`}
                 onSelect={() => handleSelect(result)}
-                className="flex items-start gap-3 px-3 py-3 rounded-md cursor-pointer aria-selected:bg-accent"
+                className="flex cursor-pointer items-start gap-3 rounded-md px-3 py-3 aria-selected:bg-accent"
               >
                 {/* Icon */}
                 <div className="mt-0.5">
-                  {result.type === 'blueprint' && (
-                    <Box className="w-5 h-5 text-muted-foreground" />
-                  )}
+                  {result.type === 'blueprint' && <Box className="h-5 w-5 text-muted-foreground" />}
                   {result.type === 'session' && (
-                    <FileText className="w-5 h-5 text-muted-foreground" />
+                    <FileText className="h-5 w-5 text-muted-foreground" />
                   )}
                   {result.type === 'artifact' && (
-                    <FileOutput className="w-5 h-5 text-muted-foreground" />
+                    <FileOutput className="h-5 w-5 text-muted-foreground" />
                   )}
                 </div>
 
                 {/* Title & Snippet */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-foreground truncate">{result.title}</div>
-                  <div className="text-sm text-muted-foreground truncate mt-0.5">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium text-foreground">{result.title}</div>
+                  <div className="mt-0.5 truncate text-sm text-muted-foreground">
                     {result.snippet}
                   </div>
                 </div>
 
                 {/* Type Badge */}
-                <div className="text-xs text-muted-foreground uppercase tracking-wide shrink-0">
+                <div className="shrink-0 text-xs uppercase tracking-wide text-muted-foreground">
                   {result.type}
                 </div>
               </Command.Item>
@@ -170,20 +166,20 @@ export function CommandPalette() {
           </Command.List>
 
           {/* Footer */}
-          <div className="border-t border-border px-4 py-2 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">↑</kbd>
-                <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">↓</kbd>
+                <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↑</kbd>
+                <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↓</kbd>
                 <span>to navigate</span>
               </div>
               <div className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">↵</kbd>
+                <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↵</kbd>
                 <span>to select</span>
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">esc</kbd>
+              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">esc</kbd>
               <span>to close</span>
             </div>
           </div>

@@ -21,10 +21,11 @@ type SuccessResponse<T> = {
  * GET /api/v1/blueprints
  *
  * List all blueprints for the user's company with section count
+ * All authenticated users can view blueprints
  */
 export async function GET() {
   try {
-    const user = await requireAuth(['owner', 'editor']);
+    const user = await requireAuth();
 
     const blueprints = await query<Blueprint>(
       `SELECT

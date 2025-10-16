@@ -16,9 +16,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/components/ui/toaster';
 import { SectionList } from '@/features/blueprints/components/section-list';
 import { FieldList } from '@/features/blueprints/components/field-list';
 import { FieldConfigModal } from '@/features/blueprints/components/field-config-modal';
+import { SectionModal } from '@/features/blueprints/components/section-modal';
 import { GeneratorList } from '@/features/blueprints/components/generator-list';
 import {
   BlueprintWithSections,
@@ -37,6 +39,10 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isFieldModalOpen, setIsFieldModalOpen] = useState(false);
   const [editingField, setEditingField] = useState<Field | undefined>(undefined);
+  const [isSectionModalOpen, setIsSectionModalOpen] = useState(false);
+  const [sectionModalMode, setSectionModalMode] = useState<'create' | 'edit'>('create');
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [editingSectionTitle, setEditingSectionTitle] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'sections' | 'generators'>('sections');
@@ -79,7 +85,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
 
   const handleSaveMetadata = async () => {
     if (!name.trim()) {
-      alert('Blueprint name is required');
+      toast.error('Blueprint name is required');
       return;
     }
 
@@ -94,11 +100,12 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
       const result = await response.json();
       if (result.ok) {
         setBlueprint((prev) => (prev ? { ...prev, ...result.data } : null));
+        toast.success('Blueprint saved');
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast.error(result.error.message || 'Failed to save blueprint');
       }
     } catch (error) {
-      alert('Failed to save blueprint');
+      toast.error('Failed to save blueprint');
     } finally {
       setIsSaving(false);
     }
@@ -113,80 +120,102 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
 
       const result = await response.json();
       if (result.ok) {
+        toast.success('Blueprint published successfully!');
         // Redirect to the new version if one was created
         if (result.data.id !== id) {
           router.push(`/blueprints/${result.data.id}/edit`);
         } else {
           setBlueprint((prev) => (prev ? { ...prev, ...result.data } : null));
         }
-        alert('Blueprint published successfully!');
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast.error(result.error.message || 'Failed to publish blueprint');
       }
     } catch (error) {
-      alert('Failed to publish blueprint');
+      toast.error('Failed to publish blueprint');
     } finally {
       setIsPublishing(false);
     }
   };
 
-  const handleAddSection = async () => {
-    const title = prompt('Enter section title:');
-    if (!title) return;
-
-    try {
-      const response = await fetch(`/api/v1/blueprints/${id}/sections`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title }),
-      });
-
-      const result = await response.json();
-      if (result.ok) {
-        const newSection: SectionWithFields = { ...result.data, fields: [] };
-        setBlueprint((prev) =>
-          prev ? { ...prev, sections: [...prev.sections, newSection] } : null
-        );
-        setSelectedSectionId(result.data.id);
-      } else {
-        alert(`Error: ${result.error.message}`);
-      }
-    } catch (error) {
-      alert('Failed to add section');
-    }
+  const handleAddSection = () => {
+    setSectionModalMode('create');
+    setEditingSectionId(null);
+    setEditingSectionTitle('');
+    setIsSectionModalOpen(true);
   };
 
-  const handleEditSection = async (sectionId: string) => {
+  const handleEditSection = (sectionId: string) => {
     const section = blueprint?.sections.find((s) => s.id === sectionId);
     if (!section) return;
 
-    const title = prompt('Enter section title:', section.title);
-    if (!title || title === section.title) return;
+    setSectionModalMode('edit');
+    setEditingSectionId(sectionId);
+    setEditingSectionTitle(section.title);
+    setIsSectionModalOpen(true);
+  };
 
-    try {
-      const response = await fetch(`/api/v1/sections/${sectionId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title }),
-      });
+  const handleSaveSection = async (title: string) => {
+    if (sectionModalMode === 'create') {
+      try {
+        const response = await fetch(`/api/v1/blueprints/${id}/sections`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title }),
+        });
 
-      const result = await response.json();
-      if (result.ok) {
-        setBlueprint((prev) =>
-          prev
-            ? {
-                ...prev,
-                sections: prev.sections.map((s) =>
-                  s.id === sectionId ? { ...s, ...result.data } : s
-                ),
-              }
-            : null
-        );
-      } else {
-        alert(`Error: ${result.error.message}`);
+        const result = await response.json();
+        if (result.ok) {
+          const newSection: SectionWithFields = { ...result.data, fields: [] };
+          setBlueprint((prev) =>
+            prev ? { ...prev, sections: [...prev.sections, newSection] } : null
+          );
+          setSelectedSectionId(result.data.id);
+          toast.success('Section added');
+        } else {
+          toast.error(result.error.message || 'Failed to add section');
+          throw new Error(result.error.message);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message) {
+          // Already shown toast above
+        } else {
+          toast.error('Failed to add section');
+        }
+        throw error;
       }
-    } catch (error) {
-      alert('Failed to update section');
+    } else if (sectionModalMode === 'edit' && editingSectionId) {
+      try {
+        const response = await fetch(`/api/v1/sections/${editingSectionId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title }),
+        });
+
+        const result = await response.json();
+        if (result.ok) {
+          setBlueprint((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  sections: prev.sections.map((s) =>
+                    s.id === editingSectionId ? { ...s, ...result.data } : s
+                  ),
+                }
+              : null
+          );
+          toast.success('Section updated');
+        } else {
+          toast.error(result.error.message || 'Failed to update section');
+          throw new Error(result.error.message);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message) {
+          // Already shown toast above
+        } else {
+          toast.error('Failed to update section');
+        }
+        throw error;
+      }
     }
   };
 
@@ -211,11 +240,12 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           }
           return { ...prev, sections: newSections };
         });
+        toast.success('Section deleted');
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast.error(result.error.message || 'Failed to delete section');
       }
     } catch (error) {
-      alert('Failed to delete section');
+      toast.error('Failed to delete section');
     }
   };
 
@@ -231,7 +261,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         }),
       });
     } catch (error) {
-      alert('Failed to reorder sections');
+      toast.error('Failed to reorder sections');
     }
   };
 
@@ -276,8 +306,9 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
               ),
             };
           });
+          toast.success('Field updated');
         } else {
-          alert(`Error: ${result.error.message}`);
+          toast.error(result.error.message || 'Failed to update field');
         }
       } else {
         // Create new field
@@ -298,12 +329,13 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
               ),
             };
           });
+          toast.success('Field added');
         } else {
-          alert(`Error: ${result.error.message}`);
+          toast.error(result.error.message || 'Failed to add field');
         }
       }
     } catch (error) {
-      alert('Failed to save field');
+      toast.error('Failed to save field');
     }
   };
 
@@ -326,11 +358,12 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
             ),
           };
         });
+        toast.success('Field deleted');
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast.error(result.error.message || 'Failed to delete field');
       }
     } catch (error) {
-      alert('Failed to delete field');
+      toast.error('Failed to delete field');
     }
   };
 
@@ -356,7 +389,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         }),
       });
     } catch (error) {
-      alert('Failed to reorder fields');
+      toast.error('Failed to reorder fields');
     }
   };
 
@@ -491,6 +524,15 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           )}
         </div>
       </div>
+
+      {/* Section Modal */}
+      <SectionModal
+        open={isSectionModalOpen}
+        onOpenChange={setIsSectionModalOpen}
+        onSave={handleSaveSection}
+        initialTitle={editingSectionTitle}
+        mode={sectionModalMode}
+      />
 
       {/* Field Config Modal */}
       {selectedSectionId && (

@@ -2,13 +2,14 @@
  * Blueprints List Page
  *
  * Server component that fetches blueprints and renders the list
+ * All authenticated users can view blueprints
  */
 
 import { requireAuth } from '@/lib/auth/middleware';
 import { BlueprintList } from '@/features/blueprints/components/blueprint-list';
 
 export default async function BlueprintsPage() {
-  const user = await requireAuth(['owner', 'editor']);
+  const user = await requireAuth();
 
   // Fetch blueprints from API
   const response = await fetch(

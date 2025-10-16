@@ -25,10 +25,11 @@ type RouteContext = {
  * GET /api/v1/sessions/[id]/sections/[section_id]/notes
  *
  * Get section notes for a session
+ * All authenticated users can view notes
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth(['owner', 'editor']);
+    const user = await requireAuth();
     const { id, section_id } = await context.params;
 
     // Verify session exists and belongs to company

@@ -12,6 +12,8 @@ import { FileText, Copy, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { CrudHeader } from '@/components/ui/crud-header';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -72,10 +74,12 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
         setBlueprints((prev) => prev.filter((b) => b.id !== deleteId));
         setDeleteId(null);
       } else {
-        alert(`Error: ${result.error.message}`);
+        alert(`Cannot delete: ${result.error.message}`);
+        setDeleteId(null);
       }
     } catch (error) {
       alert('Failed to delete blueprint');
+      setDeleteId(null);
     } finally {
       setIsDeleting(false);
     }
@@ -94,31 +98,21 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Blueprints</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Reusable templates for collecting structured data
-          </p>
-        </div>
-        <Button onClick={() => router.push('/blueprints/new')}>
-          <Plus className="mr-2 h-4 w-4" />
-          New Blueprint
-        </Button>
-      </div>
+      <CrudHeader
+        title="Blueprints"
+        description="Reusable templates for collecting structured data"
+        buttonText="New Blueprint"
+        buttonIcon={Plus}
+        onButtonClick={() => router.push('/blueprints/new')}
+        showSeparator={blueprints.length > 0}
+      />
 
       {blueprints.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-12">
-          <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-          <h3 className="mb-2 text-lg font-semibold">No blueprints yet</h3>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Create your first blueprint to get started
-          </p>
-          <Button onClick={() => router.push('/blueprints/new')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Blueprint
-          </Button>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title="No blueprints yet"
+          description="Create your first blueprint to get started"
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {blueprints.map((blueprint) => (
@@ -183,6 +177,10 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
             <AlertDialogDescription>
               This action cannot be undone. The blueprint and all its sections and fields will be
               permanently deleted.
+              <br />
+              <br />
+              <strong>Note:</strong> Blueprints with existing sessions cannot be deleted. You must
+              delete all sessions using this blueprint first.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

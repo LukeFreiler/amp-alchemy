@@ -31,10 +31,11 @@ type RouteContext = {
  * GET /api/v1/sessions/[id]
  *
  * Get session with blueprint sections and progress tracking
+ * All authenticated users can view sessions
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth(['owner', 'editor']);
+    const user = await requireAuth();
     const { id } = await context.params;
 
     // Fetch session

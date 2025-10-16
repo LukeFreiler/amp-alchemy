@@ -6,7 +6,7 @@
  * Displays fields for a section with drag-and-drop reordering
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -24,10 +24,11 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Plus, Trash2, Edit, Type, AlignLeft, ToggleLeft } from 'lucide-react';
+import { GripVertical, Plus, Trash2, Edit, Type, AlignLeft, ToggleLeft, ListChecks } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -133,6 +134,11 @@ export function FieldList({
   const [fields, setFields] = useState(initialFields);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Sync local state with props when they change
+  useEffect(() => {
+    setFields(initialFields);
+  }, [initialFields]);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -169,20 +175,18 @@ export function FieldList({
       <div className="space-y-2">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">Fields</h3>
-          <Button size="sm" variant="outline" onClick={onAddField}>
+          <Button size="sm" onClick={onAddField}>
             <Plus className="mr-2 h-4 w-4" />
             Add Field
           </Button>
         </div>
 
         {fields.length === 0 ? (
-          <Card className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="mb-2 text-sm text-muted-foreground">No fields yet</p>
-            <Button size="sm" onClick={onAddField}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Field
-            </Button>
-          </Card>
+          <EmptyState
+            icon={ListChecks}
+            title="No fields yet"
+            description="Add fields to collect specific data for this section"
+          />
         ) : (
           <DndContext
             sensors={sensors}

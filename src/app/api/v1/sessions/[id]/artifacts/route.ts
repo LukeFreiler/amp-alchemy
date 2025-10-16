@@ -52,10 +52,11 @@ type GroupedArtifacts = Record<
  * GET /api/v1/sessions/[id]/artifacts
  *
  * List all artifacts for a session, grouped by generator
+ * All authenticated users can view artifacts
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth(['owner', 'editor']);
+    const user = await requireAuth();
     const { id: sessionId } = await context.params;
 
     // Verify session exists and belongs to company
