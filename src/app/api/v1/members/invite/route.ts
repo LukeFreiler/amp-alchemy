@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     // Store invitation
     await execute(
-      `INSERT INTO member_invitations (company_id, email, role, token, expires_at, invited_by)
+      `INSERT INTO pending_invitations (company_id, email, role, token, expires_at, invited_by)
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [user.company_id, email, body.role, inviteToken, expiresAt, user.id]
     );

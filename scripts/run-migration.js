@@ -8,6 +8,22 @@ const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
+// Load environment variables from .env.local
+const envPath = path.join(process.cwd(), '.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^=:#]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim();
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  });
+}
+
 async function runMigration(migrationFile) {
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
