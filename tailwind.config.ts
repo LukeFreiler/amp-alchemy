@@ -188,7 +188,7 @@ const config: Config = {
         elevated: '#4C5163',
         'elevated-foreground': '#F7F8F9',
         overlay: 'rgb(18 21 29 / <alpha-value>)',
-        placeholder: '#888F9F',
+        placeholder: '#64697A',
         link: '#4867A1',
         'link-hover': '#6785B9',
         'link-visited': '#324F8A',
