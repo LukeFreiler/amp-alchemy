@@ -8,6 +8,7 @@
 
 import { useState, use } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
@@ -113,6 +114,9 @@ export default function ResetPasswordPage({ params }: ResetPasswordPageProps) {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-md space-y-8 rounded-lg border border-border bg-card p-8">
         <div className="text-center">
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <Image src="/logo.svg" alt="Centercode Alchemy" width={48} height={48} priority />
+          </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Reset Your Password</h1>
           <p className="mt-2 text-sm text-muted-foreground">Enter your new password below.</p>
         </div>

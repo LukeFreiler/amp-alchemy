@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Chrome, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -97,6 +98,9 @@ export default function SignUpPage() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-md space-y-8 rounded-lg border border-border bg-card p-8">
         <div className="text-center">
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <Image src="/logo.svg" alt="Centercode Alchemy" width={48} height={48} priority />
+          </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Create Account</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign up to get started with Centercode Alchemy
