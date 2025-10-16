@@ -52,16 +52,18 @@ export function TopBar({ user }: TopBarProps) {
 
             {/* Main Navigation (Desktop) */}
             <nav className="hidden items-center gap-1 md:flex">
-              <Button
-                variant={pathname.startsWith('/blueprints') ? 'default' : 'ghost'}
-                onClick={() => {
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore - Next.js 15 strict Route typing
-                  router.push('/blueprints');
-                }}
-              >
-                Blueprints
-              </Button>
+              {user.role === 'owner' && (
+                <Button
+                  variant={pathname.startsWith('/blueprints') ? 'default' : 'ghost'}
+                  onClick={() => {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore - Next.js 15 strict Route typing
+                    router.push('/blueprints');
+                  }}
+                >
+                  Blueprints
+                </Button>
+              )}
               <Button
                 variant={pathname.startsWith('/sessions') ? 'default' : 'ghost'}
                 onClick={() => {
@@ -107,17 +109,19 @@ export function TopBar({ user }: TopBarProps) {
 
             {/* Mobile Quick Links */}
             <nav className="space-y-2 border-t pt-3">
-              <button
-                onClick={() => {
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore - Next.js 15 strict Route typing
-                  router.push('/blueprints');
-                  setMobileMenuOpen(false);
-                }}
-                className="block w-full px-2 py-1 text-left text-sm text-muted-foreground hover:text-foreground"
-              >
-                Blueprints
-              </button>
+              {user.role === 'owner' && (
+                <button
+                  onClick={() => {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore - Next.js 15 strict Route typing
+                    router.push('/blueprints');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block w-full px-2 py-1 text-left text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Blueprints
+                </button>
+              )}
               <button
                 onClick={() => {
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

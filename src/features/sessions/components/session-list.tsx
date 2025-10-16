@@ -3,12 +3,12 @@
 /**
  * Session List Component
  *
- * Displays all sessions in a card grid with actions and start session modal
+ * Displays all sessions in a card grid with actions, filters, and start session modal
  */
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Plus, Trash2 } from 'lucide-react';
+import { FileText, Plus, Trash2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +25,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Session } from '@/features/sessions/types/session';
+import { Blueprint } from '@/features/blueprints/types/blueprint';
 import { StartSessionModal } from './start-session-modal';
+import { SessionFilters } from './session-filters';
 import {
   Tooltip,
   TooltipContent,
@@ -33,19 +35,26 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export function SessionList() {
+interface SessionListProps {
+  initialSessions: Session[];
+  blueprints: Blueprint[];
+  currentUserId: string;
+}
+
+export function SessionList({ initialSessions, blueprints, currentUserId }: SessionListProps) {
   const router = useRouter();
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [sessions, setSessions] = useState<Session[]>(initialSessions);
+  const [filteredSessions, setFilteredSessions] = useState<Session[]>(initialSessions);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
 
+  // Update sessions when initialSessions changes
   useEffect(() => {
-    fetchSessions();
-  }, []);
+    setSessions(initialSessions);
+  }, [initialSessions]);
 
-  const fetchSessions = async () => {
+  const refetchSessions = async () => {
     try {
       const response = await fetch('/api/v1/sessions');
       const result = await response.json();
@@ -55,8 +64,6 @@ export function SessionList() {
       }
     } catch (error) {
       alert('Failed to load sessions');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -84,8 +91,9 @@ export function SessionList() {
     }
   };
 
-  const handleSessionCreated = (sessionId: string) => {
+  const handleSessionCreated = async (sessionId: string) => {
     setShowStartModal(false);
+    await refetchSessions();
     router.push(`/sessions/${sessionId}`);
   };
 
@@ -108,13 +116,11 @@ export function SessionList() {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Loading sessions...</p>
-      </div>
-    );
-  }
+  // Determine empty state type
+  const hasFilters =
+    filteredSessions.length < sessions.length || sessions.length === 0;
+  const showEmptyFiltered = hasFilters && filteredSessions.length === 0 && sessions.length > 0;
+  const showEmptyNoSessions = sessions.length === 0;
 
   return (
     <>
@@ -127,21 +133,56 @@ export function SessionList() {
         showSeparator={sessions.length > 0}
       />
 
-      {sessions.length === 0 ? (
+      {sessions.length > 0 && (
+        <SessionFilters
+          sessions={sessions}
+          blueprints={blueprints}
+          currentUserId={currentUserId}
+          onFilterChange={setFilteredSessions}
+        />
+      )}
+
+      {showEmptyNoSessions ? (
         <EmptyState
           icon={FileText}
           title="No sessions yet"
           description="Start your first data collection session"
         />
+      ) : showEmptyFiltered ? (
+        <div className="rounded-lg border border-border bg-card p-8 text-center">
+          <p className="text-muted-foreground">No sessions match your filters</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => {
+              // This will be handled by the filter component's clear function
+              const event = new CustomEvent('clearFilters');
+              window.dispatchEvent(event);
+            }}
+          >
+            Clear filters
+          </Button>
+        </div>
       ) : (
-        <TooltipProvider delayDuration={200}>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {sessions.map((session) => (
+        <>
+          <div className="mb-4 text-sm text-muted-foreground">
+            Showing {filteredSessions.length} of {sessions.length} sessions
+          </div>
+          <TooltipProvider delayDuration={200}>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredSessions.map((session) => (
             <Card key={session.id} className="flex flex-col p-6 transition-colors hover:bg-card/80">
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{session.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{session.blueprint_name}</p>
+                  {session.created_by_name && (
+                    <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                      <User className="h-3 w-3" />
+                      Created by: {session.created_by_name}
+                    </p>
+                  )}
                 </div>
                 <Badge className={getStatusColor(session.status)}>
                   {session.status.replace('_', ' ')}
@@ -231,9 +272,10 @@ export function SessionList() {
                 </Button>
               </div>
             </Card>
-          ))}
-          </div>
-        </TooltipProvider>
+            ))}
+            </div>
+          </TooltipProvider>
+        </>
       )}
 
       <StartSessionModal

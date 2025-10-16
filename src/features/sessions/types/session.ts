@@ -16,6 +16,8 @@ export interface Session {
   created_at: string;
   updated_at: string;
   blueprint_name?: string; // Computed field from JOIN query
+  created_by_name?: string; // Computed field from JOIN with members
+  created_by_email?: string; // Computed field from JOIN with members
   required_count?: number; // Computed field for progress
   required_filled_count?: number; // Computed field for progress
   total_count?: number; // Computed field for progress

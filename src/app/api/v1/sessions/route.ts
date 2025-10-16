@@ -31,6 +31,8 @@ export async function GET() {
       `SELECT
         s.*,
         b.name as blueprint_name,
+        m.name as created_by_name,
+        m.email as created_by_email,
         (SELECT COUNT(*)::int
          FROM fields f
          JOIN sections sec ON f.section_id = sec.id
@@ -59,6 +61,7 @@ export async function GET() {
            AND sfv.value != '') as total_filled_count
        FROM sessions s
        JOIN blueprints b ON b.id = s.blueprint_id
+       JOIN members m ON m.id = s.created_by
        WHERE s.company_id = $1
        ORDER BY s.updated_at DESC`,
       [user.company_id]

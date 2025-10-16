@@ -2,7 +2,7 @@
  * Blueprints List Page
  *
  * Server component that fetches blueprints and renders the list
- * All authenticated users can view blueprints
+ * Only owners can access blueprints
  */
 
 import { cookies } from 'next/headers';
@@ -10,7 +10,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { BlueprintList } from '@/features/blueprints/components/blueprint-list';
 
 export default async function BlueprintsPage() {
-  const user = await requireAuth();
+  await requireAuth(['owner']);
 
   // Get cookies to pass to internal API
   const cookieStore = await cookies();
