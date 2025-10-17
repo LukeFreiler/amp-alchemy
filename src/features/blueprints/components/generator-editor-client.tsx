@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useRef, FormEvent } from 'react';
+import { useState, useRef, FormEvent, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,9 @@ import { toast } from '@/components/ui/toaster';
 import { BlueprintWithSections } from '@/features/blueprints/types/blueprint';
 import { BlueprintArtifactGenerator, OutputFormat } from '@/features/blueprints/types/generator';
 import { BlueprintTokenPicker } from './blueprint-token-picker-enhanced';
+import { useTokenAutocomplete } from '@/features/blueprints/hooks/use-token-autocomplete';
+import { useRecentTokens } from '@/features/blueprints/hooks/use-recent-tokens';
+import { TokenAutocompleteMenu } from './token-autocomplete-menu';
 
 interface GeneratorEditorClientProps {
   blueprint: BlueprintWithSections;
@@ -50,13 +53,39 @@ export function GeneratorEditorClient({
   const [visible, setVisible] = useState(generator?.visible_in_data_room ?? true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { recentTokens, addRecentToken } = useRecentTokens();
+
+  // Transform blueprint sections into token array
+  const tokens = useMemo(() => {
+    return blueprint.sections.flatMap((section) =>
+      section.fields.map((field) => ({
+        tag: `{{${field.key}}}`,
+        label: field.label,
+        help: field.help_text,
+        section: section.title,
+        type: field.type,
+      }))
+    );
+  }, [blueprint]);
+
   const handleInsertToken = (token: string) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const before = promptTemplate.substring(0, start);
+
+    // Find start of {{ trigger
+    let triggerStart = start;
+    const textBeforeCursor = promptTemplate.substring(0, start);
+    const lastTriggerIndex = textBeforeCursor.lastIndexOf('{{');
+
+    if (lastTriggerIndex !== -1 && !textBeforeCursor.substring(lastTriggerIndex).includes('}}')) {
+      // We're in the middle of typing a token, replace from {{ onwards
+      triggerStart = lastTriggerIndex;
+    }
+
+    const before = promptTemplate.substring(0, triggerStart);
     const after = promptTemplate.substring(end);
 
     setPromptTemplate(before + token + after);
@@ -64,10 +93,20 @@ export function GeneratorEditorClient({
     // Set cursor position after inserted token
     setTimeout(() => {
       textarea.focus();
-      const newPosition = start + token.length;
+      const newPosition = before.length + token.length;
       textarea.setSelectionRange(newPosition, newPosition);
     }, 0);
+
+    // Track in recent tokens
+    addRecentToken(token);
   };
+
+  const autocomplete = useTokenAutocomplete({
+    textareaRef,
+    value: promptTemplate,
+    onInsert: handleInsertToken,
+    tokens,
+  });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -222,10 +261,25 @@ export function GeneratorEditorClient({
               ref={textareaRef}
               value={promptTemplate}
               onChange={(e) => setPromptTemplate(e.target.value)}
+              onKeyDown={autocomplete.handleKeyDown}
               className="h-full min-h-[500px] resize-none font-mono text-sm"
               required
-              placeholder="Enter your prompt template here...&#10;&#10;Example:&#10;Create a test plan for {{field:project_name}}.&#10;&#10;Requirements:&#10;{{section:requirements}}&#10;&#10;Click 'Insert Token' to browse available tokens."
+              placeholder="Enter your prompt template here...&#10;&#10;Type '{{' to insert blueprint field tokens.&#10;&#10;Example:&#10;Create a comprehensive test plan for {{project_name}}.&#10;&#10;Target Audience: {{target_audience}}&#10;Timeline: {{timeline}}&#10;&#10;Include sections for test scope, participant criteria, and success metrics."
             />
+
+            {/* Inline autocomplete menu */}
+            {autocomplete.isOpen && autocomplete.cursorPosition && (
+              <TokenAutocompleteMenu
+                isOpen={autocomplete.isOpen}
+                tokens={autocomplete.filteredTokens}
+                recentTokens={recentTokens}
+                selectedIndex={autocomplete.selectedIndex}
+                cursorPosition={autocomplete.cursorPosition}
+                textareaRef={textareaRef}
+                onSelect={autocomplete.handleInsert}
+                onClose={autocomplete.handleClose}
+              />
+            )}
           </div>
 
           {/* Editor Footer */}

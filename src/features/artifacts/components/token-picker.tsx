@@ -72,7 +72,7 @@ export function TokenPicker({ tokens, loading, onInsert, trigger }: TokenPickerP
                         <div className="text-xs text-muted-foreground">{field.sectionTitle}</div>
                         {field.value && (
                           <div className="mt-1 text-xs text-muted-foreground truncate">
-                            "{field.value}"
+                            &ldquo;{field.value}&rdquo;
                           </div>
                         )}
                       </div>

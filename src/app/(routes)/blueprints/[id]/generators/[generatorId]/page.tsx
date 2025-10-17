@@ -5,7 +5,7 @@
  */
 
 import { notFound } from 'next/navigation';
-import { query, queryOne } from '@/lib/db/query';
+import { queryOne } from '@/lib/db/query';
 import { BlueprintWithSections } from '@/features/blueprints/types/blueprint';
 import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
 import { GeneratorEditorClient } from '@/features/blueprints/components/generator-editor-client';

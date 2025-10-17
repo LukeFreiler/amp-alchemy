@@ -23,18 +23,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
-import { BlueprintWithSections } from '@/features/blueprints/types/blueprint';
 
 interface GeneratorListProps {
   blueprintId: string;
-  blueprint: BlueprintWithSections;
   generators: BlueprintArtifactGenerator[];
   onUpdate: () => void;
 }
 
 export function GeneratorList({
   blueprintId,
-  blueprint,
   generators: initialGenerators,
   onUpdate,
 }: GeneratorListProps) {

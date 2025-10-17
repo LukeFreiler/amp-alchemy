@@ -50,8 +50,6 @@ export function BlueprintTokenPicker({ blueprint, onInsert, trigger }: Blueprint
     },
   ];
 
-  const allTokens = [...fieldTokens, ...sectionTokens, ...legacyTokens];
-
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'field':

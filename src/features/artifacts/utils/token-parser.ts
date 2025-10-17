@@ -43,13 +43,15 @@ export function parseTokens(template: string): ParsedToken[] {
   const legacyFieldRegex = new RegExp(TOKEN_PATTERNS.legacy_field.source, 'gi');
   let match: RegExpExecArray | null;
   while ((match = legacyFieldRegex.exec(template)) !== null) {
-    tokens.push({
-      type: 'field',
-      key: match[1],
-      raw: match[0],
-      start: match.index,
-      end: match.index + match[0].length,
-    });
+    if (match[1]) {
+      tokens.push({
+        type: 'field',
+        key: match[1],
+        raw: match[0],
+        start: match.index,
+        end: match.index + match[0].length,
+      });
+    }
   }
 
   // Extract fields_json and notes_json
@@ -71,8 +73,8 @@ export function parseTokens(template: string): ParsedToken[] {
   const simpleFieldRegex = new RegExp(TOKEN_PATTERNS.simple_field.source, 'gi');
   while ((match = simpleFieldRegex.exec(template)) !== null) {
     const key = match[1];
-    // Skip if it's fields_json or notes_json
-    if (key === 'fields_json' || key === 'notes_json') continue;
+    // Skip if key is undefined or it's fields_json or notes_json
+    if (!key || key === 'fields_json' || key === 'notes_json') continue;
 
     // Skip if already matched by legacy pattern
     const alreadyMatched = tokens.some(

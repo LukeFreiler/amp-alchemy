@@ -73,24 +73,6 @@ export function useTokenResolution(
                 message: `Field not found: ${token.key}`,
               });
             }
-          } else if (token.type === 'section') {
-            const exists = tokenData.sections.some((s: { sectionId: string }) => s.sectionId === token.key);
-            if (!exists) {
-              validationErrors.push({
-                token: token.raw,
-                type: 'section',
-                message: `Section not found: ${token.key}`,
-              });
-            }
-          } else if (token.type === 'notes') {
-            const exists = tokenData.notes.some((n: { sectionId: string }) => n.sectionId === token.key);
-            if (!exists) {
-              validationErrors.push({
-                token: token.raw,
-                type: 'notes',
-                message: `Section not found: ${token.key}`,
-              });
-            }
           }
         });
 
