@@ -102,14 +102,14 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
   if (!currentSection) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] items-center justify-center">
         <p className="text-muted-foreground">No sections available</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
       {/* Top bar */}
       <div className="border-b bg-navbar p-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

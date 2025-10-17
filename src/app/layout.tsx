@@ -29,7 +29,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`dark ${figtree.variable}`}>
-      <body className="min-h-screen font-sans antialiased">
+      <body className="font-sans antialiased">
         <Providers session={session}>
           <a
             href="#main-content"

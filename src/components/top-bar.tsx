@@ -34,7 +34,7 @@ export function TopBar({ user }: TopBarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
+    <header className="sticky top-0 z-40 border-b bg-background [--topbar-height:4rem]">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Left: Logo + Main Nav + Breadcrumbs */}

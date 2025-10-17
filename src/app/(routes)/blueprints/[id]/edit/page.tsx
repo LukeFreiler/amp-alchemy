@@ -419,7 +419,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
 
   if (!blueprint) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] items-center justify-center">
         <p>Loading...</p>
       </div>
     );
@@ -427,7 +427,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <div className="flex h-screen flex-col">
+      <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
         {/* Header */}
         <div className="border-b border-border bg-card">
           <div className="flex items-center justify-between px-6 py-4">

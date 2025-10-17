@@ -31,7 +31,7 @@ export default async function ArtifactsPage({ params }: ArtifactsPageProps) {
 
   if (!session) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Session Not Found</h1>
           <p className="mt-2 text-muted-foreground">

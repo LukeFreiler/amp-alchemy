@@ -161,7 +161,7 @@ export function ArtifactsPageClient({
     selectedItem?.type === 'generator' ? generators.find((g) => g.id === selectedItem.id) : null;
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
       {/* Header */}
       <div className="border-b bg-navbar p-4">
         <div className="flex items-center gap-4">
