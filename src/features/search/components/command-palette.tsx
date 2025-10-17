@@ -150,7 +150,8 @@ export function CommandPalette() {
                   value={`${result.type}-${result.id}-${result.title}`}
                   onSelect={() => {
                     setOpen(false);
-                    router.push(result.href);
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    router.push(result.href as any);
                   }}
                   className="flex cursor-pointer items-start gap-3 rounded-md border-2 border-transparent px-3 py-3 aria-selected:border-primary aria-selected:bg-accent"
                 >

@@ -19,7 +19,7 @@ import { Generator, Artifact, GenerateResponse } from '@/features/artifacts/type
 interface ArtifactsPageClientProps {
   sessionId: string;
   sessionName: string;
-  blueprintName: string;
+  blueprintName: string | undefined;
   generators: Generator[];
 }
 
@@ -70,8 +70,8 @@ export function ArtifactsPageClient({
       if (result.ok) {
         setArtifacts(result.data);
         // Auto-select first artifact if available
-        if (result.data.length > 0 && !selectedArtifactId) {
-          setSelectedArtifactId(result.data[0].id);
+        if (result.data.length > 0 && !selectedItem) {
+          setSelectedItem({ type: 'artifact', id: result.data[0].id });
         }
       }
     } catch (err) {
@@ -176,7 +176,7 @@ export function ArtifactsPageClient({
           <div>
             <h1 className="text-xl font-semibold">Artifacts</h1>
             <p className="text-sm text-muted-foreground">
-              {sessionName} • {blueprintName}
+              {sessionName} • {blueprintName || 'Blueprint'}
             </p>
           </div>
         </div>

@@ -11,6 +11,9 @@ import { handleError, NotFoundError, ValidationError } from '@/lib/errors';
 import { query, queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
 import { generateArtifact } from '@/lib/ai/openai-client';
+import { validateTokens } from '@/features/artifacts/utils/token-validator';
+import { resolveTokens } from '@/features/artifacts/utils/token-resolver';
+import { TokenResolutionData } from '@/features/artifacts/types/tokens';
 
 type SuccessResponse<T> = {
   ok: true;
@@ -42,15 +45,25 @@ type GenerateResponse = {
   prompt_hash: string;
 };
 
-type Field = {
+type FieldRow = {
+  id: string;
   key: string;
   label: string;
+  type: 'ShortText' | 'LongText' | 'Toggle';
   value: string | null;
+  section_id: string;
+  section_title: string;
 };
 
-type Note = {
+type SectionRow = {
+  id: string;
   title: string;
+};
+
+type NoteRow = {
+  section_id: string;
   markdown: string | null;
+  section_title: string;
 };
 
 type Generator = {
@@ -134,9 +147,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Gather field values
-    const fields = await query<Field>(
-      `SELECT f.key, f.label, sfv.value
+    // Gather field values with section info for token resolution
+    const fields = await query<FieldRow>(
+      `SELECT f.id, f.key, f.label, f.type, sfv.value, f.section_id, s.title as section_title
        FROM fields f
        JOIN sections s ON s.id = f.section_id
        LEFT JOIN session_field_values sfv ON sfv.field_id = f.id AND sfv.session_id = $1
@@ -145,36 +158,82 @@ export async function POST(request: NextRequest, context: RouteContext) {
       [sessionId, session.blueprint_id]
     );
 
-    const fieldsJson = fields.reduce(
-      (acc, f) => {
-        acc[f.key] = f.value || '';
-        return acc;
-      },
-      {} as Record<string, string>
+    // Gather sections for token resolution
+    const sections = await query<SectionRow>(
+      `SELECT id, title
+       FROM sections
+       WHERE blueprint_id = $1
+       ORDER BY order_index`,
+      [session.blueprint_id]
     );
 
     // Gather section notes
-    const notes = await query<Note>(
-      `SELECT s.title, sn.markdown
-       FROM section_notes sn
-       JOIN sections s ON s.id = sn.section_id
-       WHERE sn.session_id = $1
+    const notes = await query<NoteRow>(
+      `SELECT sn.section_id, sn.markdown, s.title as section_title
+       FROM sections s
+       LEFT JOIN section_notes sn ON sn.section_id = s.id AND sn.session_id = $1
+       WHERE s.blueprint_id = $2
        ORDER BY s.order_index`,
-      [sessionId]
+      [sessionId, session.blueprint_id]
     );
 
-    const notesJson = notes.reduce(
-      (acc, n) => {
-        acc[n.title] = n.markdown || '';
-        return acc;
-      },
-      {} as Record<string, string>
-    );
+    // Prepare token resolution data
+    const tokenData: TokenResolutionData = {
+      fields: fields.map((f) => ({
+        ...f,
+        sectionId: f.section_id,
+        sectionTitle: f.section_title,
+        help_text: null,
+        placeholder: null,
+        required: false,
+        span: 1 as const,
+        order_index: 0,
+        created_at: '',
+        updated_at: '',
+      })),
+      sections: sections.map((s) => ({
+        ...s,
+        blueprint_id: session.blueprint_id,
+        order_index: 0,
+        description: null,
+        created_at: '',
+        updated_at: '',
+      })),
+      notes: notes.map((n) => ({
+        id: '',
+        session_id: sessionId,
+        section_id: n.section_id,
+        markdown: n.markdown || '',
+        sectionTitle: n.section_title,
+        created_at: '',
+        updated_at: '',
+      })),
+    };
 
-    // Render template
-    let prompt = generator.prompt_template;
-    prompt = prompt.replace(/\{\{fields_json\}\}/g, JSON.stringify(fieldsJson, null, 2));
-    prompt = prompt.replace(/\{\{notes_json\}\}/g, JSON.stringify(notesJson, null, 2));
+    // Validate tokens in template
+    const validation = validateTokens(generator.prompt_template, tokenData);
+
+    if (!validation.valid) {
+      logger.warn('Invalid tokens in generator template', {
+        session_id: sessionId,
+        generator_id: body.generator_id,
+        errors: validation.errors,
+      });
+
+      return NextResponse.json<ErrorResponse>(
+        {
+          ok: false,
+          error: {
+            code: 'INVALID_TOKENS',
+            message: validation.errors.map((e) => e.message).join('; '),
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    // Resolve all tokens in the template
+    const prompt = resolveTokens(generator.prompt_template, tokenData);
 
     logger.info('Generating artifact', {
       session_id: sessionId,
