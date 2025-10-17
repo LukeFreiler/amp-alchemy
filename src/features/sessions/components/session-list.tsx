@@ -28,12 +28,7 @@ import { Session } from '@/features/sessions/types/session';
 import { Blueprint } from '@/features/blueprints/types/blueprint';
 import { StartSessionModal } from './start-session-modal';
 import { SessionFilters } from './session-filters';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SessionListProps {
   initialSessions: Session[];
@@ -118,8 +113,7 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
   };
 
   // Determine empty state type
-  const hasFilters =
-    filteredSessions.length < sessions.length || sessions.length === 0;
+  const hasFilters = filteredSessions.length < sessions.length || sessions.length === 0;
   const showEmptyFiltered = hasFilters && filteredSessions.length === 0 && sessions.length > 0;
   const showEmptyNoSessions = sessions.length === 0;
 
@@ -174,108 +168,132 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
           </div>
           <TooltipProvider delayDuration={200}>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredSessions.map((session) => (
-            <Card key={session.id} className="flex flex-col p-6 transition-colors hover:bg-card/80">
-              <div className="mb-4 flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold">{session.name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{session.blueprint_name}</p>
-                  {session.created_by_name && (
-                    <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                      <User className="h-3 w-3" />
-                      Created by: {session.created_by_name}
-                    </p>
-                  )}
-                </div>
-                <Badge className={getStatusColor(session.status)}>
-                  {session.status.replace('_', ' ')}
-                </Badge>
-              </div>
-
-              <div className="mb-4 text-sm text-muted-foreground">
-                <span>{formatDate(session.updated_at)}</span>
-              </div>
-
-              {/* Progress bar */}
-              {(session.required_count || 0) > 0 || (session.total_count || 0) > 0 ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="mb-4 cursor-help">
-                      <div className="h-2 w-full rounded-full bg-muted relative overflow-hidden">
-                        {(session.required_count || 0) > 0 ? (
-                          <>
-                            {/* Background layer: overall progress (lighter) */}
-                            <div
-                              className="absolute inset-0 h-2 rounded-full bg-primary/30 transition-all"
-                              style={{
-                                width: `${session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%`,
-                              }}
-                            />
-                            {/* Foreground layer: required progress (primary) */}
-                            <div
-                              className="absolute inset-0 h-2 rounded-full bg-primary transition-all"
-                              style={{
-                                width: `${session.required_count ? Math.round(((session.required_filled_count || 0) / session.required_count) * 100) : 0}%`,
-                              }}
-                            />
-                          </>
-                        ) : (
-                          /* Single bar: overall progress only */
-                          <div
-                            className="h-2 rounded-full bg-primary transition-all"
-                            style={{
-                              width: `${session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%`,
-                            }}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="text-xs">
-                      {(session.required_count || 0) > 0 ? (
-                        <>
-                          <div>
-                            <span className="font-medium">Required:</span> {session.required_filled_count || 0}/{session.required_count} (
-                            {session.required_count ? Math.round(((session.required_filled_count || 0) / session.required_count) * 100) : 0}%)
-                          </div>
-                          <div>
-                            <span className="font-medium">Overall:</span> {session.total_filled_count || 0}/{session.total_count} (
-                            {session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%)
-                          </div>
-                        </>
-                      ) : (
-                        <div>
-                          <span className="font-medium">Progress:</span> {session.total_filled_count || 0}/{session.total_count} (
-                          {session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%)
-                        </div>
+              {filteredSessions.map((session) => (
+                <Card
+                  key={session.id}
+                  className="flex flex-col p-6 transition-colors hover:bg-card/80"
+                >
+                  <div className="mb-4 flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold">{session.name}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{session.blueprint_name}</p>
+                      {session.created_by_name && (
+                        <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          Created by: {session.created_by_name}
+                        </p>
                       )}
                     </div>
-                  </TooltipContent>
-                </Tooltip>
-              ) : null}
+                    <Badge className={getStatusColor(session.status)}>
+                      {session.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
 
-              <div className="mt-auto flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => router.push(`/sessions/${session.id}`)}
-                >
-                  <FileText className="h-4 w-4" />
-                  Open
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDeleteId(session.id)}
-                  aria-label="Delete session"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </Card>
-            ))}
+                  <div className="mb-4 text-sm text-muted-foreground">
+                    <span>{formatDate(session.updated_at)}</span>
+                  </div>
+
+                  {/* Progress bar */}
+                  {(session.required_count || 0) > 0 || (session.total_count || 0) > 0 ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="mb-4 cursor-help">
+                          <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                            {(session.required_count || 0) > 0 ? (
+                              <>
+                                {/* Background layer: overall progress (lighter) */}
+                                <div
+                                  className="absolute inset-0 h-2 rounded-full bg-primary/30 transition-all"
+                                  style={{
+                                    width: `${session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%`,
+                                  }}
+                                />
+                                {/* Foreground layer: required progress (primary) */}
+                                <div
+                                  className="absolute inset-0 h-2 rounded-full bg-primary transition-all"
+                                  style={{
+                                    width: `${session.required_count ? Math.round(((session.required_filled_count || 0) / session.required_count) * 100) : 0}%`,
+                                  }}
+                                />
+                              </>
+                            ) : (
+                              /* Single bar: overall progress only */
+                              <div
+                                className="h-2 rounded-full bg-primary transition-all"
+                                style={{
+                                  width: `${session.total_count ? Math.round(((session.total_filled_count || 0) / session.total_count) * 100) : 0}%`,
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className="text-xs">
+                          {(session.required_count || 0) > 0 ? (
+                            <>
+                              <div>
+                                <span className="font-medium">Required:</span>{' '}
+                                {session.required_filled_count || 0}/{session.required_count} (
+                                {session.required_count
+                                  ? Math.round(
+                                      ((session.required_filled_count || 0) /
+                                        session.required_count) *
+                                        100
+                                    )
+                                  : 0}
+                                %)
+                              </div>
+                              <div>
+                                <span className="font-medium">Overall:</span>{' '}
+                                {session.total_filled_count || 0}/{session.total_count} (
+                                {session.total_count
+                                  ? Math.round(
+                                      ((session.total_filled_count || 0) / session.total_count) *
+                                        100
+                                    )
+                                  : 0}
+                                %)
+                              </div>
+                            </>
+                          ) : (
+                            <div>
+                              <span className="font-medium">Progress:</span>{' '}
+                              {session.total_filled_count || 0}/{session.total_count} (
+                              {session.total_count
+                                ? Math.round(
+                                    ((session.total_filled_count || 0) / session.total_count) * 100
+                                  )
+                                : 0}
+                              %)
+                            </div>
+                          )}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : null}
+
+                  <div className="mt-auto flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => router.push(`/sessions/${session.id}`)}
+                    >
+                      <FileText className="h-4 w-4" />
+                      Open
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDeleteId(session.id)}
+                      aria-label="Delete session"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
             </div>
           </TooltipProvider>
         </>

@@ -8,12 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth/middleware';
 import { execute, queryOne } from '@/lib/db/query';
-import {
-  handleError,
-  NotFoundError,
-  AuthorizationError,
-  ValidationError,
-} from '@/lib/errors';
+import { handleError, NotFoundError, AuthorizationError, ValidationError } from '@/lib/errors';
 import { logger } from '@/lib/logger';
 import { UpdateMemberRoleRequest } from '@/features/team/types';
 

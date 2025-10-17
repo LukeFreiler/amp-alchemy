@@ -17,10 +17,7 @@ import {
 } from '@/lib/errors';
 import { logger } from '@/lib/logger';
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
-) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const user = await getAuthUser();
     const { token } = await params;
@@ -54,9 +51,7 @@ export async function POST(
 
     // Check if email matches (case insensitive)
     if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {
-      throw new ValidationError(
-        'This invitation was sent to a different email address'
-      );
+      throw new ValidationError('This invitation was sent to a different email address');
     }
 
     // Check if user already belongs to a company

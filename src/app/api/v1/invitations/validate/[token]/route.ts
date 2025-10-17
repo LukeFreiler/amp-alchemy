@@ -9,10 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { queryOne } from '@/lib/db/query';
 import { handleError, NotFoundError } from '@/lib/errors';
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const { token } = await params;
 

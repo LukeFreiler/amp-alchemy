@@ -6,11 +6,7 @@
 
 import { requireAuth } from '@/lib/auth/middleware';
 
-export default async function BlueprintsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function BlueprintsLayout({ children }: { children: React.ReactNode }) {
   await requireAuth(['owner']);
 
   return <>{children}</>;

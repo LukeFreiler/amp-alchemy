@@ -62,10 +62,9 @@ export async function POST(req: NextRequest) {
     );
 
     // Get company name for email
-    const company = await queryOne<{ name: string }>(
-      'SELECT name FROM companies WHERE id = $1',
-      [user.company_id]
-    );
+    const company = await queryOne<{ name: string }>('SELECT name FROM companies WHERE id = $1', [
+      user.company_id,
+    ]);
 
     // Send invitation email
     const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/accept-invite/${inviteToken}`;

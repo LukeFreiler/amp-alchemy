@@ -87,17 +87,15 @@ export function SessionShell({ sessionData }: SessionShellProps) {
       (sum, section) => sum + section.required_filled_count,
       0
     );
-    const totalFields = sessionData.sections.reduce(
-      (sum, section) => sum + section.total_count,
-      0
-    );
+    const totalFields = sessionData.sections.reduce((sum, section) => sum + section.total_count, 0);
     const totalFieldsFilled = sessionData.sections.reduce(
       (sum, section) => sum + section.total_filled_count,
       0
     );
 
     return {
-      requiredProgress: totalRequired > 0 ? Math.round((totalRequiredFilled / totalRequired) * 100) : 0,
+      requiredProgress:
+        totalRequired > 0 ? Math.round((totalRequiredFilled / totalRequired) * 100) : 0,
       overallProgress: totalFields > 0 ? Math.round((totalFieldsFilled / totalFields) * 100) : 0,
     };
   };
@@ -117,9 +115,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-xl font-semibold">{sessionData.name}</h1>
-            <p className="text-sm text-muted-foreground">
-              {sessionData.blueprint_name}
-            </p>
+            <p className="text-sm text-muted-foreground">{sessionData.blueprint_name}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:gap-4">
             <Button

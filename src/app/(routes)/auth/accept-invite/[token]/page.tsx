@@ -75,7 +75,7 @@ export default function AcceptInvitePage() {
   if (error || !invitation) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <div className="w-full max-w-md text-center space-y-4">
+        <div className="w-full max-w-md space-y-4 text-center">
           <h1 className="text-2xl font-bold">Invalid Invitation</h1>
           <p className="text-muted-foreground">{error || 'This invitation could not be found'}</p>
           <Button onClick={() => router.push('/')}>Go to Homepage</Button>
@@ -87,11 +87,11 @@ export default function AcceptInvitePage() {
   if (invitation.is_expired) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <div className="w-full max-w-md text-center space-y-4">
+        <div className="w-full max-w-md space-y-4 text-center">
           <h1 className="text-2xl font-bold">Invitation Expired</h1>
           <p className="text-muted-foreground">
-            This invitation has expired. Please contact{' '}
-            {invitation.inviter_name} for a new invitation.
+            This invitation has expired. Please contact {invitation.inviter_name} for a new
+            invitation.
           </p>
           <Button onClick={() => router.push('/')}>Go to Homepage</Button>
         </div>
@@ -109,7 +109,7 @@ export default function AcceptInvitePage() {
           </p>
         </div>
 
-        <div className="rounded-lg border bg-card p-6 space-y-4">
+        <div className="space-y-4 rounded-lg border bg-card p-6">
           <div>
             <p className="text-sm text-muted-foreground">Invited by</p>
             <p className="font-medium">{invitation.inviter_name}</p>
