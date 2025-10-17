@@ -552,6 +552,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         <FieldConfigModal
           field={editingField}
           sectionId={selectedSectionId}
+          existingFields={selectedSection?.fields || []}
           open={isFieldModalOpen}
           onOpenChange={setIsFieldModalOpen}
           onSave={handleSaveField}

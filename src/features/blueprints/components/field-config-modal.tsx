@@ -32,12 +32,13 @@ import { Field, FieldType } from '@/features/blueprints/types/blueprint';
 interface FieldConfigModalProps {
   field?: Field;
   sectionId?: string;
+  existingFields?: Field[]; // For uniqueness validation
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: Partial<Field>) => Promise<void>;
 }
 
-export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldConfigModalProps) {
+export function FieldConfigModal({ field, existingFields = [], open, onOpenChange, onSave }: FieldConfigModalProps) {
   const [type, setType] = useState<FieldType>(field?.type || 'ShortText');
   const [key, setKey] = useState(field?.key || '');
   const [label, setLabel] = useState(field?.label || '');
@@ -46,6 +47,7 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
   const [required, setRequired] = useState(field?.required || false);
   const [span, setSpan] = useState<1 | 2>(field?.span || 1);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasManuallyEditedKey, setHasManuallyEditedKey] = useState(false);
 
   // Reset form when field changes
   useEffect(() => {
@@ -57,6 +59,7 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
       setPlaceholder(field.placeholder || '');
       setRequired(field.required);
       setSpan(field.span);
+      setHasManuallyEditedKey(true); // Editing existing field
     } else {
       // Reset for new field
       setType('ShortText');
@@ -66,6 +69,7 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
       setPlaceholder('');
       setRequired(false);
       setSpan(1);
+      setHasManuallyEditedKey(false);
     }
   }, [field, open]);
 
@@ -78,7 +82,17 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
     }
 
     if (!key.trim()) {
-      alert('Key is required');
+      alert('Token ID is required');
+      return;
+    }
+
+    // Validate uniqueness (exclude current field if editing)
+    const isDuplicate = existingFields.some(
+      (f) => f.key === key.trim() && f.id !== field?.id
+    );
+
+    if (isDuplicate) {
+      alert(`Token ID "${key.trim()}" is already in use. Please choose a unique ID.`);
       return;
     }
 
@@ -101,17 +115,23 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
     }
   };
 
-  // Auto-generate key from label if creating new field
+  // Auto-generate key from label unless user manually edited it
   const handleLabelChange = (value: string) => {
     setLabel(value);
-    if (!field && !key) {
-      // Auto-generate key from label
+    if (!hasManuallyEditedKey) {
+      // Auto-generate key from label (slugify)
       const autoKey = value
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '_')
         .replace(/^_|_$/g, '');
       setKey(autoKey);
     }
+  };
+
+  // Track manual edits to key
+  const handleKeyChange = (value: string) => {
+    setKey(value);
+    setHasManuallyEditedKey(true);
   };
 
   return (
@@ -122,10 +142,23 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
           <DialogDescription>
             Configure the field properties. All fields are saved immediately.
           </DialogDescription>
+          <hr className="!mt-4 border-border" />
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Row 1: Label and Field Type */}
           <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="field-label">Label *</Label>
+              <Input
+                id="field-label"
+                value={label}
+                onChange={(e) => handleLabelChange(e.target.value)}
+                placeholder="Displayed to users"
+                required
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="field-type">Field Type *</Label>
               <Select value={type} onValueChange={(v) => setType(v as FieldType)}>
@@ -139,33 +172,9 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="field-key">Field Key *</Label>
-              <Input
-                id="field-key"
-                value={key}
-                onChange={(e) => setKey(e.target.value)}
-                placeholder="field_name"
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Unique identifier (lowercase, underscores)
-              </p>
-            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="field-label">Label *</Label>
-            <Input
-              id="field-label"
-              value={label}
-              onChange={(e) => handleLabelChange(e.target.value)}
-              placeholder="Displayed to users"
-              required
-            />
-          </div>
-
+          {/* Help Text - Full Width */}
           <div className="space-y-2">
             <Label htmlFor="field-help">Help Text</Label>
             <Textarea
@@ -177,17 +186,31 @@ export function FieldConfigModal({ field, open, onOpenChange, onSave }: FieldCon
             />
           </div>
 
-          {type !== 'Toggle' && (
+          {/* Row 2: Token ID and Placeholder */}
+          <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="field-placeholder">Placeholder</Label>
+              <Label htmlFor="field-token">Token ID *</Label>
               <Input
-                id="field-placeholder"
-                value={placeholder}
-                onChange={(e) => setPlaceholder(e.target.value)}
-                placeholder="Example text shown in empty field"
+                id="field-token"
+                value={key}
+                onChange={(e) => handleKeyChange(e.target.value)}
+                placeholder="field_name"
+                required
               />
             </div>
-          )}
+
+            {type !== 'Toggle' && (
+              <div className="space-y-2">
+                <Label htmlFor="field-placeholder">Placeholder</Label>
+                <Input
+                  id="field-placeholder"
+                  value={placeholder}
+                  onChange={(e) => setPlaceholder(e.target.value)}
+                  placeholder="Example text shown in empty field"
+                />
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
