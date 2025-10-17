@@ -306,6 +306,85 @@ xl:  1280px  - Desktops
 - **Color contrast:** Maintain WCAG AA standards minimum
 - **Screen readers:** Test with VoiceOver (macOS) or NVDA (Windows)
 
+## Layout Patterns
+
+### Full-Viewport Layouts (No Scroll)
+
+When creating pages that should fill the entire viewport without scrolling, follow this pattern:
+
+**✅ Correct Pattern:**
+
+```tsx
+// For authenticated pages with topbar
+<div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
+  {/* Header - fixed height */}
+  <div className="border-b border-border bg-card">
+    <div className="flex items-center justify-between px-6 py-4">
+      {/* Header content */}
+    </div>
+  </div>
+
+  {/* Main content - fills remaining space */}
+  <div className="flex flex-1 overflow-hidden">
+    {/* Left panel */}
+    <div className="w-96 overflow-y-auto border-r border-border bg-card p-6">
+      {/* Scrollable content */}
+    </div>
+
+    {/* Right panel - fills remaining space */}
+    <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Nested content with overflow handling */}
+    </div>
+  </div>
+</div>
+```
+
+**❌ Common Mistakes:**
+
+```tsx
+// DON'T: Using h-screen (doesn't account for topbar)
+<div className="flex h-screen flex-col">
+
+// DON'T: Using min-h-screen (allows unwanted scrolling)
+<div className="flex min-h-screen flex-col">
+
+// DON'T: Forgetting overflow-hidden on flex containers
+<div className="flex flex-1">  // Missing overflow-hidden
+
+// DON'T: Not using flex-1 on expanding children
+<div className="w-full">  // Should be flex-1 in flex container
+```
+
+**Key Principles:**
+
+1. **Root Container Height**
+   - Use `h-[calc(100vh-var(--topbar-height,4rem))]` for authenticated pages
+   - Use `h-screen` ONLY for unauthenticated pages without topbar
+
+2. **Flex Layout Chain**
+   - Root: `flex flex-col` with fixed height
+   - Header: Fixed height (auto from content)
+   - Main: `flex-1 overflow-hidden` to fill remaining space
+   - Panels: `overflow-y-auto` for scrollable content within
+
+3. **Overflow Management**
+   - Add `overflow-hidden` to prevent unwanted scrollbars
+   - Add `overflow-y-auto` where you want scrolling
+   - Always set overflow on the specific element that should scroll
+
+4. **Testing**
+   - Open DevTools and set viewport to different sizes
+   - Check that body height is exactly 100vh (no extra space)
+   - Verify no double scrollbars (body + container)
+   - Test on mobile viewports
+
+**Examples in Codebase:**
+
+- Session shell: `src/features/sessions/components/session-shell.tsx`
+- Generate page: `src/app/(routes)/sessions/[id]/generate/page.tsx`
+- Generator editor: `src/features/blueprints/components/generator-editor-client.tsx`
+- Blueprint editor: `src/app/(routes)/blueprints/[id]/edit/page.tsx`
+
 ## Component Patterns
 
 ### Forms

@@ -528,7 +528,12 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           ) : (
             /* Generators Tab */
             <div className="flex-1 overflow-y-auto p-6">
-              <GeneratorList blueprintId={id} generators={generators} onUpdate={fetchGenerators} />
+              <GeneratorList
+                blueprintId={id}
+                blueprint={blueprint}
+                generators={generators}
+                onUpdate={fetchGenerators}
+              />
             </div>
           )}
         </div>

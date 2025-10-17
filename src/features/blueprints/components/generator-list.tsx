@@ -7,6 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { FileText, Edit, Trash2, Plus, Eye, EyeOff, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,24 +23,23 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
-import { GeneratorModal } from './generator-modal';
+import { BlueprintWithSections } from '@/features/blueprints/types/blueprint';
 
 interface GeneratorListProps {
   blueprintId: string;
+  blueprint: BlueprintWithSections;
   generators: BlueprintArtifactGenerator[];
   onUpdate: () => void;
 }
 
 export function GeneratorList({
   blueprintId,
+  blueprint,
   generators: initialGenerators,
   onUpdate,
 }: GeneratorListProps) {
+  const router = useRouter();
   const [generators, setGenerators] = useState(initialGenerators);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingGenerator, setEditingGenerator] = useState<
-    BlueprintArtifactGenerator | undefined
-  >();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -50,46 +50,11 @@ export function GeneratorList({
   }, [initialGenerators]);
 
   const handleAdd = () => {
-    setEditingGenerator(undefined);
-    setModalOpen(true);
+    router.push(`/blueprints/${blueprintId}/generators/new`);
   };
 
   const handleEdit = (generator: BlueprintArtifactGenerator) => {
-    setEditingGenerator(generator);
-    setModalOpen(true);
-  };
-
-  const handleSave = async (data: {
-    name: string;
-    description: string;
-    prompt_template: string;
-    output_format: string;
-    visible_in_data_room: boolean;
-  }) => {
-    try {
-      const url = editingGenerator
-        ? `/api/v1/generators/${editingGenerator.id}`
-        : `/api/v1/blueprints/${blueprintId}/generators`;
-
-      const method = editingGenerator ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (result.ok) {
-        onUpdate();
-        setModalOpen(false);
-      } else {
-        alert(`Error: ${result.error.message}`);
-      }
-    } catch (error) {
-      alert('Failed to save generator');
-    }
+    router.push(`/blueprints/${blueprintId}/generators/${generator.id}`);
   };
 
   const handleDelete = async () => {
@@ -245,16 +210,6 @@ export function GeneratorList({
             </Card>
           ))}
         </div>
-      )}
-
-      {modalOpen && (
-        <GeneratorModal
-          generator={editingGenerator}
-          blueprintId={blueprintId}
-          open={modalOpen}
-          onSave={handleSave}
-          onClose={() => setModalOpen(false)}
-        />
       )}
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>

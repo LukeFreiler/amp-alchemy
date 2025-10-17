@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -20,11 +20,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Plus } from 'lucide-react';
 import { BlueprintArtifactGenerator, OutputFormat } from '@/features/blueprints/types/generator';
+import { BlueprintWithSections } from '@/features/blueprints/types/blueprint';
+import { BlueprintTokenPicker } from './blueprint-token-picker';
 
 interface GeneratorModalProps {
   generator?: BlueprintArtifactGenerator;
   blueprintId: string;
+  blueprint: BlueprintWithSections;
   open: boolean;
   onSave: (data: {
     name: string;
@@ -36,7 +40,7 @@ interface GeneratorModalProps {
   onClose: () => void;
 }
 
-export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorModalProps) {
+export function GeneratorModal({ generator, blueprint, open, onSave, onClose }: GeneratorModalProps) {
   const [name, setName] = useState(generator?.name || '');
   const [description, setDescription] = useState(generator?.description || '');
   const [promptTemplate, setPromptTemplate] = useState(generator?.prompt_template || '');
@@ -45,6 +49,26 @@ export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorMo
   );
   const [visible, setVisible] = useState(generator?.visible_in_data_room ?? true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleInsertToken = (token: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = promptTemplate.substring(0, start);
+    const after = promptTemplate.substring(end);
+
+    setPromptTemplate(before + token + after);
+
+    // Set cursor position after inserted token
+    setTimeout(() => {
+      textarea.focus();
+      const newPosition = start + token.length;
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -101,20 +125,33 @@ export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorMo
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt Template *</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="prompt">Prompt Template *</Label>
+                <BlueprintTokenPicker
+                  blueprint={blueprint}
+                  onInsert={handleInsertToken}
+                  trigger={
+                    <Button type="button" variant="outline" size="sm">
+                      <Plus className="h-4 w-4" />
+                      Insert Token
+                    </Button>
+                  }
+                />
+              </div>
               <Textarea
+                ref={textareaRef}
                 id="prompt"
                 value={promptTemplate}
                 onChange={(e) => setPromptTemplate(e.target.value)}
                 rows={8}
                 className="font-mono text-sm"
                 required
-                placeholder="Enter your prompt template here..."
+                placeholder="Enter your prompt template here...&#10;&#10;Use tokens like {{field:key}} to insert session field values.&#10;Click 'Insert Token' to browse available tokens."
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                Use <code className="rounded bg-muted px-1">{'{{fields_json}}'}</code> to inject
-                session field values and{' '}
-                <code className="rounded bg-muted px-1">{'{{notes_json}}'}</code> for section notes.
+                Use tokens like <code className="rounded bg-muted px-1">{'{{field:key}}'}</code> for
+                individual fields or{' '}
+                <code className="rounded bg-muted px-1">{'{{section:id}}'}</code> for entire sections.
               </p>
             </div>
 
