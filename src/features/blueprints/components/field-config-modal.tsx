@@ -186,19 +186,8 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
             />
           </div>
 
-          {/* Row 2: Token ID and Placeholder */}
+          {/* Row 2: Placeholder and Token ID */}
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="field-token">Token ID *</Label>
-              <Input
-                id="field-token"
-                value={key}
-                onChange={(e) => handleKeyChange(e.target.value)}
-                placeholder="field_name"
-                required
-              />
-            </div>
-
             {type !== 'Toggle' && (
               <div className="space-y-2">
                 <Label htmlFor="field-placeholder">Placeholder</Label>
@@ -210,27 +199,39 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
                 />
               </div>
             )}
+
+            <div className="space-y-2">
+              <Label htmlFor="field-token">Token ID *</Label>
+              <Input
+                id="field-token"
+                value={key}
+                onChange={(e) => handleKeyChange(e.target.value)}
+                placeholder="field_name"
+                required
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
+          {/* Row 3: Width and Required */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="field-width">Width</Label>
+              <Select value={span === 2 ? 'full' : 'half'} onValueChange={(v) => setSpan(v === 'full' ? 2 : 1)}>
+                <SelectTrigger id="field-width">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="half">Half width</SelectItem>
+                  <SelectItem value="full">Full width</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2 pt-8">
               <Switch id="field-required" checked={required} onCheckedChange={setRequired} />
               <Label htmlFor="field-required" className="cursor-pointer">
                 Required
               </Label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Label htmlFor="field-span">Column Span:</Label>
-              <Select value={String(span)} onValueChange={(v) => setSpan(Number(v) as 1 | 2)}>
-                <SelectTrigger id="field-span" className="w-20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
