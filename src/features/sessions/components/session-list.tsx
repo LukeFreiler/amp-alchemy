@@ -6,7 +6,7 @@
  * Displays all sessions in a card grid with actions, filters, and start session modal
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileText, Plus, Trash2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,6 +48,7 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
+  const [quickActions, setQuickActions] = useState<ReactNode>(null);
 
   // Update sessions when initialSessions changes
   useEffect(() => {
@@ -130,7 +131,8 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
         buttonText="Start Session"
         buttonIcon={Plus}
         onButtonClick={() => setShowStartModal(true)}
-        showSeparator={sessions.length > 0}
+        showSeparator={false}
+        quickActions={quickActions}
       />
 
       {sessions.length > 0 && (
@@ -139,6 +141,7 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
           blueprints={blueprints}
           currentUserId={currentUserId}
           onFilterChange={setFilteredSessions}
+          renderQuickActions={setQuickActions}
         />
       )}
 

@@ -78,7 +78,7 @@ export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorMo
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
@@ -89,7 +89,7 @@ export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorMo
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
@@ -100,13 +100,13 @@ export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorMo
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="prompt">Prompt Template *</Label>
               <Textarea
                 id="prompt"
                 value={promptTemplate}
                 onChange={(e) => setPromptTemplate(e.target.value)}
-                rows={12}
+                rows={8}
                 className="font-mono text-sm"
                 required
                 placeholder="Enter your prompt template here..."
@@ -119,8 +119,8 @@ export function GeneratorModal({ generator, open, onSave, onClose }: GeneratorMo
             </div>
 
             <div className="flex items-center gap-6">
-              <div>
-                <Label htmlFor="format">Output Format</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="format">Output Format:</Label>
                 <Select
                   value={outputFormat}
                   onValueChange={(val) => setOutputFormat(val as OutputFormat)}

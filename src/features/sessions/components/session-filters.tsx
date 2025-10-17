@@ -34,16 +34,14 @@ interface SessionFiltersProps {
   blueprints: Blueprint[];
   currentUserId: string;
   onFilterChange: (filtered: Session[]) => void;
+  renderQuickActions?: (quickActions: React.ReactNode) => void;
 }
-
-type SortOption = 'recent' | 'oldest' | 'name-asc' | 'name-desc' | 'completion';
 
 interface FilterState {
   search: string;
   status: SessionStatus | 'all';
   blueprint: string;
   owner: string;
-  sort: SortOption;
 }
 
 interface Creator {
@@ -56,6 +54,7 @@ export function SessionFilters({
   blueprints,
   currentUserId,
   onFilterChange,
+  renderQuickActions,
 }: SessionFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -66,10 +65,41 @@ export function SessionFilters({
     status: (searchParams.get('status') as SessionStatus) || 'all',
     blueprint: searchParams.get('blueprint') || 'all',
     owner: searchParams.get('owner') || currentUserId, // Default to "My Sessions"
-    sort: (searchParams.get('sort') as SortOption) || 'recent',
   }));
 
   const [searchInput, setSearchInput] = useState(filters.search);
+
+  const handleQuickFilter = (type: 'mine' | 'all' | 'incomplete') => {
+    switch (type) {
+      case 'mine':
+        setFilters({
+          search: '',
+          status: 'all',
+          blueprint: 'all',
+          owner: currentUserId,
+        });
+        setSearchInput('');
+        break;
+      case 'all':
+        setFilters({
+          search: '',
+          status: 'all',
+          blueprint: 'all',
+          owner: 'all',
+        });
+        setSearchInput('');
+        break;
+      case 'incomplete':
+        setFilters({
+          search: '',
+          status: 'in_progress',
+          blueprint: 'all',
+          owner: 'all',
+        });
+        setSearchInput('');
+        break;
+    }
+  };
 
   // Extract unique creators from sessions
   const creators = useMemo(() => {
@@ -118,27 +148,9 @@ export function SessionFilters({
       filtered = filtered.filter((s) => s.created_by === filters.owner);
     }
 
-    // Sort
+    // Sort by most recent by default
     filtered.sort((a, b) => {
-      switch (filters.sort) {
-        case 'recent':
-          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-        case 'oldest':
-          return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
-        case 'name-asc':
-          return a.name.localeCompare(b.name);
-        case 'name-desc':
-          return b.name.localeCompare(a.name);
-        case 'completion': {
-          const getCompletionPercent = (s: Session) => {
-            if (!s.required_count || s.required_count === 0) return 0;
-            return ((s.required_filled_count || 0) / s.required_count) * 100;
-          };
-          return getCompletionPercent(b) - getCompletionPercent(a);
-        }
-        default:
-          return 0;
-      }
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
     });
 
     onFilterChange(filtered);
@@ -149,7 +161,6 @@ export function SessionFilters({
     if (filters.status !== 'all') params.set('status', filters.status);
     if (filters.blueprint !== 'all') params.set('blueprint', filters.blueprint);
     if (filters.owner !== 'all') params.set('owner', filters.owner);
-    if (filters.sort !== 'recent') params.set('sort', filters.sort);
 
     const queryString = params.toString();
     const url = queryString ? `/sessions?${queryString}` : '/sessions';
@@ -165,44 +176,8 @@ export function SessionFilters({
     if (filters.status !== 'all') count++;
     if (filters.blueprint !== 'all') count++;
     if (filters.owner !== 'all' && filters.owner !== currentUserId) count++;
-    if (filters.sort !== 'recent') count++;
     return count;
   }, [filters, currentUserId]);
-
-  const handleQuickFilter = (type: 'mine' | 'all' | 'incomplete') => {
-    switch (type) {
-      case 'mine':
-        setFilters({
-          search: '',
-          status: 'all',
-          blueprint: 'all',
-          owner: currentUserId,
-          sort: 'recent',
-        });
-        setSearchInput('');
-        break;
-      case 'all':
-        setFilters({
-          search: '',
-          status: 'all',
-          blueprint: 'all',
-          owner: 'all',
-          sort: 'recent',
-        });
-        setSearchInput('');
-        break;
-      case 'incomplete':
-        setFilters({
-          search: '',
-          status: 'in_progress',
-          blueprint: 'all',
-          owner: 'all',
-          sort: 'recent',
-        });
-        setSearchInput('');
-        break;
-    }
-  };
 
   const handleClearFilters = () => {
     setFilters({
@@ -210,66 +185,73 @@ export function SessionFilters({
       status: 'all',
       blueprint: 'all',
       owner: currentUserId, // Reset to "My Sessions"
-      sort: 'recent',
     });
     setSearchInput('');
   };
 
+  // Listen for clear filters event from SessionList
+  useEffect(() => {
+    const handleClear = () => {
+      handleClearFilters();
+    };
+
+    window.addEventListener('clearFilters', handleClear);
+    return () => window.removeEventListener('clearFilters', handleClear);
+  }, [currentUserId]);
+
+  // Provide quick action buttons to parent via callback
+  useEffect(() => {
+    if (renderQuickActions) {
+      const quickActions = (
+        <div className="flex items-center gap-2">
+          <Button
+            variant={filters.owner === currentUserId && filters.status === 'all' ? 'default' : 'outline'}
+            size="default"
+            onClick={() => handleQuickFilter('mine')}
+          >
+            My Sessions
+          </Button>
+          <Button
+            variant={filters.owner === 'all' && filters.status === 'all' ? 'default' : 'outline'}
+            size="default"
+            onClick={() => handleQuickFilter('all')}
+          >
+            All Sessions
+          </Button>
+          <Button
+            variant={filters.status === 'in_progress' && filters.owner === 'all' ? 'default' : 'outline'}
+            size="default"
+            onClick={() => handleQuickFilter('incomplete')}
+          >
+            Incomplete
+          </Button>
+        </div>
+      );
+      renderQuickActions(quickActions);
+    }
+  }, [filters, currentUserId, renderQuickActions]);
+
   return (
     <div className="mb-6 space-y-4">
-      {/* Quick Filter Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant={filters.owner === currentUserId && filters.status === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleQuickFilter('mine')}
-        >
-          My Sessions
-        </Button>
-        <Button
-          variant={filters.owner === 'all' && filters.status === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleQuickFilter('all')}
-        >
-          All Sessions
-        </Button>
-        <Button
-          variant={filters.status === 'in_progress' && filters.owner === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleQuickFilter('incomplete')}
-        >
-          Incomplete
-        </Button>
-
-        {/* Active Filter Badge */}
-        {activeFilterCount > 0 && (
-          <Badge variant="secondary" className="ml-2">
-            {activeFilterCount} {activeFilterCount === 1 ? 'filter' : 'filters'} active
-          </Badge>
-        )}
-      </div>
-
       {/* Filter Controls */}
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Filters</span>
-          {activeFilterCount > 0 && (
+        {activeFilterCount > 0 && (
+          <div className="flex items-center justify-end">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleClearFilters}
-              className="ml-auto h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+              className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
             >
               <X className="mr-1 h-3 w-3" />
               Clear filters
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {/* Search */}
-          <div className="relative sm:col-span-2">
+          <div className="relative sm:col-span-2 lg:col-span-2">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search sessions..."
@@ -330,26 +312,6 @@ export function SessionFilters({
                   {creator.name}
                 </SelectItem>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Sort */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Sort by:</span>
-          <Select
-            value={filters.sort}
-            onValueChange={(value) => setFilters((prev) => ({ ...prev, sort: value as SortOption }))}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">Most Recent</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-              <SelectItem value="completion">Completion %</SelectItem>
             </SelectContent>
           </Select>
         </div>

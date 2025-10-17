@@ -14,18 +14,12 @@ import { Input } from '@/components/ui/input';
  */
 export function SearchInput() {
   const handleFocus = () => {
-    // Trigger Cmd+K to open command palette
-    window.dispatchEvent(
-      new KeyboardEvent('keydown', {
-        key: 'k',
-        metaKey: true,
-        bubbles: true,
-      })
-    );
+    // Dispatch custom event to open command palette
+    window.dispatchEvent(new CustomEvent('open-command-palette'));
   };
 
   return (
-    <div className="relative w-full max-w-md">
+    <div className="relative w-[12rem]">
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="text"

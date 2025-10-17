@@ -16,10 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SessionWithSections } from '@/features/sessions/types/session';
 import { ImportModal } from '@/features/sources/components/import-modal';
 import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
-import { GenerateButton } from '@/features/artifacts/components/generate-button';
-import { ArtifactsList } from '@/features/artifacts/components/artifacts-list';
-import { Generator } from '@/features/artifacts/types/artifact';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
 import { SessionFooter } from './session-footer';
@@ -27,15 +23,13 @@ import { FieldGrid } from './field-grid';
 
 interface SessionShellProps {
   sessionData: SessionWithSections;
-  generators: Generator[];
 }
 
-export function SessionShell({ sessionData, generators }: SessionShellProps) {
+export function SessionShell({ sessionData }: SessionShellProps) {
   const router = useRouter();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState(0);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [artifactsModalOpen, setArtifactsModalOpen] = useState(false);
   const currentSection = sessionData.sections[currentSectionIndex];
 
   // Keyboard navigation
@@ -137,11 +131,10 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
               <Upload className="h-4 w-4" />
               <span className="hidden sm:inline">Import</span>
             </Button>
-            <GenerateButton sessionId={sessionData.id} generators={generators} />
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setArtifactsModalOpen(true)}
+              onClick={() => router.push(`/sessions/${sessionData.id}/artifacts`)}
               aria-label="View artifacts"
             >
               <FileText className="h-4 w-4" />
@@ -258,16 +251,6 @@ export function SessionShell({ sessionData, generators }: SessionShellProps) {
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
       />
-
-      {/* Artifacts modal */}
-      <Dialog open={artifactsModalOpen} onOpenChange={setArtifactsModalOpen}>
-        <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Artifacts</DialogTitle>
-          </DialogHeader>
-          <ArtifactsList sessionId={sessionData.id} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

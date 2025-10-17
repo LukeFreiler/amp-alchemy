@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
@@ -9,6 +10,7 @@ interface CrudHeaderProps {
   buttonIcon: LucideIcon;
   onButtonClick: () => void;
   showSeparator?: boolean;
+  quickActions?: ReactNode;
 }
 
 /**
@@ -34,6 +36,7 @@ export function CrudHeader({
   buttonIcon: Icon,
   onButtonClick,
   showSeparator = false,
+  quickActions,
 }: CrudHeaderProps) {
   return (
     <>
@@ -42,10 +45,18 @@ export function CrudHeader({
           <h1 className="text-3xl font-bold">{title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         </div>
-        <Button onClick={onButtonClick}>
-          <Icon className="h-4 w-4" />
-          {buttonText}
-        </Button>
+        <div className="flex items-center gap-3">
+          {quickActions && (
+            <>
+              {quickActions}
+              <Separator orientation="vertical" className="h-8" />
+            </>
+          )}
+          <Button onClick={onButtonClick}>
+            <Icon className="h-4 w-4" />
+            {buttonText}
+          </Button>
+        </div>
       </div>
       {showSeparator && <Separator className="mb-6" />}
     </>

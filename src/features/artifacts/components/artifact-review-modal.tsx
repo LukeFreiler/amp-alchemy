@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GenerateResponse } from '@/features/artifacts/types/artifact';
 
 type ArtifactReviewModalProps = {
@@ -164,23 +165,24 @@ export function ArtifactReviewModal({ sessionId, generatorId, onClose }: Artifac
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : artifact ? (
-          <div className="flex flex-1 gap-4 overflow-hidden">
-            {/* Left: Prompt */}
-            <div className="flex w-1/2 flex-col">
-              <h3 className="mb-2 text-sm font-semibold">Prompt</h3>
-              <div className="flex-1 overflow-y-auto rounded-md bg-muted p-4 font-mono text-xs">
-                <pre className="whitespace-pre-wrap">{artifact.prompt}</pre>
-              </div>
-            </div>
+          <Tabs defaultValue="artifact" className="flex flex-1 flex-col overflow-hidden">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="artifact">Artifact</TabsTrigger>
+              <TabsTrigger value="prompt">Prompt</TabsTrigger>
+            </TabsList>
 
-            {/* Right: Generated Output */}
-            <div className="flex w-1/2 flex-col">
-              <h3 className="mb-2 text-sm font-semibold">Generated Artifact</h3>
+            <TabsContent value="artifact" className="mt-4 flex flex-1 flex-col overflow-hidden">
               <div className="prose prose-sm dark:prose-invert flex-1 overflow-y-auto rounded-md border border-border bg-card p-4">
                 <ReactMarkdown>{artifact.markdown}</ReactMarkdown>
               </div>
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="prompt" className="mt-4 flex flex-1 flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto rounded-md bg-muted p-4 font-mono text-xs">
+                <pre className="whitespace-pre-wrap">{artifact.prompt}</pre>
+              </div>
+            </TabsContent>
+          </Tabs>
         ) : null}
 
         <div className="mt-4 flex justify-between">

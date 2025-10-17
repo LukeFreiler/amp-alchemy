@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       });
     });
 
-    // Search sessions (by name)
+    // Search sessions (by name and blueprint name)
     const sessions = await query<{
       id: string;
       name: string;
@@ -92,8 +92,14 @@ export async function GET(request: NextRequest) {
        FROM sessions s
        JOIN blueprints b ON b.id = s.blueprint_id
        WHERE s.company_id = $1
-         AND s.name ILIKE $2
-       ORDER BY s.updated_at DESC
+         AND (s.name ILIKE $2 OR b.name ILIKE $2)
+       ORDER BY
+         CASE
+           WHEN s.name ILIKE $2 THEN 1
+           WHEN b.name ILIKE $2 THEN 2
+           ELSE 3
+         END,
+         s.updated_at DESC
        LIMIT 10`,
       [user.company_id, searchTerm]
     );

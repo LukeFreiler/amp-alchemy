@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Blueprint } from '@/features/blueprints/types/blueprint';
+import { NewBlueprintModal } from './new-blueprint-modal';
 
 interface BlueprintListProps {
   blueprints: Blueprint[];
@@ -35,6 +36,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
   const [blueprints, setBlueprints] = useState(initialBlueprints);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showNewModal, setShowNewModal] = useState(false);
 
   const handleDuplicate = async (blueprint: Blueprint) => {
     const name = prompt(`Enter name for duplicate:`, `${blueprint.name} (Copy)`);
@@ -85,6 +87,11 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
     }
   };
 
+  const handleBlueprintCreated = (blueprintId: string) => {
+    setShowNewModal(false);
+    router.push(`/blueprints/${blueprintId}/edit`);
+  };
+
   const getStatusColor = (status: Blueprint['status']) => {
     switch (status) {
       case 'published':
@@ -101,7 +108,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
         description="Reusable templates for collecting structured data"
         buttonText="New Blueprint"
         buttonIcon={Plus}
-        onButtonClick={() => router.push('/blueprints/new')}
+        onButtonClick={() => setShowNewModal(true)}
         showSeparator={blueprints.length > 0}
       />
 
@@ -167,6 +174,12 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
           ))}
         </div>
       )}
+
+      <NewBlueprintModal
+        open={showNewModal}
+        onOpenChange={setShowNewModal}
+        onBlueprintCreated={handleBlueprintCreated}
+      />
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>

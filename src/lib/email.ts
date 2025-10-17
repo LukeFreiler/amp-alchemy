@@ -10,7 +10,7 @@ import { logger } from '@/lib/logger';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = 'Centercode Alchemy <onboarding@resend.dev>'; // Update with your verified domain
+const FROM_EMAIL = 'Centercode Alchemy <noreply@centercode.com>';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export interface SendWelcomeEmailParams {
@@ -31,6 +31,13 @@ export interface SendInvitationEmailParams {
   role: string;
   acceptUrl: string;
   expiresAt: Date;
+}
+
+export interface SendArtifactShareEmailParams {
+  to: string;
+  sharerName: string;
+  artifactTitle: string;
+  shareUrl: string;
 }
 
 /**
@@ -397,6 +404,126 @@ function getInvitationEmailHtml(
     </div>
     <div class="footer">
       <p>If you didn't expect this invitation, you can safely ignore this email.</p>
+      <p>&copy; ${new Date().getFullYear()} Centercode Alchemy. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
+/**
+ * Send artifact share email
+ */
+export async function sendArtifactShareEmail({
+  to,
+  sharerName,
+  artifactTitle,
+  shareUrl,
+}: SendArtifactShareEmailParams): Promise<boolean> {
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `${sharerName} shared an artifact with you`,
+      html: getArtifactShareEmailHtml(sharerName, artifactTitle, shareUrl),
+    });
+
+    logger.info('Artifact share email sent', { to, artifact: artifactTitle });
+    return true;
+  } catch (error) {
+    logger.error('Failed to send artifact share email', { error, to });
+    return false;
+  }
+}
+
+/**
+ * Artifact share email HTML template
+ */
+function getArtifactShareEmailHtml(
+  sharerName: string,
+  artifactTitle: string,
+  shareUrl: string
+): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artifact Shared</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 40px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h1 {
+      color: #111827;
+      margin: 0;
+      font-size: 28px;
+    }
+    .content {
+      margin-bottom: 30px;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #000000;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      margin: 20px 0;
+    }
+    .artifact-name {
+      background-color: #f3f4f6;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 20px 0;
+      font-weight: 500;
+    }
+    .footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Artifact Shared</h1>
+    </div>
+    <div class="content">
+      <p><strong>${sharerName}</strong> has shared an artifact with you:</p>
+
+      <div class="artifact-name">
+        ${artifactTitle}
+      </div>
+
+      <p>Click the button below to view this artifact:</p>
+
+      <div style="text-align: center;">
+        <a href="${shareUrl}" class="button">View Artifact</a>
+      </div>
+    </div>
+    <div class="footer">
+      <p>If you didn't expect this email, you can safely ignore it.</p>
       <p>&copy; ${new Date().getFullYear()} Centercode Alchemy. All rights reserved.</p>
     </div>
   </div>

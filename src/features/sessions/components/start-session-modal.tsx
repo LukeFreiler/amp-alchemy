@@ -126,31 +126,27 @@ export function StartSessionModal({
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="blueprint">Blueprint</Label>
-              <Select
-                value={selectedBlueprintId}
-                onValueChange={setSelectedBlueprintId}
-                disabled={isLoading}
-              >
-                <SelectTrigger id="blueprint">
-                  <SelectValue placeholder="Select a blueprint" />
-                </SelectTrigger>
-                <SelectContent>
-                  {blueprints.length === 0 ? (
-                    <div className="p-2 text-sm text-muted-foreground">
-                      No published blueprints available
-                    </div>
-                  ) : (
-                    blueprints.map((blueprint) => (
+            {blueprints.length > 1 && (
+              <div className="space-y-2">
+                <Label htmlFor="blueprint">Blueprint</Label>
+                <Select
+                  value={selectedBlueprintId}
+                  onValueChange={setSelectedBlueprintId}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger id="blueprint">
+                    <SelectValue placeholder="Select a blueprint" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {blueprints.map((blueprint) => (
                       <SelectItem key={blueprint.id} value={blueprint.id}>
                         {blueprint.name}
                       </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="name">Session Name</Label>

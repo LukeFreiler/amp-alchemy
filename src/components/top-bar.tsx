@@ -77,13 +77,13 @@ export function TopBar({ user }: TopBarProps) {
             </nav>
           </div>
 
-          {/* Center: Search (Desktop only) */}
-          <div className="hidden max-w-md flex-1 lg:block">
-            <SearchInput />
-          </div>
+          {/* Right: Search + User Menu + Mobile Toggle */}
+          <div className="flex shrink-0 items-center gap-3">
+            {/* Search (Desktop only) */}
+            <div className="hidden lg:block">
+              <SearchInput />
+            </div>
 
-          {/* Right: User Menu + Mobile Toggle */}
-          <div className="flex shrink-0 items-center gap-2">
             <UserMenu user={user} />
 
             {/* Mobile Menu Toggle */}

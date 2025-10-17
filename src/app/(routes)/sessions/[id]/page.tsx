@@ -9,7 +9,6 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { SessionShell } from '@/features/sessions/components/session-shell';
 import { query, queryOne } from '@/lib/db/query';
 import { SessionWithSections, SectionWithProgress } from '@/features/sessions/types/session';
-import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
 import { Session } from '@/features/sessions/types/session';
 
 interface SessionPageProps {
@@ -108,11 +107,5 @@ export default async function SessionPage({ params }: SessionPageProps) {
     sections: sectionsWithProgress,
   };
 
-  // Fetch generators for this blueprint
-  const generators = await query<BlueprintArtifactGenerator>(
-    'SELECT * FROM blueprint_artifact_generators WHERE blueprint_id = $1 ORDER BY order_index',
-    [session.blueprint_id]
-  );
-
-  return <SessionShell sessionData={sessionData} generators={generators} />;
+  return <SessionShell sessionData={sessionData} />;
 }

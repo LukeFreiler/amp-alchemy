@@ -9,6 +9,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { handleError, NotFoundError, AuthorizationError, ValidationError } from '@/lib/errors';
 import { queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
+import { sendArtifactShareEmail } from '@/lib/email';
 
 type SuccessResponse<T> = {
   ok: true;
@@ -82,45 +83,25 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const shareUrl = `${appUrl}/share/${shareLink.token}`;
 
-    // Send email via Resend
-    try {
-      const { Resend } = await import('resend');
-      const resend = new Resend(process.env.RESEND_API_KEY);
+    // Send email via shared email function
+    const emailSent = await sendArtifactShareEmail({
+      to: email.trim().toLowerCase(),
+      sharerName: user.name,
+      artifactTitle: shareLink.artifact_title,
+      shareUrl,
+    });
 
-      await resend.emails.send({
-        from: 'Centercode Alchemy <noreply@centercode.com>',
-        to: email.trim().toLowerCase(),
-        subject: `${user.name} shared an artifact with you`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1>Artifact Shared</h1>
-            <p><strong>${user.name}</strong> has shared an artifact with you: <strong>${shareLink.artifact_title}</strong></p>
-            <p>
-              <a href="${shareUrl}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">
-                View Artifact
-              </a>
-            </p>
-            <p style="color: #666; font-size: 12px;">
-              If you didn't expect this email, you can safely ignore it.
-            </p>
-          </div>
-        `,
-      });
-
-      logger.info('Sent share link email', {
-        artifact_id: id,
-        share_link_id: shareLink.id,
-        recipient: email.trim().toLowerCase(),
-        company_id: user.company_id,
-        user_id: user.id,
-      });
-    } catch (emailError) {
-      logger.error('Failed to send share link email', {
-        error: emailError,
-        email: email.trim().toLowerCase(),
-      });
+    if (!emailSent) {
       throw new Error('Failed to send email');
     }
+
+    logger.info('Sent share link email', {
+      artifact_id: id,
+      share_link_id: shareLink.id,
+      recipient: email.trim().toLowerCase(),
+      company_id: user.company_id,
+      user_id: user.id,
+    });
 
     return NextResponse.json<SuccessResponse<{ sent: boolean }>>({
       ok: true,

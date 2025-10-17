@@ -10,6 +10,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { execute, queryOne } from '@/lib/db/query';
 import { handleError, ValidationError, ConflictError } from '@/lib/errors';
 import { logger } from '@/lib/logger';
+import { sendInvitationEmail } from '@/lib/email';
 import { MemberRole } from '@/features/auth/types/session';
 import { randomBytes } from 'crypto';
 
@@ -60,49 +61,37 @@ export async function POST(req: NextRequest) {
       [user.company_id, email, body.role, inviteToken, expiresAt, user.id]
     );
 
+    // Get company name for email
+    const company = await queryOne<{ name: string }>(
+      'SELECT name FROM companies WHERE id = $1',
+      [user.company_id]
+    );
+
     // Send invitation email
-    const inviteUrl = `${process.env.NEXTAUTH_URL}/auth/invite/${inviteToken}`;
+    const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/accept-invite/${inviteToken}`;
+    const emailSent = await sendInvitationEmail({
+      to: email,
+      inviterName: user.name,
+      companyName: company?.name || 'Unknown Company',
+      role: body.role,
+      acceptUrl,
+      expiresAt,
+    });
 
-    try {
-      // Dynamically import Resend to avoid build issues
-      const { Resend } = await import('resend');
-      const resend = new Resend(process.env.RESEND_API_KEY);
-
-      await resend.emails.send({
-        from: 'Centercode Alchemy <noreply@centercode.com>',
-        to: email,
-        subject: `You've been invited to join Centercode Alchemy`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1>You've been invited!</h1>
-            <p>${user.name} has invited you to join their company on Centercode Alchemy as a <strong>${body.role}</strong>.</p>
-            <p>
-              <a href="${inviteUrl}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">
-                Accept Invitation
-              </a>
-            </p>
-            <p style="color: #666; font-size: 14px;">
-              This invitation will expire on ${expiresAt.toLocaleDateString()}.
-            </p>
-            <p style="color: #666; font-size: 12px;">
-              If you didn't expect this invitation, you can safely ignore this email.
-            </p>
-          </div>
-        `,
+    if (!emailSent) {
+      logger.warn('Invitation created but email failed to send', {
+        company_id: user.company_id,
+        invited_by: user.id,
+        email,
       });
-
+      // Note: We don't throw here - invitation is still created in DB
+    } else {
       logger.info('Invitation sent', {
         company_id: user.company_id,
         invited_by: user.id,
         email,
         role: body.role,
       });
-    } catch (emailError) {
-      logger.error('Failed to send invitation email', {
-        error: emailError,
-        email,
-      });
-      throw new Error('Failed to send invitation email');
     }
 
     return NextResponse.json({

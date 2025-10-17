@@ -171,10 +171,6 @@ export default function SignInPage() {
             </Link>
           </p>
         </div>
-
-        <p className="text-center text-xs text-muted-foreground">
-          By signing in, you agree to our Terms of Service and Privacy Policy.
-        </p>
       </div>
     </div>
   );

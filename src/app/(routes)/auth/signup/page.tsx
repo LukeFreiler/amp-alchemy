@@ -255,10 +255,6 @@ export default function SignUpPage() {
             </Link>
           </p>
         </div>
-
-        <p className="text-center text-xs text-muted-foreground">
-          By signing up, you agree to our Terms of Service and Privacy Policy.
-        </p>
       </div>
     </div>
   );

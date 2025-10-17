@@ -41,7 +41,7 @@ export function GenerateButton({ sessionId, generators }: GenerateButtonProps) {
     <>
       <div className="flex gap-2">
         <Select value={selectedGenerator || ''} onValueChange={setSelectedGenerator}>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="h-9 w-64">
             <SelectValue placeholder="Select generator..." />
           </SelectTrigger>
           <SelectContent>
@@ -53,7 +53,7 @@ export function GenerateButton({ sessionId, generators }: GenerateButtonProps) {
           </SelectContent>
         </Select>
 
-        <Button onClick={handleGenerate} disabled={!selectedGenerator}>
+        <Button size="sm" onClick={handleGenerate} disabled={!selectedGenerator}>
           <Sparkles className="h-4 w-4" />
           Generate
         </Button>
