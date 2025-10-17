@@ -304,9 +304,7 @@ export function ArtifactsPageClient({
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
-                          onClick={() =>
-                            selectedGenerator && handleGenerate(selectedGenerator.id)
-                          }
+                          onClick={() => selectedGenerator && handleGenerate(selectedGenerator.id)}
                           disabled={generating || saving}
                         >
                           <RefreshCw className="h-4 w-4" />

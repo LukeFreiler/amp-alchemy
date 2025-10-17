@@ -8,12 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/auth/middleware';
 import { transaction } from '@/lib/db/query';
-import {
-  handleError,
-  ValidationError,
-  AuthenticationError,
-  ConflictError,
-} from '@/lib/errors';
+import { handleError, ValidationError, AuthenticationError, ConflictError } from '@/lib/errors';
 import { logger } from '@/lib/logger';
 
 interface OnboardingCompleteRequest {
@@ -54,18 +49,17 @@ export async function POST(req: NextRequest) {
     // Create company and update member in a transaction
     const result = await transaction(async (client) => {
       // Create company
-      const company = await client.query(
-        `INSERT INTO companies (name) VALUES ($1) RETURNING id`,
-        [companyName]
-      );
+      const company = await client.query(`INSERT INTO companies (name) VALUES ($1) RETURNING id`, [
+        companyName,
+      ]);
 
       const companyId = (company.rows[0] as { id: string }).id;
 
       // Update member with company_id and set as owner
-      await client.query(
-        `UPDATE members SET company_id = $1, role = 'owner' WHERE id = $2`,
-        [companyId, user.id]
-      );
+      await client.query(`UPDATE members SET company_id = $1, role = 'owner' WHERE id = $2`, [
+        companyId,
+        user.id,
+      ]);
 
       return { company_id: companyId };
     });

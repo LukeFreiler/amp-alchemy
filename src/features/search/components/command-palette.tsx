@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Command } from 'cmdk';
-import { Box, FileText, FileOutput, Search, Loader2 } from 'lucide-react';
+import { Box, FileText, FileOutput } from 'lucide-react';
 
 type SearchResult = {
   type: 'blueprint' | 'session' | 'artifact';
@@ -15,208 +15,174 @@ type SearchResult = {
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState('');
+  const [search, setSearch] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string>('');
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Cmd/Ctrl+K to open palette, ESC to close
+  // Cmd/Ctrl+K to open palette
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((prevOpen) => !prevOpen);
-      } else if (e.key === 'Escape' && open) {
-        e.preventDefault();
-        setOpen(false);
+        setOpen((prev) => !prev);
       }
     };
-
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, [open]);
+  }, []);
 
-  // Listen for custom open event from search input
+  // Listen for custom open event
   useEffect(() => {
-    const handleOpen = () => {
-      setOpen(true);
-    };
-
+    const handleOpen = () => setOpen(true);
     window.addEventListener('open-command-palette', handleOpen);
     return () => window.removeEventListener('open-command-palette', handleOpen);
   }, []);
 
-  // Reset state when closing, focus input when opening
+  // Reset when closing
   useEffect(() => {
     if (!open) {
-      setQuery('');
+      setSearch('');
       setResults([]);
-      setLoading(false);
-    } else {
-      // Focus input when palette opens
-      setTimeout(() => inputRef.current?.focus(), 0);
+      setSelectedValue('');
     }
   }, [open]);
 
-  // Debounced search on query change
+  // Focus input when opening
   useEffect(() => {
-    if (!query.trim() || query.trim().length < 2) {
+    if (open) {
+      // Delay to ensure DOM is ready after render
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+  }, [open]);
+
+  // Handle ESC to close dialog (only when palette is open)
+  useEffect(() => {
+    if (!open) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // Just close the dialog - cmdk doesn't actually clear search/value on ESC
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [open]);
+
+  // Debounced search
+  useEffect(() => {
+    if (!search || search.length < 2) {
       setResults([]);
       setLoading(false);
       return;
     }
 
     setLoading(true);
-
     const timer = setTimeout(async () => {
-      try {
-        const response = await fetch(`/api/v1/search?q=${encodeURIComponent(query)}`);
-        const json = await response.json();
-
-        console.log('Search response:', { ok: json.ok, dataLength: json.data?.length, data: json.data });
-
-        if (json.ok) {
-          setResults(json.data);
-          console.log('Results set to:', json.data);
-        } else {
-          console.error('Search failed:', json.error);
-          setResults([]);
-        }
-      } catch (error) {
-        console.error('Search request failed:', error);
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
+      const res = await fetch(`/api/v1/search?q=${encodeURIComponent(search)}`);
+      const json = await res.json();
+      if (json.ok) setResults(json.data);
+      setLoading(false);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
-
-  const handleSelect = (result: SearchResult) => {
-    setOpen(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.push(result.href as any);
-  };
+  }, [search]);
 
   if (!open) return null;
 
   return (
-    <>
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50">
       <div
-        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm"
         onClick={() => setOpen(false)}
       />
-
-      {/* Command Palette */}
       <div className="fixed left-1/2 top-[20%] z-50 w-full max-w-2xl -translate-x-1/2 px-4">
-        <Command shouldFilter={false} className="overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
-          {/* Search Input */}
-          <div className="flex items-center border-b border-border px-4">
-            <Search className="mr-2 h-5 w-5 text-muted-foreground" />
-            <Command.Input
-              ref={inputRef}
-              value={query}
-              onValueChange={setQuery}
-              placeholder="Search by name, blueprint, description..."
-              className="flex-1 bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground"
-            />
-            {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-          </div>
-
-          {/* Results List */}
-          <Command.List className="max-h-96 overflow-y-auto p-2">
-            {/* Help Text - Empty Query */}
-            {query.trim().length === 0 && (
-              <div className="py-12 text-center text-sm text-muted-foreground">
-                <p>Start typing to search...</p>
-                <p className="mt-2 text-xs">Search across blueprints, sessions, and artifacts</p>
-              </div>
+        <Command
+          shouldFilter={false}
+          loop
+          value={selectedValue}
+          onValueChange={setSelectedValue}
+          className="overflow-hidden rounded-lg border bg-card shadow-2xl"
+        >
+          <Command.Input
+            ref={inputRef}
+            value={search}
+            onValueChange={setSearch}
+            placeholder="Search..."
+            className="flex h-12 w-full border-none bg-transparent px-4 py-3 text-base outline-none"
+          />
+          <Command.List className="max-h-96 overflow-y-auto border-t p-2">
+            {loading && (
+              <Command.Loading>
+                <div className="flex items-center justify-center py-8">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                    <span>Searching...</span>
+                  </div>
+                </div>
+              </Command.Loading>
             )}
-
-            {/* Help Text - Single Character */}
-            {query.trim().length === 1 && (
-              <div className="py-12 text-center text-sm text-muted-foreground">
-                Type at least 2 characters to search
-              </div>
-            )}
-
-            {/* Empty State - No Results */}
-            {!loading && query.trim().length >= 2 && results.length === 0 && (
-              <div className="py-12 text-center">
-                <p className="text-sm text-muted-foreground">No results found for &quot;{query}&quot;</p>
-                <p className="mt-2 text-xs text-muted-foreground">Try a different search term</p>
-              </div>
-            )}
-
-            {/* Loading State */}
-            {loading && query.trim().length >= 2 && (
-              <div className="py-12 text-center text-sm text-muted-foreground">
-                Searching...
-              </div>
-            )}
-
-            {/* Results */}
-            {!loading && results.length > 0 && (
-              <>
-                {console.log('Rendering results:', results)}
-                {results.map((result) => (
-                  <Command.Item
-                    key={`${result.type}-${result.id}`}
-                    onSelect={() => handleSelect(result)}
-                    className="flex cursor-pointer items-start gap-3 rounded-md px-3 py-3 aria-selected:bg-accent"
-                  >
-                    {/* Icon */}
-                    <div className="mt-0.5">
-                      {result.type === 'blueprint' && <Box className="h-5 w-5 text-muted-foreground" />}
-                      {result.type === 'session' && (
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                      )}
-                      {result.type === 'artifact' && (
-                        <FileOutput className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </div>
-
-                    {/* Title & Snippet */}
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium text-foreground">{result.title}</div>
-                      <div className="mt-0.5 truncate text-sm text-muted-foreground">
-                        {result.snippet}
-                      </div>
-                    </div>
-
-                    {/* Type Badge */}
-                    <div className="shrink-0 text-xs uppercase tracking-wide text-muted-foreground">
-                      {result.type}
-                    </div>
-                  </Command.Item>
-                ))}
-              </>
-            )}
+            <Command.Empty>
+              {!search && (
+                <div className="py-12 text-center text-sm text-muted-foreground">
+                  Start typing...
+                </div>
+              )}
+              {search && search.length < 2 && (
+                <div className="py-12 text-center text-sm text-muted-foreground">
+                  Type 2+ characters
+                </div>
+              )}
+              {search && search.length >= 2 && !loading && results.length === 0 && (
+                <div className="py-12 text-center text-sm text-muted-foreground">No results</div>
+              )}
+            </Command.Empty>
+            <Command.Group>
+              {results.map((result) => (
+                <Command.Item
+                  key={`${result.type}-${result.id}`}
+                  value={`${result.type}-${result.id}-${result.title}`}
+                  onSelect={() => {
+                    setOpen(false);
+                    router.push(result.href);
+                  }}
+                  className="flex cursor-pointer items-start gap-3 rounded-md border-2 border-transparent px-3 py-3 aria-selected:border-primary aria-selected:bg-accent"
+                >
+                  <div className="mt-0.5">
+                    {result.type === 'blueprint' && <Box className="h-5 w-5" />}
+                    {result.type === 'session' && <FileText className="h-5 w-5" />}
+                    {result.type === 'artifact' && <FileOutput className="h-5 w-5" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium">{result.title}</div>
+                    <div className="text-sm text-muted-foreground">{result.snippet}</div>
+                  </div>
+                  <div className="text-xs uppercase text-muted-foreground">{result.type}</div>
+                </Command.Item>
+              ))}
+            </Command.Group>
           </Command.List>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↑</kbd>
-                <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↓</kbd>
-                <span>to navigate</span>
+          <div className="flex items-center justify-between border-t px-4 py-2 text-xs text-muted-foreground">
+            <div className="flex gap-4">
+              <div>
+                <kbd className="rounded bg-muted px-1.5 py-0.5">↑↓</kbd> navigate
               </div>
-              <div className="flex items-center gap-1">
-                <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">↵</kbd>
-                <span>to select</span>
+              <div>
+                <kbd className="rounded bg-muted px-1.5 py-0.5">↵</kbd> select
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <kbd className="rounded bg-muted px-1.5 py-0.5 font-mono">esc</kbd>
-              <span>to close</span>
+            <div>
+              <kbd className="rounded bg-muted px-1.5 py-0.5">esc</kbd> close
             </div>
           </div>
         </Command>
       </div>
-    </>
+    </div>
   );
 }

@@ -205,7 +205,9 @@ export function SessionFilters({
       const quickActions = (
         <div className="flex items-center gap-2">
           <Button
-            variant={filters.owner === currentUserId && filters.status === 'all' ? 'default' : 'outline'}
+            variant={
+              filters.owner === currentUserId && filters.status === 'all' ? 'default' : 'outline'
+            }
             size="default"
             onClick={() => handleQuickFilter('mine')}
           >
@@ -219,7 +221,9 @@ export function SessionFilters({
             All Sessions
           </Button>
           <Button
-            variant={filters.status === 'in_progress' && filters.owner === 'all' ? 'default' : 'outline'}
+            variant={
+              filters.status === 'in_progress' && filters.owner === 'all' ? 'default' : 'outline'
+            }
             size="default"
             onClick={() => handleQuickFilter('incomplete')}
           >

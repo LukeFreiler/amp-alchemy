@@ -52,7 +52,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
           <nav className="flex gap-4">
             <button
               onClick={() => router.push('/settings/company')}
-              className={`flex items-center gap-2 border-b-2 pb-3 px-1 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 border-b-2 px-1 pb-3 text-sm font-medium transition-colors ${
                 isCompanyPage
                   ? 'border-primary text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -64,7 +64,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
             {isOwner && (
               <button
                 onClick={() => router.push('/settings/team')}
-                className={`flex items-center gap-2 border-b-2 pb-3 px-1 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-2 border-b-2 px-1 pb-3 text-sm font-medium transition-colors ${
                   isTeamPage
                     ? 'border-primary text-foreground'
                     : 'border-transparent text-muted-foreground hover:text-foreground'

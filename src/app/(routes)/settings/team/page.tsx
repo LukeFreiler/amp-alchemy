@@ -78,7 +78,7 @@ export default function TeamSettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">Team Management</h2>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage your team members and invitations
           </p>
         </div>
@@ -90,16 +90,16 @@ export default function TeamSettingsPage() {
 
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold mb-4">Team Members ({members.length})</h3>
+          <h3 className="mb-4 text-lg font-semibold">Team Members ({members.length})</h3>
           <div className="rounded-lg border">
             <div className="divide-y">
               {members.map((member) => (
-                <div key={member.id} className="p-4 flex items-center justify-between">
+                <div key={member.id} className="flex items-center justify-between p-4">
                   <div>
                     <p className="font-medium">{member.name}</p>
                     <p className="text-sm text-muted-foreground">{member.email}</p>
                   </div>
-                  <div className="text-sm capitalize px-3 py-1 rounded-full bg-muted">
+                  <div className="rounded-full bg-muted px-3 py-1 text-sm capitalize">
                     {member.role}
                   </div>
                 </div>
@@ -109,14 +109,12 @@ export default function TeamSettingsPage() {
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold mb-4">
-            Pending Invitations ({invitations.length})
-          </h3>
+          <h3 className="mb-4 text-lg font-semibold">Pending Invitations ({invitations.length})</h3>
           {invitations.length > 0 ? (
             <div className="rounded-lg border">
               <div className="divide-y">
                 {invitations.map((invitation) => (
-                  <div key={invitation.id} className="p-4 flex items-center justify-between">
+                  <div key={invitation.id} className="flex items-center justify-between p-4">
                     <div>
                       <p className="font-medium">{invitation.email}</p>
                       <p className="text-sm text-muted-foreground">
@@ -124,7 +122,7 @@ export default function TeamSettingsPage() {
                         {new Date(invitation.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="text-sm capitalize px-3 py-1 rounded-full bg-muted">
+                    <div className="rounded-full bg-muted px-3 py-1 text-sm capitalize">
                       {invitation.role}
                     </div>
                   </div>

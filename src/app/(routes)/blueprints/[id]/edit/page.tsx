@@ -446,11 +446,11 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
                     onChange={(e) => setTempName(e.target.value)}
                     onBlur={handleNameSave}
                     onKeyDown={handleNameKeyDown}
-                    className="text-xl font-bold bg-transparent border-none outline-none focus:outline-none p-0 m-0"
+                    className="m-0 border-none bg-transparent p-0 text-xl font-bold outline-none focus:outline-none"
                   />
                 ) : (
                   <h1
-                    className="text-xl font-bold cursor-pointer hover:opacity-70 transition-opacity"
+                    className="cursor-pointer text-xl font-bold transition-opacity hover:opacity-70"
                     onClick={handleNameClick}
                   >
                     {name}

@@ -57,11 +57,7 @@ export default async function SessionsPage() {
 
   return (
     <div className="container mx-auto max-w-7xl py-8">
-      <SessionList
-        initialSessions={sessions}
-        blueprints={blueprints}
-        currentUserId={user.id}
-      />
+      <SessionList initialSessions={sessions} blueprints={blueprints} currentUserId={user.id} />
     </div>
   );
 }

@@ -39,12 +39,10 @@ export function SectionNav({
               {requiredProgress}% required • {overallProgress}% overall
             </>
           ) : (
-            <>
-              {overallProgress}% complete
-            </>
+            <>{overallProgress}% complete</>
           )}
         </div>
-        <div className="mt-2 h-2 w-full rounded-full bg-muted relative overflow-hidden">
+        <div className="relative mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
           {hasRequiredFields ? (
             <>
               {/* Background layer: overall progress (lighter) */}
@@ -105,7 +103,8 @@ export function SectionNav({
               <div className="ml-4 mt-1 text-xs text-muted-foreground">
                 {section.required_count > 0 ? (
                   <>
-                    {section.required_filled_count}/{section.required_count} required • {section.total_filled_count}/{section.total_count} total
+                    {section.required_filled_count}/{section.required_count} required •{' '}
+                    {section.total_filled_count}/{section.total_count} total
                   </>
                 ) : section.total_count > 0 ? (
                   <>
