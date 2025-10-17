@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, RefObject } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, RefObject } from 'react';
 
 export interface TokenData {
   tag: string;
@@ -46,7 +46,7 @@ export function useTokenAutocomplete({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const [filterQuery, setFilterQuery] = useState('');
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Filter tokens based on query
   const filteredTokens = useMemo(() => {
@@ -157,22 +157,21 @@ export function useTokenAutocomplete({
     setFilterQuery(query);
 
     // Calculate cursor position with debounce
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
 
-    const timer = setTimeout(() => {
+    debounceTimerRef.current = setTimeout(() => {
       const position = calculateCursorPosition();
       setCursorPosition(position);
     }, DEBOUNCE_MS);
-
-    setDebounceTimer(timer);
-  }, [textareaRef, value, calculateCursorPosition, debounceTimer]);
+  }, [textareaRef, value, calculateCursorPosition]);
 
   // Watch for changes in value to detect trigger
   useEffect(() => {
     checkForTrigger();
-  }, [value, checkForTrigger]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   // Close menu
   const handleClose = useCallback(() => {
@@ -248,11 +247,11 @@ export function useTokenAutocomplete({
   // Clean up debounce timer on unmount
   useEffect(() => {
     return () => {
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [debounceTimer]);
+  }, []);
 
   return {
     isOpen,
