@@ -87,6 +87,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
       if (result.ok) {
         // Add the new blueprint to the local state immediately
         setBlueprints((prev) => [...prev, result.data]);
+        router.refresh(); // Invalidate Next.js cache
 
         toast.success('Blueprint duplicated successfully', {
           description: `Created "${duplicateName}"`,
@@ -119,6 +120,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
 
       if (result.ok) {
         setBlueprints((prev) => prev.filter((b) => b.id !== deleteId));
+        router.refresh(); // Invalidate Next.js cache
         toast.success('Blueprint deleted successfully');
         setDeleteId(null);
       } else {
