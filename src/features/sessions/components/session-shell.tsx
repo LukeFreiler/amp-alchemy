@@ -182,7 +182,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
             {/* Field Grid */}
             <FieldGrid
-              key={fieldRefreshKey}
+              key={`mobile-${fieldRefreshKey}`}
               sessionId={sessionData.id}
               sectionId={currentSection.id}
               onProgressUpdate={handleProgressUpdate}
@@ -227,7 +227,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
             {/* Field Grid */}
             <FieldGrid
-              key={fieldRefreshKey}
+              key={`desktop-${fieldRefreshKey}`}
               sessionId={sessionData.id}
               sectionId={currentSection.id}
               onProgressUpdate={handleProgressUpdate}
