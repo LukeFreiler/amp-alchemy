@@ -9,13 +9,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText } from 'lucide-react';
+import { FileText, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SessionWithSections } from '@/features/sessions/types/session';
-import { InlineImportBar } from '@/features/sources/components/inline-import-bar';
+import { ImportDialog } from '@/features/sources/components/import-dialog';
 import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
@@ -31,6 +31,8 @@ export function SessionShell({ sessionData }: SessionShellProps) {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState(0);
   const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
+  const [fieldRefreshKey, setFieldRefreshKey] = useState(0);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const currentSection = sessionData.sections[currentSectionIndex];
 
   // Keyboard navigation
@@ -80,8 +82,9 @@ export function SessionShell({ sessionData }: SessionShellProps) {
   };
 
   const handleImportComplete = () => {
-    // Force suggestion banner to refresh by changing its key
+    // Force suggestion banner and field grid to refresh by changing their keys
     setSuggestionRefreshKey((prev) => prev + 1);
+    setFieldRefreshKey((prev) => prev + 1);
     // Refresh router to update progress
     router.refresh();
   };
@@ -129,6 +132,15 @@ export function SessionShell({ sessionData }: SessionShellProps) {
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setShowImportDialog(true)}
+              aria-label="Import content"
+            >
+              <Upload className="h-4 w-4" />
+              <span className="hidden sm:inline">Import</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => router.push(`/sessions/${sessionData.id}/artifacts`)}
               aria-label="View artifacts"
             >
@@ -162,12 +174,6 @@ export function SessionShell({ sessionData }: SessionShellProps) {
             {/* AI Suggestions Banner */}
             <SuggestionBanner key={suggestionRefreshKey} sessionId={sessionData.id} />
 
-            {/* Inline Import Bar */}
-            <InlineImportBar
-              sessionId={sessionData.id}
-              onImportComplete={handleImportComplete}
-            />
-
             <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
             {currentSection.description && (
               <p className="mb-6 text-muted-foreground">{currentSection.description}</p>
@@ -176,6 +182,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
             {/* Field Grid */}
             <FieldGrid
+              key={fieldRefreshKey}
               sessionId={sessionData.id}
               sectionId={currentSection.id}
               onProgressUpdate={handleProgressUpdate}
@@ -212,12 +219,6 @@ export function SessionShell({ sessionData }: SessionShellProps) {
             {/* AI Suggestions Banner */}
             <SuggestionBanner key={suggestionRefreshKey} sessionId={sessionData.id} />
 
-            {/* Inline Import Bar */}
-            <InlineImportBar
-              sessionId={sessionData.id}
-              onImportComplete={handleImportComplete}
-            />
-
             <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
             {currentSection.description && (
               <p className="mb-6 text-muted-foreground">{currentSection.description}</p>
@@ -226,6 +227,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
             {/* Field Grid */}
             <FieldGrid
+              key={fieldRefreshKey}
               sessionId={sessionData.id}
               sectionId={currentSection.id}
               onProgressUpdate={handleProgressUpdate}
@@ -252,6 +254,14 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         onNext={handleNext}
         onHome={handleHome}
         validationErrors={validationErrors}
+      />
+
+      {/* Import Dialog */}
+      <ImportDialog
+        sessionId={sessionData.id}
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        onImportComplete={handleImportComplete}
       />
     </div>
   );
