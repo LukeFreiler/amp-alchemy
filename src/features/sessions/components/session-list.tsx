@@ -56,7 +56,6 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
 
       if (result.ok) {
         setSessions((prev) => prev.filter((s) => s.id !== deleteId));
-        router.refresh(); // Invalidate Next.js cache
         setDeleteId(null);
       } else {
         toast({
