@@ -72,6 +72,7 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
 
   const handleSessionCreated = (sessionId: string) => {
     setShowStartModal(false);
+    router.refresh(); // Invalidate cache before navigation
     router.push(`/sessions/${sessionId}`);
   };
 

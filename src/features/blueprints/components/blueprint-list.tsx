@@ -87,7 +87,8 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
           description: `Created "${duplicateName}"`,
         });
 
-        // Navigate to edit page
+        // Invalidate cache before navigation
+        router.refresh();
         router.push(`/blueprints/${result.data.id}/edit`);
       } else {
         toast.error('Failed to duplicate blueprint', {
@@ -134,6 +135,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
 
   const handleBlueprintCreated = (blueprintId: string) => {
     setShowNewModal(false);
+    router.refresh(); // Invalidate cache before navigation
     router.push(`/blueprints/${blueprintId}/edit`);
   };
 
