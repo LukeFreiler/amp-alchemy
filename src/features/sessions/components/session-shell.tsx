@@ -9,13 +9,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SessionWithSections } from '@/features/sessions/types/session';
-import { ImportModal } from '@/features/sources/components/import-modal';
+import { InlineImportBar } from '@/features/sources/components/inline-import-bar';
 import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
 import { SectionNav } from './section-nav';
 import { SectionNotes } from './section-notes';
@@ -30,7 +30,6 @@ export function SessionShell({ sessionData }: SessionShellProps) {
   const router = useRouter();
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState(0);
-  const [importModalOpen, setImportModalOpen] = useState(false);
   const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
   const currentSection = sessionData.sections[currentSectionIndex];
 
@@ -80,9 +79,11 @@ export function SessionShell({ sessionData }: SessionShellProps) {
     setValidationErrors(errorCount);
   };
 
-  const handleMappingComplete = () => {
+  const handleImportComplete = () => {
     // Force suggestion banner to refresh by changing its key
     setSuggestionRefreshKey((prev) => prev + 1);
+    // Refresh router to update progress
+    router.refresh();
   };
 
   const calculateProgress = () => {
@@ -128,15 +129,6 @@ export function SessionShell({ sessionData }: SessionShellProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setImportModalOpen(true)}
-              aria-label="Import sources"
-            >
-              <Upload className="h-4 w-4" />
-              <span className="hidden sm:inline">Import</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
               onClick={() => router.push(`/sessions/${sessionData.id}/artifacts`)}
               aria-label="View artifacts"
             >
@@ -169,6 +161,12 @@ export function SessionShell({ sessionData }: SessionShellProps) {
           <TabsContent value="fields" className="mt-0 flex-1 overflow-y-auto p-4">
             {/* AI Suggestions Banner */}
             <SuggestionBanner key={suggestionRefreshKey} sessionId={sessionData.id} />
+
+            {/* Inline Import Bar */}
+            <InlineImportBar
+              sessionId={sessionData.id}
+              onImportComplete={handleImportComplete}
+            />
 
             <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
             {currentSection.description && (
@@ -214,6 +212,12 @@ export function SessionShell({ sessionData }: SessionShellProps) {
             {/* AI Suggestions Banner */}
             <SuggestionBanner key={suggestionRefreshKey} sessionId={sessionData.id} />
 
+            {/* Inline Import Bar */}
+            <InlineImportBar
+              sessionId={sessionData.id}
+              onImportComplete={handleImportComplete}
+            />
+
             <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
             {currentSection.description && (
               <p className="mb-6 text-muted-foreground">{currentSection.description}</p>
@@ -248,14 +252,6 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         onNext={handleNext}
         onHome={handleHome}
         validationErrors={validationErrors}
-      />
-
-      {/* Import modal */}
-      <ImportModal
-        sessionId={sessionData.id}
-        open={importModalOpen}
-        onClose={() => setImportModalOpen(false)}
-        onMappingComplete={handleMappingComplete}
       />
     </div>
   );

@@ -67,17 +67,17 @@ export function SuggestionBanner({ sessionId, onSuggestionsReviewed }: Suggestio
 
   return (
     <>
-      <div className="mb-6 rounded-md border border-blue-700/50 bg-blue-950/30 px-4 py-3">
+      <div className="mb-6 rounded-md border border-yellow-700/50 bg-yellow-950/30 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-blue-400" />
+            <Sparkles className="h-5 w-5 text-yellow-400" />
             <div>
               <span className="font-medium">
-                {count} suggestion{count > 1 ? 's' : ''} ready to review
+                {count} lower-confidence suggestion{count > 1 ? 's' : ''} need{count === 1 ? 's' : ''} review
                 {source && <> from {source}</>}
               </span>
-              <p className="text-xs text-blue-300/70">
-                Click AI badges on fields to accept or reject suggestions
+              <p className="text-xs text-yellow-300/70">
+                High-confidence suggestions were applied automatically. Click AI badges below to review remaining suggestions.
               </p>
             </div>
           </div>
