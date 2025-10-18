@@ -20,6 +20,7 @@ import { Blueprint } from '@/features/blueprints/types/blueprint';
 import { StartSessionModal } from './start-session-modal';
 import { SessionFilters } from './session-filters';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
 
 interface SessionListProps {
   initialSessions: Session[];
@@ -29,6 +30,7 @@ interface SessionListProps {
 
 export function SessionList({ initialSessions, blueprints, currentUserId }: SessionListProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [sessions, setSessions] = useState<Session[]>(initialSessions);
   const [filteredSessions, setFilteredSessions] = useState<Session[]>(initialSessions);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -56,10 +58,18 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
         setSessions((prev) => prev.filter((s) => s.id !== deleteId));
         setDeleteId(null);
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.error.message,
+        });
       }
     } catch (error) {
-      alert('Failed to delete session');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete session',
+      });
     } finally {
       setIsDeleting(false);
     }

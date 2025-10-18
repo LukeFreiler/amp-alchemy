@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
+import { useToast } from '@/hooks/use-toast';
 
 interface GeneratorListProps {
   blueprintId: string;
@@ -27,6 +28,7 @@ export function GeneratorList({
   onUpdate,
 }: GeneratorListProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [generators, setGenerators] = useState(initialGenerators);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -61,10 +63,18 @@ export function GeneratorList({
         setDeleteId(null);
         onUpdate();
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.error.message,
+        });
       }
     } catch (error) {
-      alert('Failed to delete generator');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete generator',
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -107,11 +117,19 @@ export function GeneratorList({
       const result = await response.json();
 
       if (!result.ok) {
-        alert(`Error: ${result.error.message}`);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.error.message,
+        });
         onUpdate();
       }
     } catch (error) {
-      alert('Failed to reorder generators');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to reorder generators',
+      });
       onUpdate();
     } finally {
       setDraggedIndex(null);

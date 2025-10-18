@@ -1,21 +1,36 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FileText, Type, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { FileText, Type, Link as LinkIcon, Trash2, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Source } from '@/features/sources/types/source';
 
 type SourcesListProps = {
   sessionId: string;
   refreshTrigger?: number;
+  onMappingComplete?: () => void;
 };
 
-export function SourcesList({ sessionId, refreshTrigger }: SourcesListProps) {
+export function SourcesList({ sessionId, refreshTrigger, onMappingComplete }: SourcesListProps) {
   const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteSourceId, setDeleteSourceId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [mappingSourceId, setMappingSourceId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchSources();
@@ -35,25 +50,62 @@ export function SourcesList({ sessionId, refreshTrigger }: SourcesListProps) {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this source?')) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setDeleteSourceId(id);
+  };
 
-    setDeletingId(id);
+  const handleDeleteConfirm = async () => {
+    if (!deleteSourceId) return;
+
+    setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/v1/sources/${id}`, {
+      const response = await fetch(`/api/v1/sources/${deleteSourceId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setSources((prev) => prev.filter((s) => s.id !== id));
+        setSources((prev) => prev.filter((s) => s.id !== deleteSourceId));
+        setDeleteSourceId(null);
       }
     } catch (error) {
       // Silent fail for now
     } finally {
-      setDeletingId(null);
+      setIsDeleting(false);
+    }
+  };
+
+  const handleMapWithAI = async (sourceId: string) => {
+    setMappingSourceId(sourceId);
+
+    try {
+      const response = await fetch(`/api/v1/sessions/${sessionId}/sources/${sourceId}/map`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Failed to map source');
+      }
+
+      const data = await response.json();
+      const suggestionsCount = data.data?.suggestions_stored || 0;
+
+      toast({
+        title: 'AI Mapping Complete',
+        description: `Generated ${suggestionsCount} suggestion${suggestionsCount !== 1 ? 's' : ''} from source content.`,
+      });
+
+      // Notify parent to refresh suggestions
+      onMappingComplete?.();
+    } catch (error) {
+      toast({
+        title: 'Mapping Failed',
+        description: error instanceof Error ? error.message : 'Failed to map source with AI',
+        variant: 'destructive',
+      });
+    } finally {
+      setMappingSourceId(null);
     }
   };
 
@@ -103,19 +155,57 @@ export function SourcesList({ sessionId, refreshTrigger }: SourcesListProps) {
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(source.id)}
-              disabled={deletingId === source.id}
-              className="ml-2"
-              aria-label="Delete source"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleMapWithAI(source.id)}
+                disabled={mappingSourceId === source.id || isDeleting}
+                className="ml-2"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {mappingSourceId === source.id ? 'Mapping...' : 'Map with AI'}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleDeleteClick(source.id)}
+                disabled={isDeleting || mappingSourceId === source.id}
+                aria-label="Delete source"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       ))}
+
+      <AlertDialog
+        open={!!deleteSourceId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteSourceId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Source?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This source will be permanently removed from the session.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

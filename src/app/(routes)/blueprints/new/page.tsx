@@ -9,14 +9,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 export default function NewBlueprintPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -25,7 +28,11 @@ export default function NewBlueprintPage() {
     e.preventDefault();
 
     if (!name.trim()) {
-      alert('Blueprint name is required');
+      toast({
+        variant: 'destructive',
+        title: 'Validation Error',
+        description: 'Blueprint name is required',
+      });
       return;
     }
 
@@ -42,11 +49,19 @@ export default function NewBlueprintPage() {
       if (result.ok) {
         router.push(`/blueprints/${result.data.id}/edit`);
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.error.message,
+        });
         setIsCreating(false);
       }
     } catch (error) {
-      alert('Failed to create blueprint');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to create blueprint',
+      });
       setIsCreating(false);
     }
   };

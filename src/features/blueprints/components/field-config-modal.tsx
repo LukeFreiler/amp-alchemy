@@ -7,6 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Field, FieldType } from '@/features/blueprints/types/blueprint';
+import { useToast } from '@/hooks/use-toast';
 
 interface FieldConfigModalProps {
   field?: Field;
@@ -39,6 +41,7 @@ interface FieldConfigModalProps {
 }
 
 export function FieldConfigModal({ field, existingFields = [], open, onOpenChange, onSave }: FieldConfigModalProps) {
+  const { toast } = useToast();
   const [type, setType] = useState<FieldType>(field?.type || 'ShortText');
   const [key, setKey] = useState(field?.key || '');
   const [label, setLabel] = useState(field?.label || '');
@@ -74,7 +77,11 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
     e.preventDefault();
 
     if (!label.trim()) {
-      alert('Label is required');
+      toast({
+        variant: 'destructive',
+        title: 'Validation Error',
+        description: 'Label is required',
+      });
       return;
     }
 
@@ -84,7 +91,11 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
     );
 
     if (isDuplicate) {
-      alert(`Token ID "${key.trim()}" is already in use. Please choose a unique ID.`);
+      toast({
+        variant: 'destructive',
+        title: 'Validation Error',
+        description: `Token ID "${key.trim()}" is already in use. Please choose a unique ID.`,
+      });
       return;
     }
 
@@ -101,7 +112,11 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
       });
       onOpenChange(false);
     } catch (error) {
-      alert('Failed to save field');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to save field',
+      });
     } finally {
       setIsSaving(false);
     }

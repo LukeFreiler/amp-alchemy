@@ -31,6 +31,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState(0);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [suggestionRefreshKey, setSuggestionRefreshKey] = useState(0);
   const currentSection = sessionData.sections[currentSectionIndex];
 
   // Keyboard navigation
@@ -77,6 +78,11 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
   const handleValidationChange = (errorCount: number) => {
     setValidationErrors(errorCount);
+  };
+
+  const handleMappingComplete = () => {
+    // Force suggestion banner to refresh by changing its key
+    setSuggestionRefreshKey((prev) => prev + 1);
   };
 
   const calculateProgress = () => {
@@ -162,7 +168,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
           <TabsContent value="fields" className="mt-0 flex-1 overflow-y-auto p-4">
             {/* AI Suggestions Banner */}
-            <SuggestionBanner sessionId={sessionData.id} />
+            <SuggestionBanner key={suggestionRefreshKey} sessionId={sessionData.id} />
 
             <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
             {currentSection.description && (
@@ -206,7 +212,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         <main className="flex-1 overflow-y-auto p-8">
           <div className="mx-auto max-w-4xl">
             {/* AI Suggestions Banner */}
-            <SuggestionBanner sessionId={sessionData.id} />
+            <SuggestionBanner key={suggestionRefreshKey} sessionId={sessionData.id} />
 
             <h2 className="mb-4 text-2xl font-semibold">{currentSection.title}</h2>
             {currentSection.description && (
@@ -249,6 +255,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
         sessionId={sessionData.id}
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
+        onMappingComplete={handleMappingComplete}
       />
     </div>
   );

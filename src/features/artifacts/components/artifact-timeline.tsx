@@ -7,16 +7,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Eye, Trash2, GitCompare, Clock, Share2 } from 'lucide-react';
 import { Artifact, GroupedArtifacts } from '@/features/artifacts/types/artifact';
 import { ArtifactViewer } from './artifact-viewer';
 import { ArtifactDiffViewer } from './artifact-diff-viewer';
 import { PublishButton } from './publish-button';
 import { ShareModal } from '@/features/data-room/components/share-modal';
+import { useToast } from '@/hooks/use-toast';
 
 type ArtifactTimelineProps = {
   sessionId: string;
@@ -25,11 +37,14 @@ type ArtifactTimelineProps = {
 };
 
 export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTimelineProps) {
+  const { toast } = useToast();
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArtifact, setSelectedArtifact] = useState<Artifact | null>(null);
   const [compareArtifacts, setCompareArtifacts] = useState<[Artifact, Artifact] | null>(null);
   const [shareArtifactId, setShareArtifactId] = useState<string | null>(null);
+  const [deleteArtifactId, setDeleteArtifactId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchArtifacts = async () => {
@@ -52,25 +67,39 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
     fetchArtifacts();
   }, [sessionId, generatorId]);
 
-  const handleDelete = async (artifactId: string) => {
-    if (!confirm('Are you sure you want to delete this artifact version?')) {
-      return;
-    }
+  const handleDeleteClick = (artifactId: string) => {
+    setDeleteArtifactId(artifactId);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!deleteArtifactId) return;
+
+    setIsDeleting(true);
     try {
-      const response = await fetch(`/api/v1/artifacts/${artifactId}`, {
+      const response = await fetch(`/api/v1/artifacts/${deleteArtifactId}`, {
         method: 'DELETE',
       });
 
       const result = await response.json();
 
       if (result.ok) {
-        setArtifacts((prev) => prev.filter((a) => a.id !== artifactId));
+        setArtifacts((prev) => prev.filter((a) => a.id !== deleteArtifactId));
+        setDeleteArtifactId(null);
       } else {
-        alert(result.error?.message || 'Failed to delete artifact');
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: result.error?.message || 'Failed to delete artifact',
+        });
       }
     } catch (error) {
-      alert('Network error occurred while deleting artifact');
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Network error occurred while deleting artifact',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -196,7 +225,7 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
                     )}
 
                     {!artifact.published && (
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(artifact.id)}>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(artifact.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     )}
@@ -230,6 +259,32 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
           onClose={() => setShareArtifactId(null)}
         />
       )}
+
+      <AlertDialog
+        open={!!deleteArtifactId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteArtifactId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Artifact Version?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This artifact version will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
