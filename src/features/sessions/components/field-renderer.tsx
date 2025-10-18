@@ -8,12 +8,14 @@
 
 import { useState, useEffect } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { FieldWithValue } from '@/app/api/v1/sessions/[id]/sections/[section_id]/fields/route';
+import { FieldSuggestionBadge } from '@/features/ai/components/field-suggestion-badge';
 
 interface FieldRendererProps {
   field: FieldWithValue;
@@ -21,6 +23,13 @@ interface FieldRendererProps {
   onValueChange: (fieldId: string, value: string) => void;
   onValidationChange?: (fieldId: string, isValid: boolean) => void;
 }
+
+type Suggestion = {
+  id: string;
+  value: string;
+  confidence: number;
+  source_provenance: Record<string, unknown> | null;
+};
 
 export function FieldRenderer({
   field,
@@ -31,11 +40,33 @@ export function FieldRenderer({
   const [value, setValue] = useState(field.value || '');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
 
   // Update local value when field prop changes
   useEffect(() => {
     setValue(field.value || '');
   }, [field.value]);
+
+  // Fetch suggestion for this field
+  useEffect(() => {
+    const fetchSuggestion = async () => {
+      try {
+        const response = await fetch(
+          `/api/v1/sessions/${sessionId}/fields/${field.id}/suggestion`
+        );
+        if (response.ok) {
+          const result = await response.json();
+          if (result.data) {
+            setSuggestion(result.data);
+          }
+        }
+      } catch (error) {
+        // Silent fail - suggestions are optional
+      }
+    };
+
+    fetchSuggestion();
+  }, [sessionId, field.id]);
 
   const debouncedSave = useDebouncedCallback(async (newValue: string) => {
     setIsSaving(true);
@@ -77,17 +108,38 @@ export function FieldRenderer({
     return true;
   };
 
+  const handleAcceptSuggestion = (suggestedValue: string) => {
+    setValue(suggestedValue);
+    handleChange(suggestedValue);
+    setSuggestion(null);
+  };
+
+  const handleRejectSuggestion = () => {
+    setSuggestion(null);
+  };
+
   return (
     <div className={cn('space-y-2', field.span === 2 ? 'col-span-1 md:col-span-2' : 'col-span-1')}>
-      <Label htmlFor={field.id}>
-        {field.label}
-        {field.required && <span className="ml-1 text-destructive">*</span>}
-        {isSaving && (
-          <span className="ml-2 text-xs text-muted-foreground" role="status" aria-live="polite">
-            Saving...
-          </span>
+      <div className="flex items-center justify-between">
+        <Label htmlFor={field.id}>
+          {field.label}
+          {field.required && <span className="ml-1 text-destructive">*</span>}
+          {isSaving && (
+            <span className="ml-2 text-xs text-muted-foreground" role="status" aria-live="polite">
+              Saving...
+            </span>
+          )}
+        </Label>
+        {suggestion && (
+          <FieldSuggestionBadge
+            sessionId={sessionId}
+            fieldId={field.id}
+            suggestion={suggestion}
+            onAccept={handleAcceptSuggestion}
+            onReject={handleRejectSuggestion}
+          />
         )}
-      </Label>
+      </div>
 
       {field.type === 'ShortText' && (
         <Input

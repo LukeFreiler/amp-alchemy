@@ -52,9 +52,9 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
 
     if (match) {
       // Name ends with a number
-      baseName = match[1]; // "Blueprint"
-      const spacing = match[2]; // " " or ""
-      currentNumber = parseInt(match[3], 10); // 3
+      baseName = match[1]!; // "Blueprint"
+      const spacing = match[2] || ''; // " " or ""
+      currentNumber = parseInt(match[3]!, 10); // 3
       baseName = baseName + spacing; // "Blueprint " or "Blueprint"
     } else {
       // Name doesn't end with a number

@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';

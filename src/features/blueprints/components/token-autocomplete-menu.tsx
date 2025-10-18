@@ -91,8 +91,6 @@ export function TokenAutocompleteMenu({
     });
   }, [tokens]);
 
-  if (!isOpen) return null;
-
   // Create flattened navigable list (sections + tokens)
   const navigableItems = useMemo(() => {
     const items: Array<{ type: 'section' | 'token'; data: TokenData; sectionName: string }> = [];
@@ -130,6 +128,8 @@ export function TokenAutocompleteMenu({
       return item ? item.data.tag : null;
     });
   }, [navigableItems, onExposeGetTag]);
+
+  if (!isOpen) return null;
 
   // Calculate global index for any item
   const getGlobalIndex = (token: TokenData, itemType: 'section' | 'token'): number => {

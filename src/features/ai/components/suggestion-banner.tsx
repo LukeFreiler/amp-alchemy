@@ -67,17 +67,24 @@ export function SuggestionBanner({ sessionId, onSuggestionsReviewed }: Suggestio
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between rounded-md border border-blue-700/50 bg-blue-950/30 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-blue-400" />
-          <span className="font-medium">
-            {count} suggestion{count > 1 ? 's' : ''} ready to review
-            {source && <> from {source}</>}
-          </span>
+      <div className="mb-6 rounded-md border border-blue-700/50 bg-blue-950/30 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-blue-400" />
+            <div>
+              <span className="font-medium">
+                {count} suggestion{count > 1 ? 's' : ''} ready to review
+                {source && <> from {source}</>}
+              </span>
+              <p className="text-xs text-blue-300/70">
+                Click AI badges on fields to accept or reject suggestions
+              </p>
+            </div>
+          </div>
+          <Button onClick={() => setShowModal(true)} size="sm" variant="outline">
+            Review All
+          </Button>
         </div>
-        <Button onClick={() => setShowModal(true)} size="sm">
-          Review
-        </Button>
       </div>
 
       {showModal && (

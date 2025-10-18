@@ -70,13 +70,14 @@ export function ArtifactsPageClient({
       if (result.ok) {
         // API returns grouped artifacts: Record<generator_id, { artifacts: Artifact[] }>
         // Flatten into a single array
-        const flatArtifacts: Artifact[] = Object.values(result.data).flatMap(
+        const groupedData = result.data as Record<string, { artifacts: Artifact[] }>;
+        const flatArtifacts: Artifact[] = Object.values(groupedData).flatMap(
           (group) => group.artifacts
         );
         setArtifacts(flatArtifacts);
         // Auto-select first artifact if available
         if (flatArtifacts.length > 0 && !selectedItem) {
-          setSelectedItem({ type: 'artifact', id: flatArtifacts[0].id });
+          setSelectedItem({ type: 'artifact', id: flatArtifacts[0]!.id });
         }
       }
     } catch (err) {
