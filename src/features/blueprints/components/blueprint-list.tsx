@@ -6,7 +6,7 @@
  * Displays all blueprints in a card grid with actions (edit, duplicate, delete)
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileText, Copy, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,11 +29,6 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
-
-  // Update blueprints when initialBlueprints changes (after cache revalidation)
-  useEffect(() => {
-    setBlueprints(initialBlueprints);
-  }, [initialBlueprints]);
 
   /**
    * Generate a unique name for the duplicated blueprint
