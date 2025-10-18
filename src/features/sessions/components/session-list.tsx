@@ -14,16 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CrudHeader } from '@/components/ui/crud-header';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { Session } from '@/features/sessions/types/session';
 import { Blueprint } from '@/features/blueprints/types/blueprint';
 import { StartSessionModal } from './start-session-modal';
@@ -50,19 +41,6 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
     setSessions(initialSessions);
   }, [initialSessions]);
 
-  const refetchSessions = async () => {
-    try {
-      const response = await fetch('/api/v1/sessions');
-      const result = await response.json();
-
-      if (result.ok) {
-        setSessions(result.data);
-      }
-    } catch (error) {
-      alert('Failed to load sessions');
-    }
-  };
-
   const handleDelete = async () => {
     if (!deleteId) return;
 
@@ -87,9 +65,8 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
     }
   };
 
-  const handleSessionCreated = async (sessionId: string) => {
+  const handleSessionCreated = (sessionId: string) => {
     setShowStartModal(false);
-    await refetchSessions();
     router.push(`/sessions/${sessionId}`);
   };
 
@@ -305,23 +282,16 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
         onSessionCreated={handleSessionCreated}
       />
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Session?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The session and all its data will be permanently
-              deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteId(null);
+        }}
+        title="Delete Session?"
+        description="This action cannot be undone. The session and all its data will be permanently deleted."
+        onConfirm={handleDelete}
+        isDeleting={isDeleting}
+      />
     </>
   );
 }

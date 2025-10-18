@@ -8,9 +8,8 @@
 
 import { useState, useEffect, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Rocket } from 'lucide-react';
+import { ArrowLeft, Rocket, Layout, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/toaster';
 import { SectionList } from '@/features/blueprints/components/section-list';
@@ -30,6 +29,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
 
   const [blueprint, setBlueprint] = useState<BlueprintWithSections | null>(null);
+  const [isLoadingBlueprint, setIsLoadingBlueprint] = useState(true);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -49,6 +49,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   // Fetch blueprint data
   useEffect(() => {
     const fetchBlueprint = async () => {
+      setIsLoadingBlueprint(true);
       const response = await fetch(`/api/v1/blueprints/${id}`);
       const result = await response.json();
       if (result.ok) {
@@ -59,6 +60,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
           setSelectedSectionId(result.data.sections[0].id);
         }
       }
+      setIsLoadingBlueprint(false);
     };
 
     fetchBlueprint();
@@ -429,69 +431,54 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
     <>
       <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
         {/* Header */}
-        <div className="border-b border-border bg-card">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-4">
+        <div className="border-b border-border bg-card px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <Button variant="ghost" size="sm" onClick={() => router.push('/blueprints')}>
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <div>
-                {isEditingName ? (
-                  <input
-                    ref={nameInputRef}
-                    type="text"
-                    value={tempName}
-                    onChange={(e) => setTempName(e.target.value)}
-                    onBlur={handleNameSave}
-                    onKeyDown={handleNameKeyDown}
-                    className="m-0 border-none bg-transparent p-0 text-xl font-bold outline-none focus:outline-none"
-                  />
-                ) : (
-                  <h1
-                    className="cursor-pointer text-xl font-bold transition-opacity hover:opacity-70"
-                    onClick={handleNameClick}
-                  >
-                    {name}
-                  </h1>
-                )}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Badge variant="outline">{blueprint.status}</Badge>
-                  <span>{blueprint.sections.length} sections</span>
-                </div>
-              </div>
+              <Separator orientation="vertical" className="h-8" />
+              {isEditingName ? (
+                <input
+                  ref={nameInputRef}
+                  type="text"
+                  value={tempName}
+                  onChange={(e) => setTempName(e.target.value)}
+                  onBlur={handleNameSave}
+                  onKeyDown={handleNameKeyDown}
+                  className="m-0 border-none bg-transparent p-0 text-xl font-bold outline-none focus:outline-none"
+                />
+              ) : (
+                <h1
+                  className="cursor-pointer text-xl font-bold transition-opacity hover:opacity-70"
+                  onClick={handleNameClick}
+                >
+                  {name}
+                </h1>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
+            <div className="flex items-center gap-3">
+              <Button
+                variant={activeTab === 'sections' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('sections')}
+              >
+                <Layout className="h-4 w-4" />
+                Sections & Fields
+              </Button>
+              <Button
+                variant={activeTab === 'generators' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('generators')}
+              >
+                <Wand2 className="h-4 w-4" />
+                Generators
+              </Button>
+              <Separator orientation="vertical" className="h-8" />
+              <Button onClick={handlePublish} disabled={isPublishing}>
                 <Rocket className="h-4 w-4" />
                 {isPublishing ? 'Publishing...' : 'Publish'}
               </Button>
             </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-6 border-t border-border px-6">
-            <button
-              onClick={() => setActiveTab('sections')}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'sections'
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Sections & Fields
-            </button>
-            <button
-              onClick={() => setActiveTab('generators')}
-              className={`border-b-2 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'generators'
-                  ? 'border-primary text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Generators
-            </button>
           </div>
         </div>
 
@@ -509,6 +496,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
                   onAddSection={handleAddSection}
                   onEditSection={handleEditSection}
                   onDeleteSection={handleDeleteSection}
+                  isLoading={isLoadingBlueprint}
                 />
               </div>
 
@@ -521,6 +509,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
                     onAddField={handleAddField}
                     onEditField={handleEditField}
                     onDeleteField={handleDeleteField}
+                    isLoading={isLoadingBlueprint}
                   />
                 )}
               </div>

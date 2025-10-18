@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Calendar, FileText } from 'lucide-react';
 
 import { SearchInput } from '@/features/search/components/search-input';
 import { UserMenu } from '@/components/user-menu';
@@ -35,7 +35,7 @@ export function TopBar({ user }: TopBarProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background [--topbar-height:4rem]">
-      <div className="px-4 py-3">
+      <div className="px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Left: Logo + Main Nav + Breadcrumbs */}
           <div className="flex min-w-0 items-center gap-4">
@@ -52,6 +52,17 @@ export function TopBar({ user }: TopBarProps) {
 
             {/* Main Navigation (Desktop) */}
             <nav className="hidden items-center gap-1 md:flex">
+              <Button
+                variant={pathname.startsWith('/sessions') ? 'default' : 'ghost'}
+                onClick={() => {
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore - Next.js 15 strict Route typing
+                  router.push('/sessions');
+                }}
+              >
+                <Calendar className="h-4 w-4" />
+                Sessions
+              </Button>
               {user.role === 'owner' && (
                 <Button
                   variant={pathname.startsWith('/blueprints') ? 'default' : 'ghost'}
@@ -61,19 +72,10 @@ export function TopBar({ user }: TopBarProps) {
                     router.push('/blueprints');
                   }}
                 >
+                  <FileText className="h-4 w-4" />
                   Blueprints
                 </Button>
               )}
-              <Button
-                variant={pathname.startsWith('/sessions') ? 'default' : 'ghost'}
-                onClick={() => {
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore - Next.js 15 strict Route typing
-                  router.push('/sessions');
-                }}
-              >
-                Sessions
-              </Button>
             </nav>
           </div>
 
@@ -109,6 +111,17 @@ export function TopBar({ user }: TopBarProps) {
 
             {/* Mobile Quick Links */}
             <nav className="space-y-2 border-t pt-3">
+              <button
+                onClick={() => {
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore - Next.js 15 strict Route typing
+                  router.push('/sessions');
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full px-2 py-1 text-left text-sm text-muted-foreground hover:text-foreground"
+              >
+                Sessions
+              </button>
               {user.role === 'owner' && (
                 <button
                   onClick={() => {
@@ -122,17 +135,6 @@ export function TopBar({ user }: TopBarProps) {
                   Blueprints
                 </button>
               )}
-              <button
-                onClick={() => {
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore - Next.js 15 strict Route typing
-                  router.push('/sessions');
-                  setMobileMenuOpen(false);
-                }}
-                className="block w-full px-2 py-1 text-left text-sm text-muted-foreground hover:text-foreground"
-              >
-                Sessions
-              </button>
               <button
                 onClick={() => {
                   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

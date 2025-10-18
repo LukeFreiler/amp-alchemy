@@ -63,7 +63,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         s.company_id,
         COALESCE(
           (SELECT true FROM share_links sl
-           WHERE sl.artifact_id = a.id AND sl.status = 'active'
+           WHERE sl.artifact_id = a.id
+             AND (sl.expires_at IS NULL OR sl.expires_at > NOW())
            LIMIT 1),
           false
         ) as published
@@ -117,7 +118,8 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
         s.company_id,
         COALESCE(
           (SELECT true FROM share_links sl
-           WHERE sl.artifact_id = a.id AND sl.status = 'active'
+           WHERE sl.artifact_id = a.id
+             AND (sl.expires_at IS NULL OR sl.expires_at > NOW())
            LIMIT 1),
           false
         ) as published

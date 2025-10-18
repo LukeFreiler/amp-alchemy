@@ -47,7 +47,6 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
   const [required, setRequired] = useState(field?.required || false);
   const [span, setSpan] = useState<1 | 2>(field?.span || 1);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasManuallyEditedKey, setHasManuallyEditedKey] = useState(false);
 
   // Reset form when field changes
   useEffect(() => {
@@ -59,7 +58,6 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
       setPlaceholder(field.placeholder || '');
       setRequired(field.required);
       setSpan(field.span);
-      setHasManuallyEditedKey(true); // Editing existing field
     } else {
       // Reset for new field
       setType('ShortText');
@@ -69,7 +67,6 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
       setPlaceholder('');
       setRequired(false);
       setSpan(1);
-      setHasManuallyEditedKey(false);
     }
   }, [field, open]);
 
@@ -78,11 +75,6 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
 
     if (!label.trim()) {
       alert('Label is required');
-      return;
-    }
-
-    if (!key.trim()) {
-      alert('Token ID is required');
       return;
     }
 
@@ -115,23 +107,17 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
     }
   };
 
-  // Auto-generate key from label unless user manually edited it
+  // Auto-generate key from label (only for new fields)
   const handleLabelChange = (value: string) => {
     setLabel(value);
-    if (!hasManuallyEditedKey) {
-      // Auto-generate key from label (slugify)
+    // Only auto-generate key for new fields, not when editing
+    if (!field) {
       const autoKey = value
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '_')
         .replace(/^_|_$/g, '');
       setKey(autoKey);
     }
-  };
-
-  // Track manual edits to key
-  const handleKeyChange = (value: string) => {
-    setKey(value);
-    setHasManuallyEditedKey(true);
   };
 
   return (
@@ -186,31 +172,18 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
             />
           </div>
 
-          {/* Row 2: Placeholder and Token ID */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {type !== 'Toggle' && (
-              <div className="space-y-2">
-                <Label htmlFor="field-placeholder">Placeholder</Label>
-                <Input
-                  id="field-placeholder"
-                  value={placeholder}
-                  onChange={(e) => setPlaceholder(e.target.value)}
-                  placeholder="Example text shown in empty field"
-                />
-              </div>
-            )}
-
+          {/* Row 2: Placeholder */}
+          {type !== 'Toggle' && (
             <div className="space-y-2">
-              <Label htmlFor="field-token">Token ID *</Label>
+              <Label htmlFor="field-placeholder">Placeholder</Label>
               <Input
-                id="field-token"
-                value={key}
-                onChange={(e) => handleKeyChange(e.target.value)}
-                placeholder="field_name"
-                required
+                id="field-placeholder"
+                value={placeholder}
+                onChange={(e) => setPlaceholder(e.target.value)}
+                placeholder="Example text shown in empty field"
               />
             </div>
-          </div>
+          )}
 
           {/* Row 3: Width and Required */}
           <div className="grid gap-6 md:grid-cols-2">

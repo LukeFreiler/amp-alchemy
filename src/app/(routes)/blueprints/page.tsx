@@ -19,11 +19,11 @@ export default async function BlueprintsPage() {
     .map((cookie) => `${cookie.name}=${cookie.value}`)
     .join('; ');
 
-  // Fetch blueprints from API
+  // Fetch blueprints from API with 30-second revalidation
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/v1/blueprints`,
     {
-      cache: 'no-store',
+      next: { revalidate: 30 },
       headers: {
         cookie: cookieHeader,
       },

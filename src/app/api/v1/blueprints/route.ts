@@ -29,16 +29,20 @@ export async function GET() {
 
     const blueprints = await query<Blueprint>(
       `SELECT
-        b.*,
-        (SELECT COUNT(*)::int
-         FROM sections s
-         WHERE s.blueprint_id = b.id) as section_count,
-        (SELECT COUNT(*)::int
-         FROM fields f
-         JOIN sections s ON f.section_id = s.id
-         WHERE s.blueprint_id = b.id) as field_count
+        b.id,
+        b.company_id,
+        b.name,
+        b.description,
+        b.status,
+        b.created_at,
+        b.updated_at,
+        COUNT(DISTINCT s.id)::int as section_count,
+        COUNT(f.id)::int as field_count
        FROM blueprints b
+       LEFT JOIN sections s ON s.blueprint_id = b.id
+       LEFT JOIN fields f ON f.section_id = s.id
        WHERE b.company_id = $1
+       GROUP BY b.id, b.company_id, b.name, b.description, b.status, b.created_at, b.updated_at
        ORDER BY b.updated_at DESC`,
       [user.company_id]
     );

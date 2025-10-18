@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { Upload, FileText } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SessionWithSections } from '@/features/sessions/types/session';
 import { ImportModal } from '@/features/sources/components/import-modal';
@@ -167,6 +168,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
             {currentSection.description && (
               <p className="mb-6 text-muted-foreground">{currentSection.description}</p>
             )}
+            <Separator gradient className="mb-6" />
 
             {/* Field Grid */}
             <FieldGrid
@@ -210,6 +212,7 @@ export function SessionShell({ sessionData }: SessionShellProps) {
             {currentSection.description && (
               <p className="mb-6 text-muted-foreground">{currentSection.description}</p>
             )}
+            <Separator gradient className="mb-6" />
 
             {/* Field Grid */}
             <FieldGrid

@@ -23,9 +23,9 @@ export default async function SessionsPage() {
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-  // Fetch sessions
+  // Fetch sessions with 30-second revalidation
   const sessionsResponse = await fetch(`${baseUrl}/api/v1/sessions`, {
-    cache: 'no-store',
+    next: { revalidate: 30 },
     headers: {
       cookie: cookieHeader,
     },
@@ -39,9 +39,9 @@ export default async function SessionsPage() {
     }
   }
 
-  // Fetch blueprints for filter dropdown
+  // Fetch blueprints for filter dropdown with 30-second revalidation
   const blueprintsResponse = await fetch(`${baseUrl}/api/v1/blueprints`, {
-    cache: 'no-store',
+    next: { revalidate: 30 },
     headers: {
       cookie: cookieHeader,
     },

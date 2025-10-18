@@ -6,7 +6,7 @@
  * Displays all blueprints in a card grid with actions (edit, duplicate, delete)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FileText, Copy, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,16 +14,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { CrudHeader } from '@/components/ui/crud-header';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { toast } from '@/components/ui/toaster';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { Blueprint } from '@/features/blueprints/types/blueprint';
 import { NewBlueprintModal } from './new-blueprint-modal';
 
@@ -38,26 +30,79 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
   const [isDeleting, setIsDeleting] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
 
+  // Update blueprints when initialBlueprints changes (after cache revalidation)
+  useEffect(() => {
+    setBlueprints(initialBlueprints);
+  }, [initialBlueprints]);
+
+  /**
+   * Generate a unique name for the duplicated blueprint
+   * - If the name ends with a number, increment it
+   * - Otherwise, append " 2"
+   * - Continue incrementing until we find an available name
+   */
+  const generateDuplicateName = (originalName: string): string => {
+    const existingNames = new Set(blueprints.map((b) => b.name));
+
+    // Check if name ends with a number (e.g., "Blueprint 3" or "Blueprint3")
+    const match = originalName.match(/^(.+?)(\s*)(\d+)$/);
+
+    let baseName: string;
+    let currentNumber: number;
+
+    if (match) {
+      // Name ends with a number
+      baseName = match[1]; // "Blueprint"
+      const spacing = match[2]; // " " or ""
+      currentNumber = parseInt(match[3], 10); // 3
+      baseName = baseName + spacing; // "Blueprint " or "Blueprint"
+    } else {
+      // Name doesn't end with a number
+      baseName = originalName + ' ';
+      currentNumber = 1;
+    }
+
+    // Find the next available number
+    let newName: string;
+    do {
+      currentNumber++;
+      newName = `${baseName}${currentNumber}`;
+    } while (existingNames.has(newName));
+
+    return newName;
+  };
+
   const handleDuplicate = async (blueprint: Blueprint) => {
-    const name = prompt(`Enter name for duplicate:`, `${blueprint.name} (Copy)`);
-    if (!name) return;
+    const duplicateName = generateDuplicateName(blueprint.name);
 
     try {
       const response = await fetch(`/api/v1/blueprints/${blueprint.id}/duplicate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: duplicateName }),
       });
 
       const result = await response.json();
 
       if (result.ok) {
+        // Add the new blueprint to the local state immediately
+        setBlueprints((prev) => [...prev, result.data]);
+
+        toast.success('Blueprint duplicated successfully', {
+          description: `Created "${duplicateName}"`,
+        });
+
+        // Navigate to edit page
         router.push(`/blueprints/${result.data.id}/edit`);
       } else {
-        alert(`Error: ${result.error.message}`);
+        toast.error('Failed to duplicate blueprint', {
+          description: result.error.message,
+        });
       }
     } catch (error) {
-      alert('Failed to duplicate blueprint');
+      toast.error('Failed to duplicate blueprint', {
+        description: 'An unexpected error occurred',
+      });
     }
   };
 
@@ -74,13 +119,18 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
 
       if (result.ok) {
         setBlueprints((prev) => prev.filter((b) => b.id !== deleteId));
+        toast.success('Blueprint deleted successfully');
         setDeleteId(null);
       } else {
-        alert(`Cannot delete: ${result.error.message}`);
+        toast.error('Cannot delete blueprint', {
+          description: result.error.message,
+        });
         setDeleteId(null);
       }
     } catch (error) {
-      alert('Failed to delete blueprint');
+      toast.error('Failed to delete blueprint', {
+        description: 'An unexpected error occurred',
+      });
       setDeleteId(null);
     } finally {
       setIsDeleting(false);
@@ -181,27 +231,25 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
         onBlueprintCreated={handleBlueprintCreated}
       />
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Blueprint?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The blueprint and all its sections and fields will be
-              permanently deleted.
-              <br />
-              <br />
-              <strong>Note:</strong> Blueprints with existing sessions cannot be deleted. You must
-              delete all sessions using this blueprint first.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? 'Deleting...' : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteId(null);
+        }}
+        title="Delete Blueprint?"
+        description={
+          <>
+            This action cannot be undone. The blueprint and all its sections and fields will be
+            permanently deleted.
+            <br />
+            <br />
+            <strong>Note:</strong> Blueprints with existing sessions cannot be deleted. You must
+            delete all sessions using this blueprint first.
+          </>
+        }
+        onConfirm={handleDelete}
+        isDeleting={isDeleting}
+      />
     </>
   );
 }

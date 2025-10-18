@@ -58,7 +58,7 @@ export function CrudHeader({
           </Button>
         </div>
       </div>
-      {showSeparator && <Separator className="mb-6" />}
+      {showSeparator && <Separator gradient className="mb-6" />}
     </>
   );
 }

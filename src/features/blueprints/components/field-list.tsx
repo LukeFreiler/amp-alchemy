@@ -38,16 +38,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { Field } from '@/features/blueprints/types/blueprint';
 
 interface FieldListProps {
@@ -56,6 +47,7 @@ interface FieldListProps {
   onAddField: () => void;
   onEditField: (fieldId: string) => void;
   onDeleteField: (fieldId: string) => void;
+  isLoading?: boolean;
 }
 
 function getFieldIcon(type: Field['type']) {
@@ -105,9 +97,6 @@ function SortableField({
         <Icon className="h-4 w-4 text-muted-foreground" />
 
         <div className="flex flex-1 items-center gap-2">
-          <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
-            {field.key}
-          </kbd>
           <h5 className="font-medium">{field.label}</h5>
           {field.required && (
             <Badge variant="outline" className="h-5 text-xs">
@@ -139,6 +128,7 @@ export function FieldList({
   onAddField,
   onEditField,
   onDeleteField,
+  isLoading = false,
 }: FieldListProps) {
   const [fields, setFields] = useState(initialFields);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -184,13 +174,17 @@ export function FieldList({
       <div className="space-y-2">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">Fields</h3>
-          <Button size="sm" onClick={onAddField}>
+          <Button onClick={onAddField}>
             <Plus className="h-4 w-4" />
             Add Field
           </Button>
         </div>
 
-        {fields.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8 text-muted-foreground">
+            <p>Loading fields...</p>
+          </div>
+        ) : fields.length === 0 ? (
           <EmptyState
             icon={ListChecks}
             title="No fields yet"
@@ -216,20 +210,15 @@ export function FieldList({
         )}
       </div>
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Field?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this field. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteId(null);
+        }}
+        title="Delete Field?"
+        description="This will permanently delete this field. This action cannot be undone."
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

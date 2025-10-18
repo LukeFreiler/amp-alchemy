@@ -28,16 +28,7 @@ import { GripVertical, Plus, Trash2, Edit, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { SectionWithFields } from '@/features/blueprints/types/blueprint';
 
 interface SectionListProps {
@@ -48,6 +39,7 @@ interface SectionListProps {
   onAddSection: () => void;
   onEditSection: (sectionId: string) => void;
   onDeleteSection: (sectionId: string) => void;
+  isLoading?: boolean;
 }
 
 function SortableSection({
@@ -133,6 +125,7 @@ export function SectionList({
   onAddSection,
   onEditSection,
   onDeleteSection,
+  isLoading = false,
 }: SectionListProps) {
   const [sections, setSections] = useState(initialSections);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -178,13 +171,17 @@ export function SectionList({
       <div className="space-y-2">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-semibold">Sections</h3>
-          <Button size="sm" onClick={onAddSection}>
+          <Button onClick={onAddSection}>
             <Plus className="h-4 w-4" />
-            Add
+            Add Section
           </Button>
         </div>
 
-        {sections.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8 text-muted-foreground">
+            <p>Loading sections...</p>
+          </div>
+        ) : sections.length === 0 ? (
           <EmptyState
             icon={FolderOpen}
             title="No sections yet"
@@ -215,20 +212,15 @@ export function SectionList({
         )}
       </div>
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Section?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will delete the section and all its fields. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        open={!!deleteId}
+        onOpenChange={(open) => {
+          if (!open) setDeleteId(null);
+        }}
+        title="Delete Section?"
+        description="This will delete the section and all its fields. This action cannot be undone."
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

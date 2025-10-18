@@ -180,7 +180,8 @@ export function SuggestionReviewModal({
         ) : (
           <div className="space-y-4">
             <div className="mb-4 flex gap-2">
-              <Button onClick={handleAcceptAll} disabled={processing !== null} size="sm">
+              <Button onClick={handleAcceptAll} disabled={processing !== null}>
+                <Check className="h-4 w-4" />
                 Accept All ({suggestions.length})
               </Button>
               <Button
@@ -222,7 +223,6 @@ export function SuggestionReviewModal({
 
                     <div className="flex gap-2">
                       <Button
-                        size="sm"
                         variant="default"
                         onClick={() => handleAccept(suggestion.id)}
                         disabled={processing !== null}
@@ -231,12 +231,11 @@ export function SuggestionReviewModal({
                         Accept
                       </Button>
                       <Button
-                        size="sm"
                         variant="outline"
+                        size="sm"
                         onClick={() => handleReject(suggestion.id)}
                         disabled={processing !== null}
                       >
-                        <X className="h-4 w-4" />
                         Reject
                       </Button>
                     </div>

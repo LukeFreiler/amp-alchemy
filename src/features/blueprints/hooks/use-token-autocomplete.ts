@@ -14,7 +14,8 @@ export interface TokenData {
   label: string;
   help: string | null;
   section: string;
-  type: 'ShortText' | 'LongText' | 'Toggle';
+  type: 'ShortText' | 'LongText' | 'Toggle' | 'Utility';
+  isUtility?: boolean;
 }
 
 interface UseTokenAutocompleteProps {
@@ -32,6 +33,10 @@ interface UseTokenAutocompleteReturn {
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   handleInsert: (token: string) => void;
   handleClose: () => void;
+  handleHover: (index: number) => void;
+  handleClearHover: (clearFn: () => void) => void;
+  handleUpdateNavigableCount: (count: number) => void;
+  handleExposeGetTag: (getFn: (index: number) => string | null) => void;
 }
 
 const DEBOUNCE_MS = 150;
@@ -47,6 +52,9 @@ export function useTokenAutocomplete({
   const [cursorPosition, setCursorPosition] = useState<{ x: number; y: number } | null>(null);
   const [filterQuery, setFilterQuery] = useState('');
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const clearHoverRef = useRef<(() => void) | null>(null);
+  const navigableCountRef = useRef<number>(0);
+  const getTagByIndexRef = useRef<((index: number) => string | null) | null>(null);
 
   // Filter tokens based on query
   const filteredTokens = useMemo(() => {
@@ -70,6 +78,7 @@ export function useTokenAutocomplete({
     if (!textarea) return null;
 
     const cursorIndex = textarea.selectionStart;
+    const textareaRect = textarea.getBoundingClientRect();
 
     // Create a mirror div to measure text position
     const div = document.createElement('div');
@@ -101,6 +110,8 @@ export function useTokenAutocomplete({
     div.style.height = 'auto';
     div.style.top = '0';
     div.style.left = '0';
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.wordWrap = 'break-word';
 
     // Add text up to cursor
     const textBeforeCursor = value.substring(0, cursorIndex);
@@ -114,12 +125,18 @@ export function useTokenAutocomplete({
     document.body.appendChild(div);
 
     const spanRect = span.getBoundingClientRect();
+    const divRect = div.getBoundingClientRect();
 
-    // Calculate position relative to viewport
-    const x = spanRect.left;
-    const y = spanRect.bottom;
+    // Calculate offset within the mirror div
+    const offsetX = spanRect.left - divRect.left;
+    const offsetY = spanRect.top - divRect.top;
 
     document.body.removeChild(div);
+
+    // Calculate position relative to textarea position, accounting for scroll
+    // offsetX and offsetY already include padding since we copied styles to mirror div
+    const x = textareaRect.left + offsetX;
+    const y = textareaRect.top + offsetY - textarea.scrollTop + parseInt(style.lineHeight || '20');
 
     return { x, y };
   }, [textareaRef, value]);
@@ -210,23 +227,31 @@ export function useTokenAutocomplete({
   // Handle keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (!isOpen || filteredTokens.length === 0) return;
+      if (!isOpen) return;
+
+      const totalCount = navigableCountRef.current;
+      if (totalCount === 0) return;
 
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex((prev) => (prev + 1) % filteredTokens.length);
+          if (clearHoverRef.current) clearHoverRef.current(); // Clear hover state when using keyboard
+          setSelectedIndex((prev) => (prev + 1) % totalCount);
           break;
 
         case 'ArrowUp':
           e.preventDefault();
-          setSelectedIndex((prev) => (prev - 1 + filteredTokens.length) % filteredTokens.length);
+          if (clearHoverRef.current) clearHoverRef.current(); // Clear hover state when using keyboard
+          setSelectedIndex((prev) => (prev - 1 + totalCount) % totalCount);
           break;
 
         case 'Enter':
           e.preventDefault();
-          if (filteredTokens[selectedIndex]) {
-            handleInsert(filteredTokens[selectedIndex].tag);
+          if (getTagByIndexRef.current) {
+            const tag = getTagByIndexRef.current(selectedIndex);
+            if (tag) {
+              handleInsert(tag);
+            }
           }
           break;
 
@@ -240,9 +265,29 @@ export function useTokenAutocomplete({
           break;
       }
     },
-    [isOpen, filteredTokens, selectedIndex, handleInsert, handleClose]
+    [isOpen, handleClose, handleInsert, selectedIndex]
   );
 
+
+  // Update selected index when hovering
+  const handleHover = useCallback((index: number) => {
+    setSelectedIndex(index);
+  }, []);
+
+  // Store the clear hover function from the menu
+  const handleClearHover = useCallback((clearFn: () => void) => {
+    clearHoverRef.current = clearFn;
+  }, []);
+
+  // Update navigable count from menu
+  const handleUpdateNavigableCount = useCallback((count: number) => {
+    navigableCountRef.current = count;
+  }, []);
+
+  // Store the get tag function from menu
+  const handleExposeGetTag = useCallback((getFn: (index: number) => string | null) => {
+    getTagByIndexRef.current = getFn;
+  }, []);
 
   // Clean up debounce timer on unmount
   useEffect(() => {
@@ -261,5 +306,9 @@ export function useTokenAutocomplete({
     handleKeyDown,
     handleInsert,
     handleClose,
+    handleHover,
+    handleClearHover,
+    handleUpdateNavigableCount,
+    handleExposeGetTag,
   };
 }

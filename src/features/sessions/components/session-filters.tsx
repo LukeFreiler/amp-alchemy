@@ -7,7 +7,7 @@
  * - Search by session name
  * - Filter by status, blueprint, owner
  * - Sort by various criteria
- * - Quick filter pills (My Sessions, All Sessions, Incomplete)
+ * - Quick filter pills (My Sessions, All Sessions)
  * - Active filter count badge
  * - URL query param persistence
  */
@@ -68,7 +68,7 @@ export function SessionFilters({
 
   const [searchInput, setSearchInput] = useState(filters.search);
 
-  const handleQuickFilter = (type: 'mine' | 'all' | 'incomplete') => {
+  const handleQuickFilter = (type: 'mine' | 'all') => {
     switch (type) {
       case 'mine':
         setFilters({
@@ -83,15 +83,6 @@ export function SessionFilters({
         setFilters({
           search: '',
           status: 'all',
-          blueprint: 'all',
-          owner: 'all',
-        });
-        setSearchInput('');
-        break;
-      case 'incomplete':
-        setFilters({
-          search: '',
-          status: 'in_progress',
           blueprint: 'all',
           owner: 'all',
         });
@@ -218,15 +209,6 @@ export function SessionFilters({
             onClick={() => handleQuickFilter('all')}
           >
             All Sessions
-          </Button>
-          <Button
-            variant={
-              filters.status === 'in_progress' && filters.owner === 'all' ? 'default' : 'outline'
-            }
-            size="default"
-            onClick={() => handleQuickFilter('incomplete')}
-          >
-            Incomplete
           </Button>
         </div>
       );

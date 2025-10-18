@@ -8,7 +8,7 @@
 
 import { useState, useRef, FormEvent, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Plus } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,9 +25,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/toaster';
 import { BlueprintWithSections } from '@/features/blueprints/types/blueprint';
 import { BlueprintArtifactGenerator, OutputFormat } from '@/features/blueprints/types/generator';
-import { BlueprintTokenPicker } from './blueprint-token-picker-enhanced';
 import { useTokenAutocomplete } from '@/features/blueprints/hooks/use-token-autocomplete';
-import { useRecentTokens } from '@/features/blueprints/hooks/use-recent-tokens';
 import { TokenAutocompleteMenu } from './token-autocomplete-menu';
 
 interface GeneratorEditorClientProps {
@@ -53,19 +51,64 @@ export function GeneratorEditorClient({
   const [visible, setVisible] = useState(generator?.visible_in_data_room ?? true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { recentTokens, addRecentToken } = useRecentTokens();
-
   // Transform blueprint sections into token array
   const tokens = useMemo(() => {
-    return blueprint.sections.flatMap((section) =>
+    // Helper function to generate a key from a title
+    const generateKey = (title: string): string => {
+      return title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '');
+    };
+
+    const fieldTokens = blueprint.sections.flatMap((section) =>
       section.fields.map((field) => ({
         tag: `{{${field.key}}}`,
         label: field.label,
         help: field.help_text,
         section: section.title,
         type: field.type,
+        isUtility: false,
       }))
     );
+
+    const utilityTokens = [];
+
+    // Add section-level tokens
+    blueprint.sections.forEach((section) => {
+      const sectionKey = generateKey(section.title);
+
+      // Token for all fields in a section
+      utilityTokens.push({
+        tag: `{{section_${sectionKey}}}`,
+        label: `All ${section.title} Fields`,
+        section: 'Utilities',
+        type: 'Utility' as const,
+        isUtility: true,
+      });
+
+      // Token for section description/comments
+      if (section.description) {
+        utilityTokens.push({
+          tag: `{{section_${sectionKey}_description}}`,
+          label: `${section.title} Description`,
+          section: 'Utilities',
+          type: 'Utility' as const,
+          isUtility: true,
+        });
+      }
+    });
+
+    // Add "All Input" token
+    utilityTokens.push({
+      tag: '{{all_input}}',
+      label: 'All Input Data',
+      section: 'Utilities',
+      type: 'Utility' as const,
+      isUtility: true,
+    });
+
+    return [...utilityTokens, ...fieldTokens];
   }, [blueprint]);
 
   const handleInsertToken = (token: string) => {
@@ -96,9 +139,6 @@ export function GeneratorEditorClient({
       const newPosition = before.length + token.length;
       textarea.setSelectionRange(newPosition, newPosition);
     }, 0);
-
-    // Track in recent tokens
-    addRecentToken(token);
   };
 
   const autocomplete = useTokenAutocomplete({
@@ -236,23 +276,11 @@ export function GeneratorEditorClient({
         {/* Right Panel - Prompt Editor */}
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Editor Header */}
-          <div className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
-            <div>
-              <h2 className="text-sm font-semibold">Prompt Template</h2>
-              <p className="text-xs text-muted-foreground">
-                Use tokens to insert blueprint field data dynamically
-              </p>
-            </div>
-            <BlueprintTokenPicker
-              blueprint={blueprint}
-              onInsert={handleInsertToken}
-              trigger={
-                <Button type="button" variant="outline" size="sm">
-                  <Plus className="h-4 w-4" />
-                  Insert Token
-                </Button>
-              }
-            />
+          <div className="border-b border-border bg-card px-6 py-4">
+            <h2 className="text-base font-semibold">Prompt Template</h2>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Type <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{'{'}{'{'}</code> to insert blueprint field data dynamically
+            </p>
           </div>
 
           {/* Editor Content */}
@@ -272,12 +300,15 @@ export function GeneratorEditorClient({
               <TokenAutocompleteMenu
                 isOpen={autocomplete.isOpen}
                 tokens={autocomplete.filteredTokens}
-                recentTokens={recentTokens}
                 selectedIndex={autocomplete.selectedIndex}
                 cursorPosition={autocomplete.cursorPosition}
                 textareaRef={textareaRef}
                 onSelect={autocomplete.handleInsert}
                 onClose={autocomplete.handleClose}
+                onHover={autocomplete.handleHover}
+                onClearHover={autocomplete.handleClearHover}
+                onUpdateNavigableCount={autocomplete.handleUpdateNavigableCount}
+                onExposeGetTag={autocomplete.handleExposeGetTag}
               />
             )}
           </div>

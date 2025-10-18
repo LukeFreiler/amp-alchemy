@@ -28,7 +28,7 @@ export function GenerateButton({ sessionId, generators }: GenerateButtonProps) {
   }
 
   return (
-    <Button size="sm" onClick={handleGenerate}>
+    <Button onClick={handleGenerate}>
       <Sparkles className="h-4 w-4" />
       Generate Artifact
     </Button>

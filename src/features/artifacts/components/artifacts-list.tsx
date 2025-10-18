@@ -104,8 +104,8 @@ export function ArtifactsList({ sessionId }: ArtifactsListProps) {
                         </div>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      View Versions
+                    <Button variant="ghost" size="sm" aria-label="View versions">
+                      <Eye className="h-4 w-4" />
                     </Button>
                   </div>
                 </Card>

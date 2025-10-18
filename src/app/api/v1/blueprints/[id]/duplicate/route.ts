@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { requireAuth } from '@/lib/auth/middleware';
 import { handleError, ValidationError, NotFoundError } from '@/lib/errors';
 import { queryOne, transaction } from '@/lib/db/query';
@@ -130,6 +131,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       new_id: newBlueprint.id,
       name: body.name,
     });
+
+    // Invalidate the blueprints list cache so it refreshes immediately
+    revalidatePath('/blueprints');
 
     return NextResponse.json<SuccessResponse<Blueprint>>(
       {
