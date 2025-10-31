@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -65,8 +66,8 @@ export default async function SharePage({ params }: SharePageProps) {
 
           <Separator className="my-6" />
 
-          <div className="prose prose-sm dark:prose-invert md:prose-base max-w-none">
-            <ReactMarkdown>{shareLink.markdown}</ReactMarkdown>
+          <div className="prose prose-sm max-w-none dark:prose-invert md:prose-base">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{shareLink.markdown}</ReactMarkdown>
           </div>
 
           {shareLink.allow_source_upload && (

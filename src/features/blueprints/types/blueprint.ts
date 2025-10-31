@@ -12,6 +12,7 @@ export interface Blueprint {
   updated_at: string;
   section_count?: number; // Computed field from JOIN query
   field_count?: number; // Computed field from JOIN query
+  generator_count?: number; // Computed field from JOIN query
 }
 
 export interface Section {
@@ -20,6 +21,7 @@ export interface Section {
   order_index: number;
   title: string;
   description: string | null;
+  key: string; // Human-readable key for token references (e.g., "company_background")
   created_at: string;
   updated_at: string;
 }
@@ -95,6 +97,10 @@ export interface ReorderFieldsRequest {
     id: string;
     order_index: number;
   }>;
+}
+
+export interface MoveFieldRequest {
+  section_id: string;
 }
 
 // Extended types with nested data

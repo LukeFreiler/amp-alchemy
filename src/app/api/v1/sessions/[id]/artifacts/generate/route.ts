@@ -58,6 +58,7 @@ type FieldRow = {
 type SectionRow = {
   id: string;
   title: string;
+  key: string;
 };
 
 type NoteRow = {
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Gather sections for token resolution
     const sections = await query<SectionRow>(
-      `SELECT id, title
+      `SELECT id, title, key
        FROM sections
        WHERE blueprint_id = $1
        ORDER BY order_index`,

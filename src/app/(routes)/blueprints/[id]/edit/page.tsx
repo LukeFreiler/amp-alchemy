@@ -7,10 +7,24 @@
  */
 
 import { useState, useEffect, use, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Rocket, Layout, Wand2 } from 'lucide-react';
+import { Rocket, Layout, Wand2 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  pointerWithin,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+} from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { PageHeader } from '@/components/ui/page-header';
 import { toast } from '@/components/ui/toaster';
 import { SectionList } from '@/features/blueprints/components/section-list';
 import { FieldList } from '@/features/blueprints/components/field-list';
@@ -25,7 +39,6 @@ import {
 import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
 
 export default function BlueprintEditPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter();
   const { id } = use(params);
 
   const [blueprint, setBlueprint] = useState<BlueprintWithSections | null>(null);
@@ -45,6 +58,155 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Custom collision detection that prioritizes droppable sections for fields
+  const customCollisionDetection = (args: Parameters<typeof pointerWithin>[0]) => {
+    // First try pointer-based collision for better drop zone coverage
+    const pointerCollisions = pointerWithin(args);
+
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+
+    // Fallback to closest center
+    return closestCenter(args);
+  };
+
+  // Handle drag start to track what's being dragged
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  // Unified drag-drop handler for sections and fields
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    setActiveId(null);
+
+    if (!over || active.id === over.id) return;
+
+    // Use data attributes to determine drag type
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type;
+
+    if (activeType === 'field') {
+      // Field is being dragged
+      if (overType === 'section') {
+        // Field → Section (move to different section)
+        await handleFieldMoveToSection(active.id as string, over.id as string);
+      } else if (overType === 'field') {
+        // Field → Field (reorder within same section)
+        const oldIndex = selectedSection!.fields.findIndex((field) => field.id === active.id);
+        const newIndex = selectedSection!.fields.findIndex((field) => field.id === over.id);
+        const reordered = arrayMove(selectedSection!.fields, oldIndex, newIndex).map(
+          (field, index) => ({
+            ...field,
+            order_index: index,
+          })
+        );
+        handleFieldsReorder(reordered);
+      }
+    } else if (activeType === 'section' && overType === 'section') {
+      // Section → Section (reorder sections)
+      const oldIndex = blueprint!.sections.findIndex((s) => s.id === active.id);
+      const newIndex = blueprint!.sections.findIndex((s) => s.id === over.id);
+
+      const reordered = arrayMove(blueprint!.sections, oldIndex, newIndex).map(
+        (section, index) => ({
+          ...section,
+          order_index: index,
+        })
+      );
+
+      handleSectionsReorder(reordered);
+    }
+  };
+
+  // Handle moving a field to a different section
+  const handleFieldMoveToSection = async (fieldId: string, targetSectionId: string) => {
+    // Find the field being moved
+    const sourceSection = blueprint?.sections.find((s) => s.fields.some((f) => f.id === fieldId));
+    const field = sourceSection?.fields.find((f) => f.id === fieldId);
+
+    if (!field || !sourceSection) return;
+
+    // Don't move if already in target section
+    if (field.section_id === targetSectionId) return;
+
+    // Get target section name for toast
+    const targetSection = blueprint?.sections.find((s) => s.id === targetSectionId);
+
+    // Optimistically update state
+    setBlueprint((prev) => {
+      if (!prev) return null;
+
+      return {
+        ...prev,
+        sections: prev.sections.map((section) => {
+          if (section.id === sourceSection.id) {
+            // Remove field from source section
+            return {
+              ...section,
+              fields: section.fields.filter((f) => f.id !== fieldId),
+            };
+          } else if (section.id === targetSectionId) {
+            // Add field to target section at the end
+            return {
+              ...section,
+              fields: [...section.fields, { ...field, section_id: targetSectionId }],
+            };
+          }
+          return section;
+        }),
+      };
+    });
+
+    // Call API to persist the move
+    try {
+      const response = await fetch(`/api/v1/fields/${fieldId}/move`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ section_id: targetSectionId }),
+      });
+
+      const result = await response.json();
+
+      if (result.ok) {
+        toast.success(`Field moved to ${targetSection?.title || 'section'}`);
+      } else {
+        // Revert on error
+        toast.error(result.error.message || 'Failed to move field');
+        // Refresh blueprint to get accurate state
+        const refreshResponse = await fetch(`/api/v1/blueprints/${id}`);
+        const refreshResult = await refreshResponse.json();
+        if (refreshResult.ok) {
+          setBlueprint(refreshResult.data);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to move field:', error);
+      toast.error('Failed to move field');
+      // Refresh blueprint to get accurate state
+      try {
+        const refreshResponse = await fetch(`/api/v1/blueprints/${id}`);
+        const refreshResult = await refreshResponse.json();
+        if (refreshResult.ok) {
+          setBlueprint(refreshResult.data);
+        }
+      } catch (refreshError) {
+        console.error('Failed to refresh blueprint:', refreshError);
+      }
+    }
+  };
 
   // Fetch blueprint data
   useEffect(() => {
@@ -118,6 +280,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         setTempName(name);
       }
     } catch (error) {
+      console.error('Failed to update blueprint name:', error);
       toast.error('Failed to update blueprint name');
       setTempName(name);
     } finally {
@@ -157,6 +320,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         toast.error(result.error.message || 'Failed to publish blueprint');
       }
     } catch (error) {
+      console.error('Failed to publish blueprint:', error);
       toast.error('Failed to publish blueprint');
     } finally {
       setIsPublishing(false);
@@ -271,6 +435,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         toast.error(result.error.message || 'Failed to delete section');
       }
     } catch (error) {
+      console.error('Failed to delete section:', error);
       toast.error('Failed to delete section');
     }
   };
@@ -287,6 +452,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         }),
       });
     } catch (error) {
+      console.error('Failed to reorder sections:', error);
       toast.error('Failed to reorder sections');
     }
   };
@@ -361,6 +527,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         }
       }
     } catch (error) {
+      console.error('Failed to save field:', error);
       toast.error('Failed to save field');
     }
   };
@@ -389,6 +556,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         toast.error(result.error.message || 'Failed to delete field');
       }
     } catch (error) {
+      console.error('Failed to delete field:', error);
       toast.error('Failed to delete field');
     }
   };
@@ -415,6 +583,7 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
         }),
       });
     } catch (error) {
+      console.error('Failed to reorder fields:', error);
       toast.error('Failed to reorder fields');
     }
   };
@@ -430,62 +599,58 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
   return (
     <>
       <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
-        {/* Header */}
-        <div className="border-b border-border bg-card px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => router.push('/blueprints')}>
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-              <Separator orientation="vertical" className="h-8" />
-              {isEditingName ? (
-                <input
-                  ref={nameInputRef}
-                  type="text"
-                  value={tempName}
-                  onChange={(e) => setTempName(e.target.value)}
-                  onBlur={handleNameSave}
-                  onKeyDown={handleNameKeyDown}
-                  className="m-0 border-none bg-transparent p-0 text-xl font-bold outline-none focus:outline-none"
-                />
-              ) : (
-                <h1
-                  className="cursor-pointer text-xl font-bold transition-opacity hover:opacity-70"
-                  onClick={handleNameClick}
-                >
-                  {name}
-                </h1>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant={activeTab === 'sections' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('sections')}
-              >
-                <Layout className="h-4 w-4" />
-                Sections & Fields
-              </Button>
-              <Button
-                variant={activeTab === 'generators' ? 'default' : 'outline'}
-                onClick={() => setActiveTab('generators')}
-              >
-                <Wand2 className="h-4 w-4" />
-                Generators
-              </Button>
-              <Separator orientation="vertical" className="h-8" />
-              <Button onClick={handlePublish} disabled={isPublishing}>
-                <Rocket className="h-4 w-4" />
-                {isPublishing ? 'Publishing...' : 'Publish'}
-              </Button>
-            </div>
+        <PageHeader title={name} backHref="/blueprints">
+          <Separator orientation="vertical" className="h-8" />
+          {isEditingName ? (
+            <input
+              ref={nameInputRef}
+              type="text"
+              value={tempName}
+              onChange={(e) => setTempName(e.target.value)}
+              onBlur={handleNameSave}
+              onKeyDown={handleNameKeyDown}
+              className="m-0 border-none bg-transparent p-0 text-xl font-semibold outline-none focus:outline-none"
+            />
+          ) : (
+            <h1
+              className="cursor-pointer text-xl font-semibold transition-opacity hover:opacity-70"
+              onClick={handleNameClick}
+            >
+              {name}
+            </h1>
+          )}
+          <div className="ml-auto flex items-center gap-3">
+            <Button
+              variant={activeTab === 'sections' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('sections')}
+            >
+              <Layout className="h-4 w-4" />
+              Sections & Fields
+            </Button>
+            <Button
+              variant={activeTab === 'generators' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('generators')}
+            >
+              <Wand2 className="h-4 w-4" />
+              Artifact Generators
+            </Button>
+            <Separator orientation="vertical" className="h-8" />
+            <Button onClick={handlePublish} disabled={isPublishing}>
+              <Rocket className="h-4 w-4" />
+              {isPublishing ? 'Publishing...' : 'Publish'}
+            </Button>
           </div>
-        </div>
+        </PageHeader>
 
         {/* Content */}
         <div className="flex flex-1 overflow-hidden">
           {activeTab === 'sections' ? (
-            <>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={customCollisionDetection}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
               {/* Left Panel - Sections */}
               <div className="w-80 overflow-y-auto border-r border-border bg-card p-4">
                 <SectionList
@@ -513,15 +678,48 @@ export default function BlueprintEditPage({ params }: { params: Promise<{ id: st
                   />
                 )}
               </div>
-            </>
+
+              {/* Drag Overlay - smooth cursor following */}
+              <DragOverlay>
+                {activeId ? (
+                  <div className="cursor-grabbing opacity-80">
+                    {(() => {
+                      // Determine if dragging a section or field
+                      const section = blueprint.sections.find((s) => s.id === activeId);
+                      if (section) {
+                        return (
+                          <div className="w-80 rounded-lg border-2 border-primary bg-card p-3 shadow-lg">
+                            <div className="font-medium">{section.title}</div>
+                            <p className="text-xs text-muted-foreground">
+                              {section.fields.length} fields
+                            </p>
+                          </div>
+                        );
+                      }
+
+                      // Check if it's a field
+                      const field = blueprint.sections
+                        .flatMap((s) => s.fields)
+                        .find((f) => f.id === activeId);
+                      if (field) {
+                        return (
+                          <div className="rounded-lg border bg-card p-3 shadow-lg">
+                            <div className="font-medium">{field.label}</div>
+                            <p className="text-xs text-muted-foreground">{field.type}</p>
+                          </div>
+                        );
+                      }
+
+                      return null;
+                    })()}
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
           ) : (
             /* Generators Tab */
             <div className="flex-1 overflow-y-auto p-6">
-              <GeneratorList
-                blueprintId={id}
-                generators={generators}
-                onUpdate={fetchGenerators}
-              />
+              <GeneratorList blueprintId={id} generators={generators} onUpdate={fetchGenerators} />
             </div>
           )}
         </div>

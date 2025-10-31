@@ -268,7 +268,6 @@ export function useTokenAutocomplete({
     [isOpen, handleClose, handleInsert, selectedIndex]
   );
 
-
   // Update selected index when hovering
   const handleHover = useCallback((index: number) => {
     setSelectedIndex(index);

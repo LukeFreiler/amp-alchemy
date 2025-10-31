@@ -64,14 +64,17 @@ export function TokenPicker({ tokens, loading, onInsert, trigger }: TokenPickerP
                       onSelect={() => handleSelect(field.token)}
                       className="flex cursor-pointer items-start gap-2 rounded-md px-2 py-2 hover:bg-accent aria-selected:bg-accent"
                     >
-                      <Badge variant="outline" className="border-blue-500/30 bg-blue-500/10 text-xs">
+                      <Badge
+                        variant="outline"
+                        className="border-blue-500/30 bg-blue-500/10 text-xs"
+                      >
                         field
                       </Badge>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm">{field.label}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium">{field.label}</div>
                         <div className="text-xs text-muted-foreground">{field.sectionTitle}</div>
                         {field.value && (
-                          <div className="mt-1 text-xs text-muted-foreground truncate">
+                          <div className="mt-1 truncate text-xs text-muted-foreground">
                             &ldquo;{field.value}&rdquo;
                           </div>
                         )}
@@ -91,11 +94,14 @@ export function TokenPicker({ tokens, loading, onInsert, trigger }: TokenPickerP
                       onSelect={() => handleSelect(section.token)}
                       className="flex cursor-pointer items-start gap-2 rounded-md px-2 py-2 hover:bg-accent aria-selected:bg-accent"
                     >
-                      <Badge variant="outline" className="border-purple-500/30 bg-purple-500/10 text-xs">
+                      <Badge
+                        variant="outline"
+                        className="border-purple-500/30 bg-purple-500/10 text-xs"
+                      >
                         section
                       </Badge>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm">{section.label}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium">{section.label}</div>
                         <div className="text-xs text-muted-foreground">
                           {section.fieldCount} field{section.fieldCount !== 1 ? 's' : ''}
                         </div>
@@ -115,11 +121,14 @@ export function TokenPicker({ tokens, loading, onInsert, trigger }: TokenPickerP
                       onSelect={() => handleSelect(note.token)}
                       className="flex cursor-pointer items-start gap-2 rounded-md px-2 py-2 hover:bg-accent aria-selected:bg-accent"
                     >
-                      <Badge variant="outline" className="border-green-500/30 bg-green-500/10 text-xs">
+                      <Badge
+                        variant="outline"
+                        className="border-green-500/30 bg-green-500/10 text-xs"
+                      >
                         notes
                       </Badge>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm">{note.label}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium">{note.label}</div>
                         <div className="text-xs text-muted-foreground">
                           {note.hasContent ? 'Has content' : 'Empty'}
                         </div>
@@ -139,8 +148,8 @@ export function TokenPicker({ tokens, loading, onInsert, trigger }: TokenPickerP
                   <Badge variant="outline" className="text-xs">
                     json
                   </Badge>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm">{tokens.legacy.fields_json.label}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium">{tokens.legacy.fields_json.label}</div>
                     <div className="text-xs text-muted-foreground">Deprecated</div>
                   </div>
                 </Command.Item>
@@ -152,8 +161,8 @@ export function TokenPicker({ tokens, loading, onInsert, trigger }: TokenPickerP
                   <Badge variant="outline" className="text-xs">
                     json
                   </Badge>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm">{tokens.legacy.notes_json.label}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium">{tokens.legacy.notes_json.label}</div>
                     <div className="text-xs text-muted-foreground">Deprecated</div>
                   </div>
                 </Command.Item>

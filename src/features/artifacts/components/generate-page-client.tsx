@@ -10,10 +10,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageHeader } from '@/components/ui/page-header';
 import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
 import { GeneratorSelector } from './generator-selector';
 import { PromptEditor } from './prompt-editor';
@@ -35,7 +35,6 @@ export function GeneratePageClient({
   generators,
   initialGeneratorId,
 }: GeneratePageClientProps) {
-  const router = useRouter();
   const [selectedGeneratorId, setSelectedGeneratorId] = useState<string>(
     initialGeneratorId || generators[0]?.id || ''
   );
@@ -77,10 +76,6 @@ export function GeneratePageClient({
     setShowReviewModal(true);
   };
 
-  const handleBack = () => {
-    router.push(`/sessions/${sessionId}/artifacts`);
-  };
-
   if (!selectedGenerator) {
     return (
       <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] items-center justify-center">
@@ -91,40 +86,26 @@ export function GeneratePageClient({
 
   return (
     <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
-      {/* Header */}
-      <div className="border-b border-border bg-background">
-        <div className="flex items-center gap-4 px-6 py-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            aria-label="Back to artifacts"
-          >
-            <ArrowLeft className="h-4 w-4" />
+      <PageHeader
+        title="Generate Artifact"
+        subtitle={`${sessionName} • ${blueprintName}`}
+        backHref={`/sessions/${sessionId}/artifacts`}
+        actions={
+          <Button onClick={handleGenerate} disabled={generating || !customPrompt.trim()}>
+            {generating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                Generate
+              </>
+            )}
           </Button>
-          <div>
-            <h1 className="text-xl font-semibold">Generate Artifact</h1>
-            <p className="text-sm text-muted-foreground">
-              {sessionName} • {blueprintName}
-            </p>
-          </div>
-          <div className="ml-auto">
-            <Button onClick={handleGenerate} disabled={generating || !customPrompt.trim()}>
-              {generating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Generate
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Mobile Layout - Tabs */}
       <div className="flex flex-1 flex-col overflow-hidden lg:hidden">
@@ -142,11 +123,7 @@ export function GeneratePageClient({
             />
           </TabsContent>
           <TabsContent value="editor" className="flex-1 overflow-hidden">
-            <PromptEditor
-              sessionId={sessionId}
-              value={customPrompt}
-              onChange={setCustomPrompt}
-            />
+            <PromptEditor sessionId={sessionId} value={customPrompt} onChange={setCustomPrompt} />
           </TabsContent>
           <TabsContent value="preview" className="flex-1 overflow-hidden">
             <PromptPreview sessionId={sessionId} template={customPrompt} />
@@ -167,11 +144,7 @@ export function GeneratePageClient({
 
         {/* Center - Prompt Editor */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <PromptEditor
-            sessionId={sessionId}
-            value={customPrompt}
-            onChange={setCustomPrompt}
-          />
+          <PromptEditor sessionId={sessionId} value={customPrompt} onChange={setCustomPrompt} />
         </div>
 
         {/* Right Rail - Live Preview */}

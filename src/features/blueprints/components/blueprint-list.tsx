@@ -96,6 +96,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
         });
       }
     } catch (error) {
+      console.error('Failed to duplicate blueprint:', error);
       toast.error('Failed to duplicate blueprint', {
         description: 'An unexpected error occurred',
       });
@@ -124,6 +125,7 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
         setDeleteId(null);
       }
     } catch (error) {
+      console.error('Failed to delete blueprint:', error);
       toast.error('Failed to delete blueprint', {
         description: 'An unexpected error occurred',
       });
@@ -181,13 +183,19 @@ export function BlueprintList({ blueprints: initialBlueprints }: BlueprintListPr
                     </p>
                   )}
                 </div>
-                <Badge className={getStatusColor(blueprint.status)}>{blueprint.status}</Badge>
+                <Badge
+                  className={`${getStatusColor(blueprint.status)} pointer-events-none hover:bg-inherit`}
+                >
+                  {blueprint.status}
+                </Badge>
               </div>
 
               <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                 <span>{blueprint.section_count || 0} sections</span>
                 <span>•</span>
                 <span>{blueprint.field_count || 0} fields</span>
+                <span>•</span>
+                <span>{blueprint.generator_count || 0} generators</span>
               </div>
 
               <div className="mt-auto flex items-center gap-2">

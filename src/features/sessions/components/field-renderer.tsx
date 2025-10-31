@@ -51,9 +51,7 @@ export function FieldRenderer({
   useEffect(() => {
     const fetchSuggestion = async () => {
       try {
-        const response = await fetch(
-          `/api/v1/sessions/${sessionId}/fields/${field.id}/suggestion`
-        );
+        const response = await fetch(`/api/v1/sessions/${sessionId}/fields/${field.id}/suggestion`);
         if (response.ok) {
           const result = await response.json();
           if (result.data) {
@@ -61,6 +59,7 @@ export function FieldRenderer({
           }
         }
       } catch (error) {
+        console.error('Failed to fetch field suggestion:', error);
         // Silent fail - suggestions are optional
       }
     };

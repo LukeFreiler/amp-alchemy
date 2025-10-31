@@ -54,7 +54,7 @@ export function FieldGrid({
     onProgressUpdate?.();
   };
 
-  const handleValidationChange = (_fieldId: string, _isValid: boolean) => {
+  const handleValidationChange = () => {
     // Track validation state and notify parent
     const currentErrors = fields.filter((f) => f.required && !f.value?.trim());
     onValidationChange?.(currentErrors.length);

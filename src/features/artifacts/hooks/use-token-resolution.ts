@@ -14,10 +14,7 @@ type TokenResolutionState = {
   loading: boolean;
 };
 
-export function useTokenResolution(
-  sessionId: string,
-  template: string
-): TokenResolutionState {
+export function useTokenResolution(sessionId: string, template: string): TokenResolutionState {
   const [state, setState] = useState<TokenResolutionState>({
     resolved: null,
     errors: [],
@@ -65,7 +62,9 @@ export function useTokenResolution(
 
         tokens.forEach((token) => {
           if (token.type === 'field') {
-            const exists = tokenData.fields.some((f: { fieldKey: string }) => f.fieldKey === token.key);
+            const exists = tokenData.fields.some(
+              (f: { fieldKey: string }) => f.fieldKey === token.key
+            );
             if (!exists) {
               validationErrors.push({
                 token: token.raw,
@@ -80,7 +79,9 @@ export function useTokenResolution(
         let resolved = template;
         tokens.forEach((token) => {
           if (token.type === 'field') {
-            const field = tokenData.fields.find((f: { fieldKey: string }) => f.fieldKey === token.key);
+            const field = tokenData.fields.find(
+              (f: { fieldKey: string }) => f.fieldKey === token.key
+            );
             if (field) {
               resolved = resolved.replace(token.raw, field.value || '(empty)');
             }
@@ -94,6 +95,7 @@ export function useTokenResolution(
           loading: false,
         });
       } catch (err) {
+        console.error('Failed to resolve tokens:', err);
         setState({
           resolved: null,
           errors: [{ token: '', type: 'field', message: 'Resolution error' }],

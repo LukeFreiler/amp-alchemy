@@ -6,7 +6,7 @@
  * Displays count of pending AI suggestions with a Review button
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ export function SuggestionBanner({ sessionId, onSuggestionsReviewed }: Suggestio
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = useCallback(async () => {
     try {
       const response = await fetch(`/api/v1/sessions/${sessionId}/suggestions`);
       const result = await response.json();
@@ -43,15 +43,16 @@ export function SuggestionBanner({ sessionId, onSuggestionsReviewed }: Suggestio
         }
       }
     } catch (error) {
+      console.error('Failed to fetch suggestions:', error);
       // Silently fail - banner will just not show
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
 
   useEffect(() => {
     fetchSuggestions();
-  }, [sessionId]);
+  }, [fetchSuggestions]);
 
   const handleComplete = () => {
     setShowModal(false);
@@ -73,11 +74,13 @@ export function SuggestionBanner({ sessionId, onSuggestionsReviewed }: Suggestio
             <Sparkles className="h-5 w-5 text-yellow-400" />
             <div>
               <span className="font-medium">
-                {count} lower-confidence suggestion{count > 1 ? 's' : ''} need{count === 1 ? 's' : ''} review
+                {count} lower-confidence suggestion{count > 1 ? 's' : ''} need
+                {count === 1 ? 's' : ''} review
                 {source && <> from {source}</>}
               </span>
               <p className="text-xs text-yellow-300/70">
-                High-confidence suggestions were applied automatically. Click AI badges below to review remaining suggestions.
+                High-confidence suggestions were applied automatically. Click AI badges below to
+                review remaining suggestions.
               </p>
             </div>
           </div>

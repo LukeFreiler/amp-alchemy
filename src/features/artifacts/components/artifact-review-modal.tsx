@@ -6,11 +6,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GenerateResponse } from '@/features/artifacts/types/artifact';
@@ -43,7 +44,7 @@ export function ArtifactReviewModal({ sessionId, generatorId, onClose }: Artifac
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [showMissingFieldsWarning, setShowMissingFieldsWarning] = useState(false);
 
-  const generate = async () => {
+  const generate = useCallback(async () => {
     setLoading(true);
     setError(null);
     setMissingFields([]);
@@ -66,15 +67,16 @@ export function ArtifactReviewModal({ sessionId, generatorId, onClose }: Artifac
         setError(result.error.message || 'Failed to generate artifact');
       }
     } catch (err) {
+      console.error('Failed to generate artifact:', err);
       setError('Network error occurred while generating artifact');
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId, generatorId]);
 
   useEffect(() => {
     generate();
-  }, [sessionId, generatorId]);
+  }, [generate]);
 
   const handleProceedAnyway = () => {
     setShowMissingFieldsWarning(false);
@@ -110,6 +112,7 @@ export function ArtifactReviewModal({ sessionId, generatorId, onClose }: Artifac
         setError(result.error?.message || 'Failed to save artifact');
       }
     } catch (err) {
+      console.error('Failed to save artifact:', err);
       setError('Network error occurred while saving artifact');
     } finally {
       setSaving(false);
@@ -172,8 +175,8 @@ export function ArtifactReviewModal({ sessionId, generatorId, onClose }: Artifac
             </TabsList>
 
             <TabsContent value="artifact" className="mt-4 flex flex-1 flex-col overflow-hidden">
-              <div className="prose prose-sm dark:prose-invert flex-1 overflow-y-auto rounded-md border border-border bg-card p-4">
-                <ReactMarkdown>{artifact.markdown}</ReactMarkdown>
+              <div className="prose prose-sm max-w-none flex-1 overflow-y-auto rounded-md border border-border bg-card p-6 dark:prose-invert">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{artifact.markdown}</ReactMarkdown>
               </div>
             </TabsContent>
 

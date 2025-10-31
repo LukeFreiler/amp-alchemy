@@ -40,7 +40,13 @@ interface GeneratorModalProps {
   onClose: () => void;
 }
 
-export function GeneratorModal({ generator, blueprint, open, onSave, onClose }: GeneratorModalProps) {
+export function GeneratorModal({
+  generator,
+  blueprint,
+  open,
+  onSave,
+  onClose,
+}: GeneratorModalProps) {
   const [name, setName] = useState(generator?.name || '');
   const [description, setDescription] = useState(generator?.description || '');
   const [promptTemplate, setPromptTemplate] = useState(generator?.prompt_template || '');
@@ -98,7 +104,9 @@ export function GeneratorModal({ generator, blueprint, open, onSave, onClose }: 
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{generator ? 'Edit Generator' : 'Add Generator'}</DialogTitle>
+          <DialogTitle>
+            {generator ? 'Edit Artifact Generator' : 'Add Artifact Generator'}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
@@ -151,7 +159,8 @@ export function GeneratorModal({ generator, blueprint, open, onSave, onClose }: 
               <p className="mt-1 text-xs text-muted-foreground">
                 Use tokens like <code className="rounded bg-muted px-1">{'{{field:key}}'}</code> for
                 individual fields or{' '}
-                <code className="rounded bg-muted px-1">{'{{section:id}}'}</code> for entire sections.
+                <code className="rounded bg-muted px-1">{'{{section:id}}'}</code> for entire
+                sections.
               </p>
             </div>
 

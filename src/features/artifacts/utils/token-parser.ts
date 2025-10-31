@@ -5,16 +5,18 @@
  *
  * Supported token types:
  * - {{field_key}} - Individual field value (simple format)
- * - {{field:key}} - Individual field value (legacy format, for backward compatibility)
+ * - {{field:key}} - Individual field value (explicit format)
+ * - {{section:id}} - All fields in a section
+ * - {{notes:id}} - Notes for a section
  * - {{fields_json}} - Legacy: All fields as JSON
  * - {{notes_json}} - Legacy: All notes as JSON
  */
 
-export type TokenType = 'field' | 'fields_json' | 'notes_json';
+export type TokenType = 'field' | 'section' | 'notes' | 'fields_json' | 'notes_json';
 
 export type ParsedToken = {
   type: TokenType;
-  key: string; // field key or 'fields_json'/'notes_json'
+  key: string; // field key, section id, or special token name
   raw: string; // original token string including braces
   start: number; // position in template
   end: number; // position in template
@@ -22,12 +24,15 @@ export type ParsedToken = {
 
 // Token regex patterns
 const TOKEN_PATTERNS = {
-  // Simple format: {{field_key}}
-  simple_field: /\{\{([a-z0-9_-]+)\}\}/gi,
+  // Explicit format with type prefix
+  field: /\{\{field:([a-z0-9_-]+)\}\}/gi,
+  section: /\{\{section:([a-z0-9_-]+)\}\}/gi,
+  notes: /\{\{notes:([a-z0-9_-]+)\}\}/gi,
   // Legacy formats
-  legacy_field: /\{\{field:([a-z0-9_-]+)\}\}/gi,
   fields_json: /\{\{fields_json\}\}/gi,
   notes_json: /\{\{notes_json\}\}/gi,
+  // Simple format (must be checked last): {{field_key}}
+  simple_field: /\{\{([a-z0-9_-]+)\}\}/gi,
 };
 
 /**
@@ -39,22 +44,31 @@ const TOKEN_PATTERNS = {
 export function parseTokens(template: string): ParsedToken[] {
   const tokens: ParsedToken[] = [];
 
-  // Extract legacy field tokens ({{field:key}})
-  const legacyFieldRegex = new RegExp(TOKEN_PATTERNS.legacy_field.source, 'gi');
-  let match: RegExpExecArray | null;
-  while ((match = legacyFieldRegex.exec(template)) !== null) {
-    if (match[1]) {
-      tokens.push({
-        type: 'field',
-        key: match[1],
-        raw: match[0],
-        start: match.index,
-        end: match.index + match[0].length,
-      });
-    }
-  }
+  // Extract explicit format tokens ({{type:key}}) - must check these first
+  const explicitTypes: Array<{ type: TokenType; pattern: keyof typeof TOKEN_PATTERNS }> = [
+    { type: 'field', pattern: 'field' },
+    { type: 'section', pattern: 'section' },
+    { type: 'notes', pattern: 'notes' },
+  ];
 
-  // Extract fields_json and notes_json
+  let match: RegExpExecArray | null;
+
+  explicitTypes.forEach(({ type, pattern }) => {
+    const regex = new RegExp(TOKEN_PATTERNS[pattern].source, 'gi');
+    while ((match = regex.exec(template)) !== null) {
+      if (match[1]) {
+        tokens.push({
+          type,
+          key: match[1],
+          raw: match[0],
+          start: match.index,
+          end: match.index + match[0].length,
+        });
+      }
+    }
+  });
+
+  // Extract legacy tokens (fields_json, notes_json)
   ['fields_json', 'notes_json'].forEach((type) => {
     const pattern = TOKEN_PATTERNS[type as keyof typeof TOKEN_PATTERNS];
     const regex = new RegExp(pattern.source, 'gi');
@@ -69,14 +83,14 @@ export function parseTokens(template: string): ParsedToken[] {
     }
   });
 
-  // Extract simple field tokens ({{field_key}}) - must check they're not already matched
+  // Extract simple field tokens ({{field_key}}) - must check last to avoid conflicts
   const simpleFieldRegex = new RegExp(TOKEN_PATTERNS.simple_field.source, 'gi');
   while ((match = simpleFieldRegex.exec(template)) !== null) {
     const key = match[1];
-    // Skip if key is undefined or it's fields_json or notes_json
+    // Skip if key is undefined or it's a reserved keyword
     if (!key || key === 'fields_json' || key === 'notes_json') continue;
 
-    // Skip if already matched by legacy pattern
+    // Skip if already matched by explicit format
     const alreadyMatched = tokens.some(
       (t) => t.start === match!.index && t.end === match!.index + match![0].length
     );
@@ -105,6 +119,8 @@ export function extractTokenKeys(template: string): Record<TokenType, string[]> 
   const tokens = parseTokens(template);
   const keysByType: Record<TokenType, Set<string>> = {
     field: new Set(),
+    section: new Set(),
+    notes: new Set(),
     fields_json: new Set(),
     notes_json: new Set(),
   };
@@ -135,9 +151,7 @@ export function hasTokens(template: string): boolean {
  * @param template - Prompt template string
  * @returns Validation result with any syntax errors found
  */
-export function validateTokenSyntax(
-  template: string
-): { valid: boolean; errors: string[] } {
+export function validateTokenSyntax(template: string): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   // Check for malformed tokens (opening braces without closing, etc.)
@@ -150,7 +164,9 @@ export function validateTokenSyntax(
 
   // Find potential malformed tokens
   const malformedPatterns = [
-    /\{\{field:\s*\}\}/g, // Empty legacy field key
+    /\{\{field:\s*\}\}/g, // Empty field key
+    /\{\{section:\s*\}\}/g, // Empty section key
+    /\{\{notes:\s*\}\}/g, // Empty notes key
     /\{\{\s*\}\}/g, // Empty braces
   ];
 

@@ -37,10 +37,12 @@ export async function GET() {
         b.created_at,
         b.updated_at,
         COUNT(DISTINCT s.id)::int as section_count,
-        COUNT(f.id)::int as field_count
+        COUNT(DISTINCT f.id)::int as field_count,
+        COUNT(DISTINCT g.id)::int as generator_count
        FROM blueprints b
        LEFT JOIN sections s ON s.blueprint_id = b.id
        LEFT JOIN fields f ON f.section_id = s.id
+       LEFT JOIN blueprint_artifact_generators g ON g.blueprint_id = b.id
        WHERE b.company_id = $1
        GROUP BY b.id, b.company_id, b.name, b.description, b.status, b.created_at, b.updated_at
        ORDER BY b.updated_at DESC`,

@@ -6,14 +6,15 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Sparkles, Loader2, RefreshCw, AlertCircle, Eye, FileText } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Sparkles, Loader2, RefreshCw, AlertCircle, Eye, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader } from '@/components/ui/page-header';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Generator, Artifact, GenerateResponse } from '@/features/artifacts/types/artifact';
 
 interface ArtifactsPageClientProps {
@@ -43,7 +44,6 @@ export function ArtifactsPageClient({
   blueprintName,
   generators,
 }: ArtifactsPageClientProps) {
-  const router = useRouter();
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [selectedItem, setSelectedItem] = useState<{
     type: 'artifact' | 'generator';
@@ -56,12 +56,7 @@ export function ArtifactsPageClient({
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [generatedArtifact, setGeneratedArtifact] = useState<GenerateResponse | null>(null);
 
-  // Fetch artifacts
-  useEffect(() => {
-    fetchArtifacts();
-  }, [sessionId]);
-
-  const fetchArtifacts = async () => {
+  const fetchArtifacts = useCallback(async () => {
     setLoadingArtifacts(true);
     try {
       const response = await fetch(`/api/v1/sessions/${sessionId}/artifacts`);
@@ -81,11 +76,17 @@ export function ArtifactsPageClient({
         }
       }
     } catch (err) {
+      console.error('Failed to load artifacts:', err);
       setError('Failed to load artifacts');
     } finally {
       setLoadingArtifacts(false);
     }
-  };
+  }, [sessionId, selectedItem]);
+
+  // Fetch artifacts
+  useEffect(() => {
+    fetchArtifacts();
+  }, [fetchArtifacts]);
 
   const handleGenerate = async (generatorId: string) => {
     setGenerating(true);
@@ -111,6 +112,7 @@ export function ArtifactsPageClient({
         setError(result.error.message || 'Failed to generate artifact');
       }
     } catch (err) {
+      console.error('Failed to generate artifact:', err);
       setError('Network error occurred while generating artifact');
     } finally {
       setGenerating(false);
@@ -144,6 +146,7 @@ export function ArtifactsPageClient({
         setError(result.error?.message || 'Failed to save artifact');
       }
     } catch (err) {
+      console.error('Failed to save artifact:', err);
       setError('Network error occurred while saving artifact');
     } finally {
       setSaving(false);
@@ -168,25 +171,11 @@ export function ArtifactsPageClient({
 
   return (
     <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
-      {/* Header */}
-      <div className="border-b bg-navbar p-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push(`/sessions/${sessionId}`)}
-            aria-label="Back to session"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-semibold">Artifacts</h1>
-            <p className="text-sm text-muted-foreground">
-              {sessionName} • {blueprintName || 'Blueprint'}
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Artifacts"
+        subtitle={`${sessionName} • ${blueprintName || 'Blueprint'}`}
+        backHref={`/sessions/${sessionId}`}
+      />
 
       {/* Main layout */}
       <div className="flex flex-1 overflow-hidden">
@@ -336,8 +325,10 @@ export function ArtifactsPageClient({
                       </TabsList>
 
                       <TabsContent value="artifact" className="mt-4">
-                        <div className="prose prose-sm dark:prose-invert overflow-y-auto rounded-md border border-border bg-card p-6">
-                          <ReactMarkdown>{generatedArtifact.markdown}</ReactMarkdown>
+                        <div className="prose prose-sm max-w-none overflow-y-auto rounded-md border border-border bg-card p-6 dark:prose-invert">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {generatedArtifact.markdown}
+                          </ReactMarkdown>
                         </div>
                       </TabsContent>
 
@@ -381,8 +372,10 @@ export function ArtifactsPageClient({
                   </div>
                 </div>
 
-                <div className="prose prose-sm dark:prose-invert rounded-md border border-border bg-card p-6">
-                  <ReactMarkdown>{selectedArtifact.markdown}</ReactMarkdown>
+                <div className="prose prose-sm max-w-none rounded-md border border-border bg-card p-6 dark:prose-invert">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {selectedArtifact.markdown}
+                  </ReactMarkdown>
                 </div>
               </>
             ) : null}

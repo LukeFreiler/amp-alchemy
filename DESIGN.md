@@ -319,9 +319,7 @@ When creating pages that should fill the entire viewport without scrolling, foll
 <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
   {/* Header - fixed height */}
   <div className="border-b border-border bg-card">
-    <div className="flex items-center justify-between px-6 py-4">
-      {/* Header content */}
-    </div>
+    <div className="flex items-center justify-between px-6 py-4">{/* Header content */}</div>
   </div>
 
   {/* Main content - fills remaining space */}

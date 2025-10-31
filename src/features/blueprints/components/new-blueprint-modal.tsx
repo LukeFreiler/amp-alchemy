@@ -69,6 +69,7 @@ export function NewBlueprintModal({
         setError(result.error.message || 'Failed to create blueprint');
       }
     } catch (error) {
+      console.error('Failed to create blueprint:', error);
       setError('Failed to create blueprint');
     } finally {
       setIsLoading(false);

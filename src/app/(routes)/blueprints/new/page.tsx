@@ -57,6 +57,7 @@ export default function NewBlueprintPage() {
         setIsCreating(false);
       }
     } catch (error) {
+      console.error('Failed to create blueprint:', error);
       toast({
         variant: 'destructive',
         title: 'Error',

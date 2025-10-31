@@ -6,7 +6,7 @@
  * Modal for creating a new session from a published blueprint
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -44,13 +44,7 @@ export function StartSessionModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open) {
-      fetchBlueprints();
-    }
-  }, [open]);
-
-  const fetchBlueprints = async () => {
+  const fetchBlueprints = useCallback(async () => {
     try {
       const response = await fetch('/api/v1/blueprints');
       const result = await response.json();
@@ -66,9 +60,16 @@ export function StartSessionModal({
         }
       }
     } catch (error) {
+      console.error('Failed to load blueprints:', error);
       setError('Failed to load blueprints');
     }
-  };
+  }, [selectedBlueprintId]);
+
+  useEffect(() => {
+    if (open) {
+      fetchBlueprints();
+    }
+  }, [open, fetchBlueprints]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,6 +109,7 @@ export function StartSessionModal({
         setError(result.error.message || 'Failed to create session');
       }
     } catch (error) {
+      console.error('Failed to create session:', error);
       setError('Failed to create session');
     } finally {
       setIsLoading(false);

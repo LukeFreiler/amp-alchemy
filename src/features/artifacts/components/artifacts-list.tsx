@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
 import { FileText, Eye } from 'lucide-react';
 import { GroupedArtifacts } from '@/features/artifacts/types/artifact';
 import { ArtifactTimeline } from './artifact-timeline';
@@ -33,7 +34,7 @@ export function ArtifactsList({ sessionId }: ArtifactsListProps) {
           setArtifactsGrouped(result.data);
         }
       } catch (error) {
-        // Handle error silently
+        console.error('Failed to fetch artifacts:', error);
       } finally {
         setLoading(false);
       }
@@ -50,12 +51,11 @@ export function ArtifactsList({ sessionId }: ArtifactsListProps) {
 
   if (groupEntries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-        <p className="text-muted-foreground">
-          No artifacts generated yet. Use the Generate button to create your first artifact.
-        </p>
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No artifacts yet"
+        description="Use the Generate button to create your first artifact"
+      />
     );
   }
 

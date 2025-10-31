@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss';
 import animate from 'tailwindcss-animate';
+import typography from '@tailwindcss/typography';
 
 const config: Config = {
   // We keep "class" so Tailwind's dark features work, but we will hard-set the html to dark.
@@ -204,7 +205,12 @@ const config: Config = {
       },
     },
   },
-  plugins: [animate],
+  plugins: [
+    animate,
+    typography({
+      target: 'modern',
+    }),
+  ],
 };
 
 export default config;

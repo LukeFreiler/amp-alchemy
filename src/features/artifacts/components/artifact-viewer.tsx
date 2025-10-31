@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Eye } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Artifact } from '@/features/artifacts/types/artifact';
 
 type ArtifactViewerProps = {
@@ -32,7 +33,7 @@ export function ArtifactViewer({ artifactId, onClose }: ArtifactViewerProps) {
           setArtifact(result.data);
         }
       } catch (error) {
-        // Handle error silently
+        console.error('Failed to fetch artifact:', error);
       } finally {
         setLoading(false);
       }
@@ -74,8 +75,8 @@ export function ArtifactViewer({ artifactId, onClose }: ArtifactViewerProps) {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : artifact ? (
-          <div className="prose prose-sm dark:prose-invert flex-1 overflow-y-auto rounded-md border border-border bg-card p-6">
-            <ReactMarkdown>{artifact.markdown}</ReactMarkdown>
+          <div className="prose prose-sm max-w-none flex-1 overflow-y-auto rounded-md border border-border bg-card p-6 dark:prose-invert">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{artifact.markdown}</ReactMarkdown>
           </div>
         ) : (
           <div className="py-12 text-center text-muted-foreground">Artifact not found</div>

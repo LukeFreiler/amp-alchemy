@@ -50,9 +50,7 @@ export default async function HomePage() {
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link href="/auth/signup">
-                <Button className="w-full sm:w-auto">
-                  Start Free Trial
-                </Button>
+                <Button className="w-full sm:w-auto">Start Free Trial</Button>
               </Link>
               <Link href="/auth/signin">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">

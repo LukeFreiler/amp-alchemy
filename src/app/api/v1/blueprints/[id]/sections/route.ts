@@ -9,6 +9,7 @@ import { requireAuth } from '@/lib/auth/middleware';
 import { handleError, ValidationError, NotFoundError } from '@/lib/errors';
 import { queryOne } from '@/lib/db/query';
 import { logger } from '@/lib/logger';
+import { generateKey } from '@/lib/utils/generate-key';
 import { Blueprint, Section, CreateSectionRequest } from '@/features/blueprints/types/blueprint';
 
 type SuccessResponse<T> = {
@@ -54,12 +55,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const nextOrder = (maxOrder?.max ?? -1) + 1;
 
+    // Generate key from title
+    const key = generateKey(body.title.trim());
+
     // Create section
     const section = await queryOne<Section>(
-      `INSERT INTO sections (blueprint_id, order_index, title, description)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO sections (blueprint_id, order_index, title, description, key)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [id, nextOrder, body.title.trim(), body.description?.trim() || null]
+      [id, nextOrder, body.title.trim(), body.description?.trim() || null, key]
     );
 
     if (!section) {

@@ -38,6 +38,7 @@ export default async function GeneratorEditorPage({ params }: PageProps) {
             'order_index', s.order_index,
             'title', s.title,
             'description', s.description,
+            'key', s.key,
             'created_at', s.created_at,
             'updated_at', s.updated_at,
             'fields', COALESCE(

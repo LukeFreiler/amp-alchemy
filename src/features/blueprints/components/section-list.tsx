@@ -7,22 +7,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Plus, Trash2, Edit, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -57,6 +43,19 @@ function SortableSection({
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: section.id,
+    data: {
+      type: 'section',
+      section,
+    },
+  });
+
+  // Make this section a droppable target for fields
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: section.id,
+    data: {
+      type: 'section',
+      accepts: ['field'],
+    },
   });
 
   const style = {
@@ -65,13 +64,21 @@ function SortableSection({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Combine refs for both sortable and droppable
+  const combinedRef = (node: HTMLDivElement | null) => {
+    setNodeRef(node);
+    setDroppableRef(node);
+  };
+
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={combinedRef} style={style}>
       <Card
         className={`flex cursor-pointer items-center gap-2 p-3 transition-colors ${
           isSelected
             ? 'border-2 border-primary bg-accent'
-            : 'border-2 border-transparent hover:bg-accent/50'
+            : isOver
+              ? 'border-2 border-primary bg-accent/70 ring-2 ring-primary/50'
+              : 'border-2 border-transparent hover:bg-accent/50'
         }`}
         onClick={onSelect}
       >
@@ -80,6 +87,7 @@ function SortableSection({
           {...listeners}
           className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
           aria-label="Drag to reorder"
+          onClick={(e) => e.stopPropagation()}
         >
           <GripVertical className="h-4 w-4" />
         </button>
@@ -121,7 +129,6 @@ export function SectionList({
   sections: initialSections,
   selectedSectionId,
   onSectionSelect,
-  onSectionsReorder,
   onAddSection,
   onEditSection,
   onDeleteSection,
@@ -134,30 +141,6 @@ export function SectionList({
   useEffect(() => {
     setSections(initialSections);
   }, [initialSections]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = sections.findIndex((s) => s.id === active.id);
-      const newIndex = sections.findIndex((s) => s.id === over.id);
-
-      const reordered = arrayMove(sections, oldIndex, newIndex).map((section, index) => ({
-        ...section,
-        order_index: index,
-      }));
-
-      setSections(reordered);
-      onSectionsReorder(reordered);
-    }
-  };
 
   const handleDelete = () => {
     if (deleteId) {
@@ -188,27 +171,18 @@ export function SectionList({
             description="Add your first section to organize fields in this blueprint"
           />
         ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={sections.map((s) => s.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {sections.map((section) => (
-                <SortableSection
-                  key={section.id}
-                  section={section}
-                  isSelected={section.id === selectedSectionId}
-                  onSelect={() => onSectionSelect(section.id)}
-                  onEdit={() => onEditSection(section.id)}
-                  onDelete={() => setDeleteId(section.id)}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+          <SortableContext items={sections.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            {sections.map((section) => (
+              <SortableSection
+                key={section.id}
+                section={section}
+                isSelected={section.id === selectedSectionId}
+                onSelect={() => onSectionSelect(section.id)}
+                onEdit={() => onEditSection(section.id)}
+                onDelete={() => setDeleteId(section.id)}
+              />
+            ))}
+          </SortableContext>
         )}
       </div>
 

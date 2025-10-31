@@ -58,7 +58,7 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
           setArtifacts(generatorArtifacts);
         }
       } catch (error) {
-        // Handle error silently
+        console.error('Failed to fetch artifacts:', error);
       } finally {
         setLoading(false);
       }
@@ -93,6 +93,7 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
         });
       }
     } catch (error) {
+      console.error('Failed to delete artifact:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -225,7 +226,11 @@ export function ArtifactTimeline({ sessionId, generatorId, onClose }: ArtifactTi
                     )}
 
                     {!artifact.published && (
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(artifact.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(artifact.id)}
+                      >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     )}

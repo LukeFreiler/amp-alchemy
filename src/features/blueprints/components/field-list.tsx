@@ -7,22 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
   GripVertical,
@@ -72,6 +57,10 @@ function SortableField({
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: field.id,
+    data: {
+      type: 'field',
+      field,
+    },
   });
 
   const style = {
@@ -124,7 +113,6 @@ function SortableField({
 
 export function FieldList({
   fields: initialFields,
-  onFieldsReorder,
   onAddField,
   onEditField,
   onDeleteField,
@@ -137,30 +125,6 @@ export function FieldList({
   useEffect(() => {
     setFields(initialFields);
   }, [initialFields]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = fields.findIndex((f) => f.id === active.id);
-      const newIndex = fields.findIndex((f) => f.id === over.id);
-
-      const reordered = arrayMove(fields, oldIndex, newIndex).map((field, index) => ({
-        ...field,
-        order_index: index,
-      }));
-
-      setFields(reordered);
-      onFieldsReorder(reordered);
-    }
-  };
 
   const handleDelete = () => {
     if (deleteId) {
@@ -191,22 +155,16 @@ export function FieldList({
             description="Add fields to collect specific data for this section"
           />
         ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-              {fields.map((field) => (
-                <SortableField
-                  key={field.id}
-                  field={field}
-                  onEdit={() => onEditField(field.id)}
-                  onDelete={() => setDeleteId(field.id)}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+          <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+            {fields.map((field) => (
+              <SortableField
+                key={field.id}
+                field={field}
+                onEdit={() => onEditField(field.id)}
+                onDelete={() => setDeleteId(field.id)}
+              />
+            ))}
+          </SortableContext>
         )}
       </div>
 

@@ -35,16 +35,9 @@ export function PromptPreview({ sessionId, template }: PromptPreviewProps) {
       <div className="flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div>
           <h2 className="text-sm font-semibold">Live Preview</h2>
-          <p className="text-xs text-muted-foreground">
-            Resolved tokens with session data
-          </p>
+          <p className="text-xs text-muted-foreground">Resolved tokens with session data</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCopy}
-          disabled={!resolved || loading}
-        >
+        <Button variant="ghost" size="sm" onClick={handleCopy} disabled={!resolved || loading}>
           {copied ? (
             <>
               <CheckCircle className="h-4 w-4 text-green-500" />
@@ -61,11 +54,7 @@ export function PromptPreview({ sessionId, template }: PromptPreviewProps) {
 
       {/* Preview Content */}
       <div className="flex-1 overflow-y-auto p-4">
-        {loading && (
-          <div className="text-sm text-muted-foreground">
-            Resolving tokens...
-          </div>
-        )}
+        {loading && <div className="text-sm text-muted-foreground">Resolving tokens...</div>}
 
         {errors.length > 0 && (
           <Alert variant="destructive" className="mb-4">
@@ -82,15 +71,11 @@ export function PromptPreview({ sessionId, template }: PromptPreviewProps) {
         )}
 
         {resolved && !loading && (
-          <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed">
-            {resolved}
-          </pre>
+          <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed">{resolved}</pre>
         )}
 
         {!resolved && !loading && template && (
-          <div className="text-sm text-muted-foreground">
-            No valid tokens to resolve
-          </div>
+          <div className="text-sm text-muted-foreground">No valid tokens to resolve</div>
         )}
 
         {!template && (

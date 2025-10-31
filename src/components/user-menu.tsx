@@ -10,9 +10,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Settings, LogOut } from 'lucide-react';
+import { Settings, LogOut, Sparkles } from 'lucide-react';
 
 import { AuthUser } from '@/features/auth/types/session';
+import { useAnimationPreference } from '@/hooks/use-animation-preference';
 
 interface UserMenuProps {
   user: AuthUser;
@@ -30,6 +31,7 @@ interface UserMenuProps {
  *   <UserMenu user={session.user} />
  */
 export function UserMenu({ user }: UserMenuProps) {
+  const { animationEnabled, toggleAnimation } = useAnimationPreference();
   const initials =
     user.name
       ?.split(' ')
@@ -64,6 +66,11 @@ export function UserMenu({ user }: UserMenuProps) {
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </a>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={toggleAnimation} className="cursor-pointer">
+          <Sparkles className="mr-2 h-4 w-4" />
+          {animationEnabled ? 'Disable' : 'Enable'} Animation
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

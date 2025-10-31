@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { BlueprintArtifactGenerator } from '@/features/blueprints/types/generator';
 import { useToast } from '@/hooks/use-toast';
 
@@ -70,10 +71,11 @@ export function GeneratorList({
         });
       }
     } catch (error) {
+      console.error('Failed to delete artifact generator:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to delete generator',
+        description: 'Failed to delete artifact generator',
       });
     } finally {
       setIsDeleting(false);
@@ -125,10 +127,11 @@ export function GeneratorList({
         onUpdate();
       }
     } catch (error) {
+      console.error('Failed to reorder artifact generators:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to reorder generators',
+        description: 'Failed to reorder artifact generators',
       });
       onUpdate();
     } finally {
@@ -147,22 +150,16 @@ export function GeneratorList({
         </div>
         <Button onClick={handleAdd}>
           <Plus className="h-4 w-4" />
-          Add Generator
+          Add Artifact Generator
         </Button>
       </div>
 
       {generators.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-12">
-          <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-          <h3 className="mb-2 text-lg font-semibold">No generators yet</h3>
-          <p className="mb-4 text-sm text-muted-foreground">
-            Add your first artifact generator to get started
-          </p>
-          <Button onClick={handleAdd}>
-            <Plus className="h-4 w-4" />
-            Add Generator
-          </Button>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title="No artifact generators yet"
+          description="Add your first artifact generator to get started"
+        />
       ) : (
         <div className="space-y-3">
           {generators.map((generator, index) => (
@@ -200,7 +197,7 @@ export function GeneratorList({
                   variant="outline"
                   size="sm"
                   onClick={() => handleEdit(generator)}
-                  aria-label="Edit generator"
+                  aria-label="Edit artifact generator"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -208,7 +205,7 @@ export function GeneratorList({
                   variant="outline"
                   size="sm"
                   onClick={() => setDeleteId(generator.id)}
-                  aria-label="Delete generator"
+                  aria-label="Delete artifact generator"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -223,8 +220,8 @@ export function GeneratorList({
         onOpenChange={(open) => {
           if (!open) setDeleteId(null);
         }}
-        title="Delete Generator?"
-        description="This action cannot be undone. If any artifacts reference this generator, deletion will fail."
+        title="Delete Artifact Generator?"
+        description="This action cannot be undone. If any artifacts reference this artifact generator, deletion will fail."
         onConfirm={handleDelete}
         isDeleting={isDeleting}
       />

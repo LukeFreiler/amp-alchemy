@@ -77,7 +77,10 @@ function validateToken(
 /**
  * Validate a field token
  */
-function validateFieldToken(fieldKey: string, data: TokenResolutionData): TokenValidationError | null {
+function validateFieldToken(
+  fieldKey: string,
+  data: TokenResolutionData
+): TokenValidationError | null {
   const field = data.fields.find((f) => f.key === fieldKey);
 
   if (!field) {
@@ -91,7 +94,8 @@ function validateFieldToken(fieldKey: string, data: TokenResolutionData): TokenV
       token: `{{field:${fieldKey}}}`,
       type: 'field',
       message: `Field not found: ${fieldKey}`,
-      suggestions: suggestions.length > 0 ? suggestions.map((key) => `{{field:${key}}}`) : undefined,
+      suggestions:
+        suggestions.length > 0 ? suggestions.map((key) => `{{field:${key}}}`) : undefined,
     };
   }
 
@@ -101,20 +105,24 @@ function validateFieldToken(fieldKey: string, data: TokenResolutionData): TokenV
 /**
  * Validate a section token
  */
-function validateSectionToken(sectionId: string, data: TokenResolutionData): TokenValidationError | null {
-  const section = data.sections.find((s) => s.id === sectionId);
+function validateSectionToken(
+  sectionKey: string,
+  data: TokenResolutionData
+): TokenValidationError | null {
+  const section = data.sections.find((s) => s.key === sectionKey);
 
   if (!section) {
     const suggestions = findSimilarKeys(
-      sectionId,
-      data.sections.map((s) => s.id)
+      sectionKey,
+      data.sections.map((s) => s.key)
     );
 
     return {
-      token: `{{section:${sectionId}}}`,
+      token: `{{section:${sectionKey}}}`,
       type: 'section',
-      message: `Section not found: ${sectionId}`,
-      suggestions: suggestions.length > 0 ? suggestions.map((id) => `{{section:${id}}}`) : undefined,
+      message: `Section not found: ${sectionKey}`,
+      suggestions:
+        suggestions.length > 0 ? suggestions.map((key) => `{{section:${key}}}`) : undefined,
     };
   }
 
@@ -124,20 +132,24 @@ function validateSectionToken(sectionId: string, data: TokenResolutionData): Tok
 /**
  * Validate a notes token
  */
-function validateNotesToken(sectionId: string, data: TokenResolutionData): TokenValidationError | null {
-  const section = data.sections.find((s) => s.id === sectionId);
+function validateNotesToken(
+  sectionKey: string,
+  data: TokenResolutionData
+): TokenValidationError | null {
+  const section = data.sections.find((s) => s.key === sectionKey);
 
   if (!section) {
     const suggestions = findSimilarKeys(
-      sectionId,
-      data.sections.map((s) => s.id)
+      sectionKey,
+      data.sections.map((s) => s.key)
     );
 
     return {
-      token: `{{notes:${sectionId}}}`,
+      token: `{{notes:${sectionKey}}}`,
       type: 'notes',
-      message: `Section not found: ${sectionId}`,
-      suggestions: suggestions.length > 0 ? suggestions.map((id) => `{{notes:${id}}}`) : undefined,
+      message: `Section not found: ${sectionKey}`,
+      suggestions:
+        suggestions.length > 0 ? suggestions.map((key) => `{{notes:${key}}}`) : undefined,
     };
   }
 

@@ -103,6 +103,7 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
       setInput('');
       onImportComplete();
     } catch (error) {
+      console.error('Failed to import content:', error);
       toast({
         title: 'Import Failed',
         description: error instanceof Error ? error.message : 'Failed to import content',
@@ -114,7 +115,6 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
   };
 
   const autoMapSources = async (sourceIds: string[]) => {
-    let totalSuggestions = 0;
     let autoApplied = 0;
     let needsReview = 0;
     const autoAppliedIds: string[] = [];
@@ -128,9 +128,6 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
 
         if (!mapResponse.ok) continue;
 
-        const mapData = await mapResponse.json();
-        totalSuggestions += mapData.data?.suggestions_stored || 0;
-
         // Auto-accept high-confidence suggestions (≥90%)
         const suggestionsResponse = await fetch(`/api/v1/sessions/${sessionId}/suggestions`);
         if (suggestionsResponse.ok) {
@@ -140,10 +137,9 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
           for (const suggestion of suggestions) {
             if (suggestion.confidence >= 0.9) {
               // Auto-accept
-              await fetch(
-                `/api/v1/sessions/${sessionId}/suggestions/${suggestion.id}/accept`,
-                { method: 'PUT' }
-              );
+              await fetch(`/api/v1/sessions/${sessionId}/suggestions/${suggestion.id}/accept`, {
+                method: 'PUT',
+              });
               autoApplied++;
               autoAppliedIds.push(suggestion.id);
             } else {
@@ -152,6 +148,7 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
           }
         }
       } catch (error) {
+        console.error('Failed to map source:', error);
         // Continue with other sources
       }
     }
@@ -161,15 +158,12 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
       toast({
         title: 'Import Complete',
         description: `Applied ${autoApplied} high-confidence suggestion${autoApplied !== 1 ? 's' : ''}${needsReview > 0 ? `. ${needsReview} lower-confidence suggestion${needsReview === 1 ? '' : 's'} need${needsReview === 1 ? 's' : ''} review` : ''}`,
-        action: autoApplied > 0 ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleUndoAll(autoAppliedIds)}
-          >
-            Undo All
-          </Button>
-        ) : undefined,
+        action:
+          autoApplied > 0 ? (
+            <Button variant="outline" size="sm" onClick={() => handleUndoAll(autoAppliedIds)}>
+              Undo All
+            </Button>
+          ) : undefined,
       });
     } else if (needsReview > 0) {
       toast({
@@ -195,6 +189,7 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
 
       onImportComplete();
     } catch (error) {
+      console.error('Failed to undo suggestions:', error);
       toast({
         title: 'Undo Failed',
         description: 'Failed to undo suggestions',
@@ -237,6 +232,7 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
 
       onImportComplete();
     } catch (error) {
+      console.error('Failed to upload files:', error);
       toast({
         title: 'Upload Failed',
         description: error instanceof Error ? error.message : 'Failed to upload files',
@@ -320,12 +316,7 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
             Choose Files
           </Button>
           {input && (
-            <Button
-              onClick={() => setInput('')}
-              variant="ghost"
-              size="sm"
-              disabled={importing}
-            >
+            <Button onClick={() => setInput('')} variant="ghost" size="sm" disabled={importing}>
               <X className="mr-2 h-4 w-4" />
               Clear
             </Button>
@@ -336,11 +327,7 @@ export function InlineImportBar({ sessionId, onImportComplete }: InlineImportBar
           <p className="text-xs text-muted-foreground">
             Auto-maps as you add • High-confidence suggestions applied automatically
           </p>
-          <Button
-            onClick={processInput}
-            disabled={!input.trim() || importing}
-            size="sm"
-          >
+          <Button onClick={processInput} disabled={!input.trim() || importing} size="sm">
             {importing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

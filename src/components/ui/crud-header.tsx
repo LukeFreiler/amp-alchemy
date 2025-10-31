@@ -40,7 +40,7 @@ export function CrudHeader({
 }: CrudHeaderProps) {
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between rounded-lg bg-card p-6">
         <div>
           <h1 className="text-3xl font-bold">{title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{description}</p>

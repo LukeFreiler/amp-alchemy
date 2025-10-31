@@ -51,6 +51,7 @@ export function FieldSuggestionBadge({
         throw new Error('Failed to accept suggestion');
       }
     } catch (error) {
+      console.error('Failed to accept suggestion:', error);
       toast({
         title: 'Error',
         description: 'Failed to accept suggestion',
@@ -81,6 +82,7 @@ export function FieldSuggestionBadge({
         throw new Error('Failed to reject suggestion');
       }
     } catch (error) {
+      console.error('Failed to reject suggestion:', error);
       toast({
         title: 'Error',
         description: 'Failed to reject suggestion',
@@ -121,21 +123,11 @@ export function FieldSuggestionBadge({
           <div className="text-xs text-muted-foreground">Source: {getSourceFilename()}</div>
 
           <div className="flex gap-2">
-            <Button
-              onClick={handleAccept}
-              disabled={processing}
-              className="flex-1"
-              size="sm"
-            >
+            <Button onClick={handleAccept} disabled={processing} className="flex-1" size="sm">
               <Check className="mr-1 h-4 w-4" />
               Accept
             </Button>
-            <Button
-              onClick={handleReject}
-              disabled={processing}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={handleReject} disabled={processing} variant="outline" size="sm">
               <X className="mr-1 h-4 w-4" />
               Reject
             </Button>

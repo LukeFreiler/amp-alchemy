@@ -56,6 +56,7 @@ export function ImportModal({ sessionId, open, onClose, onMappingComplete }: Imp
           successCount++;
         }
       } catch (error) {
+        console.error('Failed to map source:', error);
         // Continue with other sources even if one fails
       }
     }

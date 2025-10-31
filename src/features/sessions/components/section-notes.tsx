@@ -7,7 +7,7 @@
  * Autosaves on blur
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Eye, Edit3 } from 'lucide-react';
@@ -26,11 +26,7 @@ export function SectionNotes({ sessionId, sectionId }: SectionNotesProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    fetchNotes();
-  }, [sessionId, sectionId]);
-
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/v1/sessions/${sessionId}/sections/${sectionId}/notes`);
@@ -44,7 +40,11 @@ export function SectionNotes({ sessionId, sectionId }: SectionNotesProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [sessionId, sectionId]);
+
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
 
   const saveNotes = async () => {
     setIsSaving(true);

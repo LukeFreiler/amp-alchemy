@@ -60,6 +60,7 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
         });
       }
     } catch (error) {
+      console.error('Failed to delete session:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -167,7 +168,9 @@ export function SessionList({ initialSessions, blueprints, currentUserId }: Sess
                         </p>
                       )}
                     </div>
-                    <Badge className={getStatusColor(session.status)}>
+                    <Badge
+                      className={`${getStatusColor(session.status)} pointer-events-none hover:bg-inherit`}
+                    >
                       {session.status.replace('_', ' ')}
                     </Badge>
                   </div>

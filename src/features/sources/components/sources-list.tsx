@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { FileText, Type, Link as LinkIcon, Trash2, Sparkles } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { FileText, Type, Link as LinkIcon, Trash2, Sparkles, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -32,11 +33,7 @@ export function SourcesList({ sessionId, refreshTrigger, onMappingComplete }: So
   const [mappingSourceId, setMappingSourceId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchSources();
-  }, [sessionId, refreshTrigger]);
-
-  const fetchSources = async () => {
+  const fetchSources = useCallback(async () => {
     try {
       const response = await fetch(`/api/v1/sessions/${sessionId}/sources`);
       if (response.ok) {
@@ -44,11 +41,15 @@ export function SourcesList({ sessionId, refreshTrigger, onMappingComplete }: So
         setSources(data.data || []);
       }
     } catch (error) {
-      // Silent fail for now
+      console.error('Failed to fetch sources:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
+
+  useEffect(() => {
+    fetchSources();
+  }, [fetchSources, refreshTrigger]);
 
   const handleDeleteClick = (id: string) => {
     setDeleteSourceId(id);
@@ -69,7 +70,7 @@ export function SourcesList({ sessionId, refreshTrigger, onMappingComplete }: So
         setDeleteSourceId(null);
       }
     } catch (error) {
-      // Silent fail for now
+      console.error('Failed to delete source:', error);
     } finally {
       setIsDeleting(false);
     }
@@ -99,6 +100,7 @@ export function SourcesList({ sessionId, refreshTrigger, onMappingComplete }: So
       // Notify parent to refresh suggestions
       onMappingComplete?.();
     } catch (error) {
+      console.error('Failed to map source with AI:', error);
       toast({
         title: 'Mapping Failed',
         description: error instanceof Error ? error.message : 'Failed to map source with AI',
@@ -128,9 +130,11 @@ export function SourcesList({ sessionId, refreshTrigger, onMappingComplete }: So
 
   if (sources.length === 0) {
     return (
-      <div className="py-8 text-center text-sm text-muted-foreground">
-        No sources imported yet. Use the Import button to add files or text.
-      </div>
+      <EmptyState
+        icon={Upload}
+        title="No sources yet"
+        description="Use the Import button to add files or text"
+      />
     );
   }
 
@@ -191,7 +195,8 @@ export function SourcesList({ sessionId, refreshTrigger, onMappingComplete }: So
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Source?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This source will be permanently removed from the session.
+              This action cannot be undone. This source will be permanently removed from the
+              session.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

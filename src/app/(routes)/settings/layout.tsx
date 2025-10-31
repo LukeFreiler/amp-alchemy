@@ -42,7 +42,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-6">
+        <div className="mb-6 rounded-lg bg-card p-6">
           <h1 className="text-3xl font-bold text-foreground">Settings</h1>
           <p className="text-muted-foreground">Manage your company and account settings</p>
         </div>

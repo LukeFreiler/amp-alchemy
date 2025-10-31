@@ -8,7 +8,7 @@
 
 import { useState, useRef, FormEvent, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { PageHeader } from '@/components/ui/page-header';
 import { toast } from '@/components/ui/toaster';
 import { BlueprintWithSections } from '@/features/blueprints/types/blueprint';
 import { BlueprintArtifactGenerator, OutputFormat } from '@/features/blueprints/types/generator';
@@ -34,11 +35,7 @@ interface GeneratorEditorClientProps {
   mode: 'create' | 'edit';
 }
 
-export function GeneratorEditorClient({
-  blueprint,
-  generator,
-  mode,
-}: GeneratorEditorClientProps) {
+export function GeneratorEditorClient({ blueprint, generator, mode }: GeneratorEditorClientProps) {
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -53,17 +50,9 @@ export function GeneratorEditorClient({
 
   // Transform blueprint sections into token array
   const tokens = useMemo(() => {
-    // Helper function to generate a key from a title
-    const generateKey = (title: string): string => {
-      return title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .replace(/^_|_$/g, '');
-    };
-
     const fieldTokens = blueprint.sections.flatMap((section) =>
       section.fields.map((field) => ({
-        tag: `{{${field.key}}}`,
+        tag: `{{field:${field.key}}}`,
         label: field.label,
         help: field.help_text,
         section: section.title,
@@ -74,35 +63,44 @@ export function GeneratorEditorClient({
 
     const utilityTokens = [];
 
-    // Add section-level tokens
+    // Add section-level tokens (all fields in a section)
     blueprint.sections.forEach((section) => {
-      const sectionKey = generateKey(section.title);
-
-      // Token for all fields in a section
       utilityTokens.push({
-        tag: `{{section_${sectionKey}}}`,
+        tag: `{{section:${section.key}}}`,
         label: `All ${section.title} Fields`,
+        help: 'Includes all field values from this section in a formatted list',
         section: 'Utilities',
         type: 'Utility' as const,
         isUtility: true,
       });
-
-      // Token for section description/comments
-      if (section.description) {
-        utilityTokens.push({
-          tag: `{{section_${sectionKey}_description}}`,
-          label: `${section.title} Description`,
-          section: 'Utilities',
-          type: 'Utility' as const,
-          isUtility: true,
-        });
-      }
     });
 
-    // Add "All Input" token
+    // Add section notes tokens
+    blueprint.sections.forEach((section) => {
+      utilityTokens.push({
+        tag: `{{notes:${section.key}}}`,
+        label: `${section.title} Notes`,
+        help: 'Includes the notes/comments for this section',
+        section: 'Utilities',
+        type: 'Utility' as const,
+        isUtility: true,
+      });
+    });
+
+    // Add legacy "All Input" tokens for backward compatibility
     utilityTokens.push({
-      tag: '{{all_input}}',
-      label: 'All Input Data',
+      tag: '{{fields_json}}',
+      label: 'All Fields (JSON)',
+      help: 'All field values as a JSON object (legacy format)',
+      section: 'Utilities',
+      type: 'Utility' as const,
+      isUtility: true,
+    });
+
+    utilityTokens.push({
+      tag: '{{notes_json}}',
+      label: 'All Notes (JSON)',
+      help: 'All section notes as a JSON object (legacy format)',
       section: 'Utilities',
       type: 'Utility' as const,
       isUtility: true,
@@ -180,13 +178,16 @@ export function GeneratorEditorClient({
       const result = await response.json();
 
       if (result.ok) {
-        toast.success(mode === 'create' ? 'Generator created' : 'Generator updated');
+        toast.success(
+          mode === 'create' ? 'Artifact Generator created' : 'Artifact Generator updated'
+        );
         router.push(`/blueprints/${blueprint.id}/edit`);
       } else {
-        toast.error(result.error?.message || 'Failed to save generator');
+        toast.error(result.error?.message || 'Failed to save artifact generator');
       }
     } catch (error) {
-      toast.error('Failed to save generator');
+      console.error('Failed to save artifact generator:', error);
+      toast.error('Failed to save artifact generator');
     } finally {
       setIsSubmitting(false);
     }
@@ -195,34 +196,21 @@ export function GeneratorEditorClient({
   const characterCount = promptTemplate.length;
 
   return (
-    <form onSubmit={handleSubmit} className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
-      {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push(`/blueprints/${blueprint.id}/edit`)}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <Separator orientation="vertical" className="h-6" />
-            <div>
-              <h1 className="text-xl font-bold">
-                {mode === 'create' ? 'New Generator' : 'Edit Generator'}
-              </h1>
-              <p className="text-sm text-muted-foreground">{blueprint.name}</p>
-            </div>
-          </div>
+    <form
+      onSubmit={handleSubmit}
+      className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col"
+    >
+      <PageHeader
+        title={mode === 'create' ? 'New Artifact Generator' : 'Edit Artifact Generator'}
+        subtitle={blueprint.name}
+        backHref={`/blueprints/${blueprint.id}/edit`}
+        actions={
           <Button type="submit" disabled={isSubmitting}>
             <Save className="h-4 w-4" />
-            {isSubmitting ? 'Saving...' : 'Save Generator'}
+            {isSubmitting ? 'Saving...' : 'Save Artifact Generator'}
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* 2-Panel Layout */}
       <div className="flex flex-1 overflow-hidden">
@@ -230,7 +218,7 @@ export function GeneratorEditorClient({
         <div className="w-96 overflow-y-auto border-r border-border bg-card p-6">
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Generator Name *</Label>
+              <Label htmlFor="name">Artifact Generator Name *</Label>
               <Input
                 id="name"
                 value={name}
@@ -255,7 +243,10 @@ export function GeneratorEditorClient({
 
             <div className="space-y-2">
               <Label htmlFor="format">Output Format</Label>
-              <Select value={outputFormat} onValueChange={(val) => setOutputFormat(val as OutputFormat)}>
+              <Select
+                value={outputFormat}
+                onValueChange={(val) => setOutputFormat(val as OutputFormat)}
+              >
                 <SelectTrigger id="format">
                   <SelectValue />
                 </SelectTrigger>
@@ -279,7 +270,12 @@ export function GeneratorEditorClient({
           <div className="border-b border-border bg-card px-6 py-4">
             <h2 className="text-base font-semibold">Prompt Template</h2>
             <p className="mt-1.5 text-xs text-muted-foreground">
-              Type <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{'{'}{'{'}</code> to insert blueprint field data dynamically
+              Type{' '}
+              <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
+                {'{'}
+                {'{'}
+              </code>{' '}
+              to insert blueprint field data dynamically
             </p>
           </div>
 

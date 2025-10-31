@@ -96,12 +96,15 @@ export function TokenAutocompleteMenu({
     const items: Array<{ type: 'section' | 'token'; data: TokenData; sectionName: string }> = [];
 
     groupedTokens.forEach((group) => {
-      // Add section header as navigable item
-      items.push({
-        type: 'section',
-        data: group.sectionToken,
-        sectionName: group.section,
-      });
+      // Add section header as navigable item only if it's not "Utilities"
+      // "Utilities" is just an organizational header, not a real section
+      if (group.section !== 'Utilities') {
+        items.push({
+          type: 'section',
+          data: group.sectionToken,
+          sectionName: group.section,
+        });
+      }
 
       // Add all tokens in this section
       group.tokens.forEach((token) => {
@@ -141,7 +144,7 @@ export function TokenAutocompleteMenu({
   return (
     <FloatingPortal>
       <div
-        className="fixed z-50 w-[400px] max-h-[300px] bg-elevated border border-border rounded-lg shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+        className="fixed z-50 max-h-[300px] w-[400px] overflow-hidden rounded-lg border border-border bg-elevated shadow-lg duration-200 animate-in fade-in slide-in-from-top-2"
         style={{
           left: `${cursorPosition.x}px`,
           top: `${cursorPosition.y + 4}px`,
@@ -149,7 +152,7 @@ export function TokenAutocompleteMenu({
         onMouseLeave={() => setHoverIndex(-1)}
       >
         {/* All Tokens by Section */}
-        <div className="overflow-y-auto max-h-[240px]">
+        <div className="max-h-[240px] overflow-y-auto">
           {groupedTokens.length === 0 ? (
             <div className="px-3 py-6 text-center text-sm text-muted-foreground">
               No matching fields found
@@ -157,30 +160,35 @@ export function TokenAutocompleteMenu({
           ) : (
             groupedTokens.map((group) => {
               const sectionIndex = getGlobalIndex(group.sectionToken, 'section');
-              const isSectionPrimary = hoverIndex >= 0
-                ? sectionIndex === hoverIndex
-                : sectionIndex === selectedIndex;
+              const isSectionPrimary =
+                hoverIndex >= 0 ? sectionIndex === hoverIndex : sectionIndex === selectedIndex;
 
               return (
                 <div key={group.section}>
-                  {/* Selectable Section Header */}
+                  {/* Section Header - non-selectable for Utilities */}
                   <SectionHeader
                     ref={isSectionPrimary && hoverIndex === -1 ? selectedItemRef : null}
                     sectionToken={group.sectionToken}
                     isPrimary={isSectionPrimary}
+                    isUtilitiesHeader={group.section === 'Utilities'}
                     onMouseEnter={() => {
-                      setHoverIndex(sectionIndex);
-                      onHover(sectionIndex);
+                      if (group.section !== 'Utilities') {
+                        setHoverIndex(sectionIndex);
+                        onHover(sectionIndex);
+                      }
                     }}
-                    onClick={() => onSelect(group.sectionToken.tag)}
+                    onClick={() => {
+                      if (group.section !== 'Utilities') {
+                        onSelect(group.sectionToken.tag);
+                      }
+                    }}
                   />
 
                   {/* Section Tokens */}
                   {group.tokens.map((token) => {
                     const globalIndex = getGlobalIndex(token, 'token');
-                    const isPrimary = hoverIndex >= 0
-                      ? globalIndex === hoverIndex
-                      : globalIndex === selectedIndex;
+                    const isPrimary =
+                      hoverIndex >= 0 ? globalIndex === hoverIndex : globalIndex === selectedIndex;
                     return (
                       <TokenMenuItem
                         key={token.tag}
@@ -202,7 +210,7 @@ export function TokenAutocompleteMenu({
         </div>
 
         {/* Footer with keyboard hints */}
-        <div className="border-t border-divider px-3 py-2 text-xs text-muted-foreground bg-card">
+        <div className="border-t border-divider bg-card px-3 py-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>⏎ Insert</span>
@@ -217,38 +225,47 @@ export function TokenAutocompleteMenu({
 interface SectionHeaderProps {
   sectionToken: TokenData;
   isPrimary: boolean;
+  isUtilitiesHeader: boolean;
   onMouseEnter: () => void;
   onClick: () => void;
 }
 
 const SectionHeader = forwardRef<HTMLDivElement, SectionHeaderProps>(
-  ({ sectionToken, isPrimary, onMouseEnter, onClick }, ref) => {
+  ({ sectionToken, isPrimary, isUtilitiesHeader, onMouseEnter, onClick }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
-          'flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors sticky top-0 z-10',
-          'text-xs font-semibold',
-          isPrimary
+          'flex items-center gap-3 px-3 py-2 transition-colors',
+          !isUtilitiesHeader && 'sticky top-0',
+          'z-10 text-xs font-semibold',
+          isUtilitiesHeader ? 'cursor-default bg-muted/50 text-muted-foreground' : 'cursor-pointer',
+          !isUtilitiesHeader && isPrimary
             ? 'bg-primary text-primary-foreground'
-            : 'bg-muted/50 text-muted-foreground hover:bg-muted/70'
+            : !isUtilitiesHeader && 'hover:bg-muted/70'
         )}
         onMouseEnter={onMouseEnter}
         onClick={onClick}
       >
-        <Sparkles className={cn(
-          "h-3.5 w-3.5 flex-shrink-0",
-          isPrimary ? "text-primary-foreground/80" : "text-muted-foreground"
-        )} />
-        <div className="flex-1 min-w-0">
+        <Sparkles
+          className={cn(
+            'h-3.5 w-3.5 flex-shrink-0',
+            isPrimary && !isUtilitiesHeader ? 'text-primary-foreground/80' : 'text-muted-foreground'
+          )}
+        />
+        <div className="min-w-0 flex-1">
           <div className="truncate">{sectionToken.label}</div>
         </div>
-        <code className={cn(
-          "text-[10px] font-mono truncate max-w-[120px]",
-          isPrimary ? "text-primary-foreground/80" : "text-muted-foreground/70"
-        )}>
-          {sectionToken.tag}
-        </code>
+        {!isUtilitiesHeader && (
+          <code
+            className={cn(
+              'max-w-[120px] truncate font-mono text-[10px]',
+              isPrimary ? 'text-primary-foreground/80' : 'text-muted-foreground/70'
+            )}
+          >
+            {sectionToken.tag}
+          </code>
+        )}
       </div>
     );
   }
@@ -271,33 +288,37 @@ const TokenMenuItem = forwardRef<HTMLDivElement, TokenMenuItemProps>(
       <div
         ref={ref}
         className={cn(
-          'flex items-center gap-3 px-3 py-2 cursor-pointer transition-colors',
-          isPrimary
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted/20 hover:bg-muted/30'
+          'flex cursor-pointer items-center gap-3 px-3 py-2 transition-colors',
+          isPrimary ? 'bg-primary text-primary-foreground' : 'bg-muted/20 hover:bg-muted/30'
         )}
         onMouseEnter={onMouseEnter}
         onClick={onClick}
       >
-        <Icon className={cn(
-          "h-4 w-4 flex-shrink-0",
-          isPrimary ? "text-primary-foreground/80" : "text-muted-foreground"
-        )} />
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-sm truncate">{token.label}</div>
+        <Icon
+          className={cn(
+            'h-4 w-4 flex-shrink-0',
+            isPrimary ? 'text-primary-foreground/80' : 'text-muted-foreground'
+          )}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium">{token.label}</div>
           {token.help && (
-            <div className={cn(
-              "text-xs truncate",
-              isPrimary ? "text-primary-foreground/80" : "text-muted-foreground"
-            )}>
+            <div
+              className={cn(
+                'truncate text-xs',
+                isPrimary ? 'text-primary-foreground/80' : 'text-muted-foreground'
+              )}
+            >
               {token.help}
             </div>
           )}
         </div>
-        <code className={cn(
-          "text-xs font-mono truncate max-w-[120px]",
-          isPrimary ? "text-primary-foreground/80" : "text-muted-foreground"
-        )}>
+        <code
+          className={cn(
+            'max-w-[120px] truncate font-mono text-xs',
+            isPrimary ? 'text-primary-foreground/80' : 'text-muted-foreground'
+          )}
+        >
           {token.tag}
         </code>
       </div>

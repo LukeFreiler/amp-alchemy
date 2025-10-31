@@ -6,7 +6,7 @@
  * Modal for reviewing and accepting/rejecting AI-generated field suggestions
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Check } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -45,11 +45,7 @@ export function SuggestionReviewModal({
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchSuggestions();
-  }, [sessionId]);
-
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = useCallback(async () => {
     try {
       const response = await fetch(`/api/v1/sessions/${sessionId}/suggestions`);
       const result = await response.json();
@@ -58,11 +54,15 @@ export function SuggestionReviewModal({
         setSuggestions(result.data);
       }
     } catch (error) {
-      // Handle error silently
+      console.error('Failed to fetch suggestions:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
+
+  useEffect(() => {
+    fetchSuggestions();
+  }, [fetchSuggestions]);
 
   const handleAccept = async (id: string) => {
     setProcessing(id);
@@ -80,7 +80,7 @@ export function SuggestionReviewModal({
         }
       }
     } catch (error) {
-      // Handle error
+      console.error('Failed to accept suggestion:', error);
     } finally {
       setProcessing(null);
     }
@@ -102,7 +102,7 @@ export function SuggestionReviewModal({
         }
       }
     } catch (error) {
-      // Handle error
+      console.error('Failed to reject suggestion:', error);
     } finally {
       setProcessing(null);
     }
@@ -120,7 +120,7 @@ export function SuggestionReviewModal({
         onComplete();
       }
     } catch (error) {
-      // Handle error
+      console.error('Failed to accept all suggestions:', error);
     } finally {
       setProcessing(null);
     }
@@ -138,7 +138,7 @@ export function SuggestionReviewModal({
         onComplete();
       }
     } catch (error) {
-      // Handle error
+      console.error('Failed to reject all suggestions:', error);
     } finally {
       setProcessing(null);
     }

@@ -40,7 +40,13 @@ interface FieldConfigModalProps {
   onSave: (data: Partial<Field>) => Promise<void>;
 }
 
-export function FieldConfigModal({ field, existingFields = [], open, onOpenChange, onSave }: FieldConfigModalProps) {
+export function FieldConfigModal({
+  field,
+  existingFields = [],
+  open,
+  onOpenChange,
+  onSave,
+}: FieldConfigModalProps) {
   const { toast } = useToast();
   const [type, setType] = useState<FieldType>(field?.type || 'ShortText');
   const [key, setKey] = useState(field?.key || '');
@@ -48,7 +54,7 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
   const [helpText, setHelpText] = useState(field?.help_text || '');
   const [placeholder, setPlaceholder] = useState(field?.placeholder || '');
   const [required, setRequired] = useState(field?.required || false);
-  const [span, setSpan] = useState<1 | 2>(field?.span || 1);
+  const [span, setSpan] = useState<1 | 2>(field?.span || 2);
   const [isSaving, setIsSaving] = useState(false);
 
   // Reset form when field changes
@@ -69,7 +75,7 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
       setHelpText('');
       setPlaceholder('');
       setRequired(false);
-      setSpan(1);
+      setSpan(2);
     }
   }, [field, open]);
 
@@ -86,9 +92,7 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
     }
 
     // Validate uniqueness (exclude current field if editing)
-    const isDuplicate = existingFields.some(
-      (f) => f.key === key.trim() && f.id !== field?.id
-    );
+    const isDuplicate = existingFields.some((f) => f.key === key.trim() && f.id !== field?.id);
 
     if (isDuplicate) {
       toast({
@@ -112,6 +116,7 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
       });
       onOpenChange(false);
     } catch (error) {
+      console.error('Failed to save field:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -204,7 +209,10 @@ export function FieldConfigModal({ field, existingFields = [], open, onOpenChang
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="field-width">Width</Label>
-              <Select value={span === 2 ? 'full' : 'half'} onValueChange={(v) => setSpan(v === 'full' ? 2 : 1)}>
+              <Select
+                value={span === 2 ? 'full' : 'half'}
+                onValueChange={(v) => setSpan(v === 'full' ? 2 : 1)}
+              >
                 <SelectTrigger id="field-width">
                   <SelectValue />
                 </SelectTrigger>

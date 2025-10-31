@@ -10,7 +10,8 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Upload } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Trash2, Upload, Link as LinkIcon } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
 type ShareLink = {
@@ -89,7 +90,11 @@ export function ShareLinksList() {
 
   if (links.length === 0) {
     return (
-      <div className="py-8 text-center text-muted-foreground">No share links created yet.</div>
+      <EmptyState
+        icon={LinkIcon}
+        title="No share links yet"
+        description="Create a share link to share artifacts with external collaborators"
+      />
     );
   }
 

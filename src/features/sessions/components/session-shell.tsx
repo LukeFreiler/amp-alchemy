@@ -14,6 +14,7 @@ import { FileText, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PageHeader } from '@/components/ui/page-header';
 import { SessionWithSections } from '@/features/sessions/types/session';
 import { ImportDialog } from '@/features/sources/components/import-dialog';
 import { SuggestionBanner } from '@/features/ai/components/suggestion-banner';
@@ -121,14 +122,12 @@ export function SessionShell({ sessionData }: SessionShellProps) {
 
   return (
     <div className="flex h-[calc(100vh-var(--topbar-height,4rem))] flex-col">
-      {/* Top bar */}
-      <div className="border-b bg-navbar p-4">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-xl font-semibold">{sessionData.name}</h1>
-            <p className="text-sm text-muted-foreground">{sessionData.blueprint_name}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 md:gap-4">
+      <PageHeader
+        title={sessionData.name}
+        subtitle={sessionData.blueprint_name}
+        backHref="/sessions"
+        actions={
+          <>
             <Button
               variant="outline"
               size="sm"
@@ -147,9 +146,9 @@ export function SessionShell({ sessionData }: SessionShellProps) {
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Artifacts</span>
             </Button>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Mobile: Tab-based layout */}
       <div className="flex flex-1 flex-col overflow-hidden md:hidden">

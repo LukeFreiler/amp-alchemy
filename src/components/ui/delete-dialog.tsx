@@ -51,9 +51,7 @@ export function DeleteDialog({
         >
           {/* Header */}
           <div className="flex flex-col space-y-2 text-center sm:text-left">
-            <DialogPrimitive.Title className="text-lg font-semibold">
-              {title}
-            </DialogPrimitive.Title>
+            <DialogPrimitive.Title className="text-lg font-semibold">{title}</DialogPrimitive.Title>
             <DialogPrimitive.Description asChild>
               <div className="text-base text-muted-foreground">{description}</div>
             </DialogPrimitive.Description>

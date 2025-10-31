@@ -33,9 +33,14 @@ export function useTokenMetadata(sessionId: string): TokenMetadataState {
         if (result.ok) {
           setState({ tokens: result.data, loading: false, error: null });
         } else {
-          setState({ tokens: null, loading: false, error: result.error?.message || 'Failed to fetch tokens' });
+          setState({
+            tokens: null,
+            loading: false,
+            error: result.error?.message || 'Failed to fetch tokens',
+          });
         }
       } catch (err) {
+        console.error('Failed to fetch token metadata:', err);
         if (cancelled) return;
         setState({ tokens: null, loading: false, error: 'Network error' });
       }

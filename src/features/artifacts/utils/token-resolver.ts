@@ -90,14 +90,14 @@ function resolveFieldToken(fieldKey: string, data: TokenResolutionData): string 
 /**
  * Resolve a section token to formatted field list
  */
-function resolveSectionToken(sectionId: string, data: TokenResolutionData): string {
-  const section = data.sections.find((s) => s.id === sectionId);
+function resolveSectionToken(sectionKey: string, data: TokenResolutionData): string {
+  const section = data.sections.find((s) => s.key === sectionKey);
 
   if (!section) {
-    return `[Section not found: ${sectionId}]`;
+    return `[Section not found: ${sectionKey}]`;
   }
 
-  const sectionFields = data.fields.filter((f) => f.sectionId === sectionId);
+  const sectionFields = data.fields.filter((f) => f.sectionId === section.id);
 
   if (sectionFields.length === 0) {
     return `[No fields in section: ${section.title}]`;
@@ -109,8 +109,14 @@ function resolveSectionToken(sectionId: string, data: TokenResolutionData): stri
 /**
  * Resolve a notes token to section notes markdown
  */
-function resolveNotesToken(sectionId: string, data: TokenResolutionData): string {
-  const note = data.notes.find((n) => n.section_id === sectionId);
+function resolveNotesToken(sectionKey: string, data: TokenResolutionData): string {
+  const section = data.sections.find((s) => s.key === sectionKey);
+
+  if (!section) {
+    return `[Section not found: ${sectionKey}]`;
+  }
+
+  const note = data.notes.find((n) => n.section_id === section.id);
 
   if (!note || !note.markdown || note.markdown.trim() === '') {
     return '(No notes)';
@@ -128,7 +134,8 @@ function resolveFieldsJsonToken(data: TokenResolutionData): string {
   data.fields.forEach((field) => {
     // Convert toggle values to boolean
     if (field.type === 'Toggle') {
-      fieldsObject[field.key] = field.value === 'true' ? true : field.value === 'false' ? false : null;
+      fieldsObject[field.key] =
+        field.value === 'true' ? true : field.value === 'false' ? false : null;
     } else {
       fieldsObject[field.key] = field.value;
     }

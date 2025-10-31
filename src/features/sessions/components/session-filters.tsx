@@ -12,7 +12,7 @@
  * - URL query param persistence
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 
@@ -68,28 +68,31 @@ export function SessionFilters({
 
   const [searchInput, setSearchInput] = useState(filters.search);
 
-  const handleQuickFilter = (type: 'mine' | 'all') => {
-    switch (type) {
-      case 'mine':
-        setFilters({
-          search: '',
-          status: 'all',
-          blueprint: 'all',
-          owner: currentUserId,
-        });
-        setSearchInput('');
-        break;
-      case 'all':
-        setFilters({
-          search: '',
-          status: 'all',
-          blueprint: 'all',
-          owner: 'all',
-        });
-        setSearchInput('');
-        break;
-    }
-  };
+  const handleQuickFilter = useCallback(
+    (type: 'mine' | 'all') => {
+      switch (type) {
+        case 'mine':
+          setFilters({
+            search: '',
+            status: 'all',
+            blueprint: 'all',
+            owner: currentUserId,
+          });
+          setSearchInput('');
+          break;
+        case 'all':
+          setFilters({
+            search: '',
+            status: 'all',
+            blueprint: 'all',
+            owner: 'all',
+          });
+          setSearchInput('');
+          break;
+      }
+    },
+    [currentUserId]
+  );
 
   // Extract unique creators from sessions
   const creators = useMemo(() => {
@@ -169,7 +172,7 @@ export function SessionFilters({
     return count;
   }, [filters, currentUserId]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setFilters({
       search: '',
       status: 'all',
@@ -177,17 +180,17 @@ export function SessionFilters({
       owner: currentUserId, // Reset to "My Sessions"
     });
     setSearchInput('');
-  };
+  }, [currentUserId]);
+
+  const handleClear = useCallback(() => {
+    handleClearFilters();
+  }, [handleClearFilters]);
 
   // Listen for clear filters event from SessionList
   useEffect(() => {
-    const handleClear = () => {
-      handleClearFilters();
-    };
-
     window.addEventListener('clearFilters', handleClear);
     return () => window.removeEventListener('clearFilters', handleClear);
-  }, [currentUserId]);
+  }, [handleClear]);
 
   // Provide quick action buttons to parent via callback
   useEffect(() => {
@@ -214,7 +217,7 @@ export function SessionFilters({
       );
       renderQuickActions(quickActions);
     }
-  }, [filters, currentUserId, renderQuickActions]);
+  }, [filters, currentUserId, renderQuickActions, handleQuickFilter]);
 
   return (
     <div className="mb-6 space-y-4">
